@@ -33,6 +33,8 @@ export interface CursoDisponible {
   disponible: boolean;
   yaMatriculado: boolean;
   motivoNoDisponible?: string;
+  estudiantesMatriculados: number;
+  capacidadMaxima?: number;
 }
 
 export interface Matricula {

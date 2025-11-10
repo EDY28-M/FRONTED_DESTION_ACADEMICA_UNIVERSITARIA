@@ -228,7 +228,7 @@ const MatriculaPage: React.FC = () => {
                         {curso.nombreDocente}
                       </td>
                       <td className="px-4 py-3 text-center text-sm text-gray-900">
-                        25/30
+                        {curso.estudiantesMatriculados || 0}/{curso.capacidadMaxima || 30}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold">
@@ -273,7 +273,7 @@ const MatriculaPage: React.FC = () => {
                         {curso.nombreDocente}
                       </td>
                       <td className="px-4 py-3 text-center text-sm text-gray-900">
-                        24/30
+                        {curso.estudiantesMatriculados || 0}/{curso.capacidadMaxima || 30}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className="px-2 py-1 bg-yellow-500 text-white rounded text-xs font-semibold">

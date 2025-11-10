@@ -16,9 +16,18 @@ const MisCursosPage: React.FC = () => {
     queryFn: estudiantesApi.getPeriodos,
   });
 
+  const { data: periodoActivo } = useQuery({
+    queryKey: ['periodo-activo'],
+    queryFn: estudiantesApi.getPeriodoActivo,
+  });
+
+  // Usar período activo por defecto, o el seleccionado manualmente
+  const periodoAConsultar = periodoSeleccionado || periodoActivo?.id;
+
   const { data: misCursos, isLoading } = useQuery({
-    queryKey: ['mis-cursos', periodoSeleccionado],
-    queryFn: () => estudiantesApi.getMisCursos(periodoSeleccionado),
+    queryKey: ['mis-cursos', periodoAConsultar],
+    queryFn: () => estudiantesApi.getMisCursos(periodoAConsultar),
+    enabled: !!periodoAConsultar, // Solo ejecutar si hay un período válido
   });
 
   const retirarMutation = useMutation({
@@ -107,18 +116,29 @@ const MisCursosPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Filtros */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-lg p-6 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="text-xl font-semibold text-gray-900">Mis Cursos Matriculados</h2>
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Mis Cursos Matriculados</h2>
+            {periodoActivo && !periodoSeleccionado ? (
+              <p className="text-purple-100">
+                Período Actual: {periodoActivo.nombre} ({new Date(periodoActivo.fechaInicio).toLocaleDateString('es-PE')} - {new Date(periodoActivo.fechaFin).toLocaleDateString('es-PE')})
+              </p>
+            ) : !periodoActivo && !periodoSeleccionado ? (
+              <p className="text-purple-100">
+                ⚠️ No hay período académico activo
+              </p>
+            ) : null}
+          </div>
           <div className="flex items-center space-x-2">
-            <label htmlFor="periodo" className="text-sm text-gray-700">Período:</label>
+            <label htmlFor="periodo" className="text-sm text-purple-100">Período:</label>
             <select
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="px-4 py-2 border border-purple-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-white text-gray-900"
             >
-              <option value="">Todos los períodos</option>
+              <option value="">Período Activo</option>
               {periodos?.map((periodo) => (
                 <option key={periodo.id} value={periodo.id}>
                   {periodo.nombre} {periodo.activo && '(Activo)'}
@@ -263,12 +283,26 @@ const MisCursosPage: React.FC = () => {
           ) : (
             <div className="text-center py-12">
               <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No hay cursos activos</p>
-              <p className="text-gray-400 text-sm mt-2">
-                {periodoSeleccionado
-                  ? 'No tienes cursos matriculados en el período seleccionado'
-                  : 'Aún no te has matriculado en ningún curso'}
-              </p>
+              {!periodoAConsultar ? (
+                <>
+                  <p className="text-gray-500 text-lg font-semibold">No hay período académico activo</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    El período actual ha sido cerrado. Los cursos se mostrarán cuando se active un nuevo período académico.
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Puedes consultar períodos anteriores usando el selector de arriba.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-gray-500 text-lg">No hay cursos activos</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    {periodoSeleccionado
+                      ? 'No tienes cursos matriculados en el período seleccionado'
+                      : 'Aún no te has matriculado en ningún curso para este período'}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
