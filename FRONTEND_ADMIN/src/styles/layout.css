@@ -1,0 +1,26 @@
+/* Estilos adicionales para mejorar la responsividad del sidebar */
+
+/* Asegurar que el sidebar no interfiera con el contenido en desktop */
+@media (min-width: 1024px) {
+  .main-content {
+    margin-left: 18rem; /* 72 * 0.25rem = 18rem */
+  }
+}
+
+/* Mejorar el scroll en dispositivos móviles */
+@media (max-width: 1023px) {
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+/* Smooth transitions */
+.sidebar-transition {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Prevent content shift on sidebar toggle */
+.layout-container {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
