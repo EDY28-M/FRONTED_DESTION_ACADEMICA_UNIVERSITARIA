@@ -133,4 +133,44 @@ export const estudiantesApi = {
     const response = await axios.get(`/estudiantes/verificar-prerequisitos/${idCurso}`);
     return response.data;
   },
+
+  // Obtener orden de mérito
+  getOrdenMerito: async (promocion?: string): Promise<OrdenMerito[]> => {
+    const params = promocion ? { promocion } : {};
+    const response = await axios.get('/estudiantes/orden-merito', { params });
+    return response.data;
+  },
+
+  // Obtener promociones disponibles
+  getPromociones: async (): Promise<string[]> => {
+    const response = await axios.get('/estudiantes/promociones');
+    return response.data;
+  },
+
+  // Obtener mi posición en el orden de mérito
+  getMiPosicionMerito: async (): Promise<OrdenMerito> => {
+    const response = await axios.get('/estudiantes/mi-posicion-merito');
+    return response.data;
+  },
 };
+
+// Tipos adicionales
+export interface OrdenMerito {
+  posicion: number;
+  codigo: string;
+  nombres: string;
+  apellidos: string;
+  nombreCompleto: string;
+  promocion: string;
+  semestre: number;
+  creditosLlevadosSemestre: number;     // CC
+  creditosAprobadosSemestre: number;     // CA
+  totalCreditosLlevados: number;         // TCC
+  totalCreditosAprobados: number;        // TCA
+  promedioPonderadoSemestral: number;    // PPS
+  promedioPonderadoAcumulado: number;    // PPA
+  rangoMerito: string;
+  totalEstudiantes: number;
+  periodoNombre?: string;                // Nombre del periodo de referencia
+  estadoPeriodo?: string;                // CERRADO o ACTIVO
+}

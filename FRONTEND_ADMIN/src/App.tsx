@@ -26,6 +26,7 @@ import MatriculaPage from './pages/Student/MatriculaPage'
 import NotasPage from './pages/Student/NotasPage'
 import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
 import RegistroNotasPage from './pages/Student/RegistroNotasPage'
+import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
 
 function App() {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -94,6 +95,7 @@ function App() {
         <Route path="matricula" element={<MatriculaPage />} />
         <Route path="notas" element={<NotasPage />} />
         <Route path="registro-notas" element={<RegistroNotasPage />} />
+        <Route path="orden-merito" element={<OrdenMeritoPage />} />
         <Route path="perfil" element={<PerfilEstudiantePage />} />
       </Route>
 

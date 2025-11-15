@@ -34,6 +34,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
     { name: 'Notas', href: '/estudiante/notas', icon: FileText },
     { name: 'Registro de Notas', href: '/estudiante/registro-notas', icon: Award },
+    { name: 'Orden de Mérito', href: '/estudiante/orden-merito', icon: GraduationCap },
     { name: 'Perfil', href: '/estudiante/perfil', icon: User },
   ];
 
