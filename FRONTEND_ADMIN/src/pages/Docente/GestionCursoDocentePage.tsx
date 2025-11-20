@@ -12,6 +12,7 @@ import {
   Cog6ToothIcon,
   PlusIcon,
   TrashIcon,
+  PencilIcon,
 } from '@heroicons/react/24/outline';
 
 type TabType = 'estudiantes' | 'notas' | 'asistencia';
@@ -44,9 +45,21 @@ export const GestionCursoDocentePage = () => {
 
   // Estado para asistencia
   const [fechaAsistencia, setFechaAsistencia] = useState(new Date().toISOString().split('T')[0]);
+  const [tipoClaseAsistencia, setTipoClaseAsistencia] = useState<string>('Teoría'); // Nuevo: Tipo de clase
   const [asistencias, setAsistencias] = useState<AsistenciaItem[]>([]);
   const [isSubmittingAsistencia, setIsSubmittingAsistencia] = useState(false);
   const [asistenciasMarcadas, setAsistenciasMarcadas] = useState<Map<string, AsistenciaItem[]>>(new Map());
+  const [asistenciasRegistradas, setAsistenciasRegistradas] = useState<any[]>([]);
+  const [isLoadingAsistenciasRegistradas, setIsLoadingAsistenciasRegistradas] = useState(false);
+  
+  // Estado para editar asistencia
+  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
+  const [asistenciaEditando, setAsistenciaEditando] = useState<any>(null);
+  const [fechaEditar, setFechaEditar] = useState('');
+  const [tipoClaseEditar, setTipoClaseEditar] = useState('');
+  const [estadoEditar, setEstadoEditar] = useState(true);
+  const [observacionesEditar, setObservacionesEditar] = useState('');
+  const [isSubmittingEdicion, setIsSubmittingEdicion] = useState(false);
 
   useEffect(() => {
     cargarEstudiantes();
@@ -56,8 +69,9 @@ export const GestionCursoDocentePage = () => {
   useEffect(() => {
     if (activeTab === 'asistencia' && estudiantes.length > 0) {
       cargarAsistenciaDelDia(fechaAsistencia);
+      cargarAsistenciasRegistradas();
     }
-  }, [activeTab, estudiantes, fechaAsistencia]);
+  }, [activeTab, estudiantes, fechaAsistencia, tipoClaseAsistencia]);
 
   useEffect(() => {
     if (activeTab === 'notas') {
@@ -87,6 +101,18 @@ export const GestionCursoDocentePage = () => {
       toast.error(error.response?.data?.mensaje || 'Error al cargar los estudiantes');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const cargarAsistenciasRegistradas = async () => {
+    try {
+      setIsLoadingAsistenciasRegistradas(true);
+      const response = await docenteAsistenciaApi.getAsistenciasCurso(cursoId);
+      setAsistenciasRegistradas(response);
+    } catch (error: any) {
+      console.error('Error al cargar asistencias registradas:', error);
+    } finally {
+      setIsLoadingAsistenciasRegistradas(false);
     }
   };
 
@@ -432,6 +458,7 @@ export const GestionCursoDocentePage = () => {
       const request = {
         idCurso: cursoId,
         fecha: fechaAsistencia,
+        tipoClase: tipoClaseAsistencia, // Agregar tipo de clase
         asistencias: asistenciasMarcadasValidas.map(a => ({
           idEstudiante: a.idEstudiante,
           presente: a.presente as boolean, // Ya filtramos los null
@@ -450,13 +477,81 @@ export const GestionCursoDocentePage = () => {
         return newMap;
       });
 
-      // Recargar estudiantes para actualizar porcentajes
+      // Recargar asistencias registradas y estudiantes
+      await cargarAsistenciasRegistradas();
       await cargarEstudiantes();
     } catch (error: any) {
       console.error('Error al registrar asistencia:', error);
       toast.error(error.response?.data?.message || 'Error al registrar asistencia');
     } finally {
       setIsSubmittingAsistencia(false);
+    }
+  };
+
+  const handleAbrirModalEditar = (asistencia: any) => {
+    setAsistenciaEditando(asistencia);
+    setFechaEditar(new Date(asistencia.fecha).toISOString().split('T')[0]);
+    setTipoClaseEditar(asistencia.tipoClase);
+    setEstadoEditar(asistencia.presente);
+    setObservacionesEditar(asistencia.observaciones || '');
+    setMostrarModalEditar(true);
+  };
+
+  const handleCerrarModalEditar = () => {
+    setMostrarModalEditar(false);
+    setAsistenciaEditando(null);
+    setFechaEditar('');
+    setTipoClaseEditar('');
+    setEstadoEditar(true);
+    setObservacionesEditar('');
+  };
+
+  const handleGuardarEdicion = async () => {
+    if (!asistenciaEditando) return;
+
+    try {
+      setIsSubmittingEdicion(true);
+      
+      await docenteAsistenciaApi.actualizarAsistencia(asistenciaEditando.id, {
+        fecha: fechaEditar,
+        tipoClase: tipoClaseEditar,
+        presente: estadoEditar,
+        observaciones: observacionesEditar || undefined,
+      });
+
+      toast.success('Asistencia actualizada correctamente');
+      handleCerrarModalEditar();
+
+      // Recargar asistencias registradas y estudiantes
+      await cargarAsistenciasRegistradas();
+      await cargarEstudiantes();
+      cargarAsistenciaDelDia(fechaAsistencia);
+    } catch (error: any) {
+      console.error('Error al actualizar asistencia:', error);
+      toast.error(error.response?.data?.message || 'Error al actualizar asistencia');
+    } finally {
+      setIsSubmittingEdicion(false);
+    }
+  };
+
+  const handleEliminarAsistenciaIndividual = async (idAsistencia: number, nombreEstudiante: string) => {
+    if (!window.confirm(`¿Está seguro de eliminar la asistencia de ${nombreEstudiante}?\n\nEsta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      await docenteAsistenciaApi.eliminarAsistencia(idAsistencia);
+      toast.success('Asistencia eliminada correctamente');
+
+      // Recargar asistencias registradas y estudiantes
+      await cargarAsistenciasRegistradas();
+      await cargarEstudiantes();
+      
+      // Resetear asistencias del día actual
+      cargarAsistenciaDelDia(fechaAsistencia);
+    } catch (error: any) {
+      console.error('Error al eliminar asistencia:', error);
+      toast.error(error.response?.data?.message || 'Error al eliminar asistencia');
     }
   };
 
@@ -774,6 +869,17 @@ export const GestionCursoDocentePage = () => {
                       className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700">Tipo:</label>
+                    <select
+                      value={tipoClaseAsistencia}
+                      onChange={(e) => setTipoClaseAsistencia(e.target.value)}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="Teoría">Teoría</option>
+                      <option value="Práctica">Práctica</option>
+                    </select>
+                  </div>
                   <button
                     onClick={handleMarcarTodosPresentes}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
@@ -876,6 +982,117 @@ export const GestionCursoDocentePage = () => {
               >
                 {isSubmittingAsistencia ? 'Guardando...' : 'Guardar Asistencia'}
               </button>
+            </div>
+
+            {/* Tabla de Asistencias Registradas */}
+            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-lg font-bold text-gray-900">Asistencias Registradas</h3>
+                <p className="text-sm text-gray-600 mt-1">Historial de todas las asistencias registradas en este curso</p>
+              </div>
+              
+              {isLoadingAsistenciasRegistradas ? (
+                <div className="px-6 py-12 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-3 text-sm text-gray-600">Cargando asistencias...</p>
+                </div>
+              ) : asistenciasRegistradas.length === 0 ? (
+                <div className="px-6 py-12 text-center">
+                  <CalendarDaysIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Sin asistencias registradas</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Aún no hay asistencias registradas para este curso.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Fecha
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tipo Clase
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estudiante
+                        </th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Observaciones
+                        </th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {asistenciasRegistradas.map((asist, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(asist.fecha).toLocaleDateString('es-PE', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              asist.tipoClase === 'Teoría'
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {asist.tipoClase}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            {asist.nombreEstudiante}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            {asist.presente ? (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <CheckCircleIcon className="w-4 h-4" />
+                                Presente
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <XCircleIcon className="w-4 h-4" />
+                                Ausente
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {asist.observaciones || '-'}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleAbrirModalEditar(asist)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition"
+                                title="Editar asistencia"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                                Editar
+                              </button>
+                              <button
+                                onClick={() => handleEliminarAsistenciaIndividual(asist.id, asist.nombreEstudiante)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-md hover:bg-red-700 transition"
+                                title="Eliminar asistencia"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1026,6 +1243,97 @@ export const GestionCursoDocentePage = () => {
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
                 {isSubmittingNotas ? 'Guardando...' : 'Guardar Configuración'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Editar Asistencia */}
+      {mostrarModalEditar && asistenciaEditando && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            {/* Header del Modal */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">Editar Asistencia</h3>
+              <p className="text-sm text-gray-600 mt-1">{asistenciaEditando.nombreEstudiante}</p>
+            </div>
+
+            {/* Contenido del Modal */}
+            <div className="px-6 py-4 space-y-4">
+              {/* Fecha */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fecha
+                </label>
+                <input
+                  type="date"
+                  value={fechaEditar}
+                  onChange={(e) => setFechaEditar(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Tipo de Clase */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Clase
+                </label>
+                <select
+                  value={tipoClaseEditar}
+                  onChange={(e) => setTipoClaseEditar(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="Teoría">Teoría</option>
+                  <option value="Práctica">Práctica</option>
+                </select>
+              </div>
+
+              {/* Estado */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Estado
+                </label>
+                <select
+                  value={estadoEditar ? 'presente' : 'ausente'}
+                  onChange={(e) => setEstadoEditar(e.target.value === 'presente')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="presente">Presente</option>
+                  <option value="ausente">Ausente</option>
+                </select>
+              </div>
+
+              {/* Observaciones */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Observaciones
+                </label>
+                <textarea
+                  value={observacionesEditar}
+                  onChange={(e) => setObservacionesEditar(e.target.value)}
+                  placeholder="Observaciones (opcional)"
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Footer del Modal */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={handleCerrarModalEditar}
+                disabled={isSubmittingEdicion}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleGuardarEdicion}
+                disabled={isSubmittingEdicion}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              >
+                {isSubmittingEdicion ? 'Guardando...' : 'Guardar Cambios'}
               </button>
             </div>
           </div>

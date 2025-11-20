@@ -79,6 +79,7 @@ export interface AsistenciaEstudiante {
 export interface RegistrarAsistenciasMasivasDto {
   idCurso: number;
   fecha: string;
+  tipoClase: string; // "Teoría" o "Práctica"
   asistencias: AsistenciaEstudiante[];
 }
 
@@ -233,14 +234,26 @@ export const docenteAsistenciaApi = {
     return response.data;
   },
 
-  getAsistenciasCurso: async (idCurso: number, fecha?: string): Promise<Asistencia[]> => {
-    const params = fecha ? { fecha } : {};
+  getAsistenciasCurso: async (idCurso: number, fecha?: string, tipoClase?: string): Promise<Asistencia[]> => {
+    const params: any = {};
+    if (fecha) params.fecha = fecha;
+    if (tipoClase) params.tipoClase = tipoClase;
     const response = await apiClient.get(`/docentes/cursos/${idCurso}/asistencia`, { params });
     return response.data;
   },
 
   getResumenAsistencia: async (idCurso: number): Promise<ResumenAsistencia[]> => {
     const response = await apiClient.get(`/docentes/cursos/${idCurso}/asistencia/resumen`);
+    return response.data;
+  },
+
+  eliminarAsistencia: async (idAsistencia: number): Promise<void> => {
+    const response = await apiClient.delete(`/asistencias/${idAsistencia}`);
+    return response.data;
+  },
+
+  actualizarAsistencia: async (idAsistencia: number, datos: { fecha: string; tipoClase: string; presente: boolean; observaciones?: string }): Promise<void> => {
+    const response = await apiClient.put(`/asistencias/${idAsistencia}`, datos);
     return response.data;
   },
 };

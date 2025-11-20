@@ -63,17 +63,27 @@ export default function RegistroNotasPage() {
   return (
     <div className="space-y-6">
       {/* Encabezado */}
-      <div className="bg-white shadow-sm rounded-lg p-6">
+      <div className="bg-white shadow border border-gray-200 rounded-lg p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Registro de Notas</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Registro de Notas</h1>
+            <p className="text-gray-600">
               Historial académico completo de todos los semestres cerrados
             </p>
+            <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Aprobado</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Desaprobado</span>
+              </div>
+            </div>
           </div>
           <button
             onClick={exportarAPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors print:hidden"
+            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm print:hidden"
           >
             <Download className="w-5 h-5" />
             Exportar PDF
@@ -91,25 +101,25 @@ export default function RegistroNotasPage() {
             {/* Cabecera del Semestre - Clickeable */}
             <button
               onClick={() => toggleSemestre(semestre.idPeriodo)}
-              className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-colors"
+              className="w-full px-6 py-5 flex items-center justify-between bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-indigo-600 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg">
+                <div className="bg-indigo-600 text-white w-14 h-14 rounded-lg flex items-center justify-center font-bold text-xl shadow-sm">
                   {index + 1}
                 </div>
                 <div className="text-left">
                   <h2 className="text-xl font-bold text-gray-900">
                     {semestre.periodo}
                   </h2>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {semestre.anio} - {semestre.ciclo}
+                  <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-600">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-indigo-600" />
+                      {semestre.anio} - Ciclo {semestre.ciclo}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                       semestre.estado === 'Cerrado' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-emerald-100 text-emerald-700' 
+                        : 'bg-amber-100 text-amber-700'
                     }`}>
                       {semestre.estado}
                     </span>
@@ -119,29 +129,29 @@ export default function RegistroNotasPage() {
 
               <div className="flex items-center gap-6">
                 {/* Estadísticas Rápidas */}
-                <div className="hidden md:flex items-center gap-4 text-sm">
-                  <div className="text-center">
-                    <p className="text-gray-500">Créditos</p>
-                    <p className="font-bold text-indigo-600">{semestre.totales.totalCreditos}</p>
+                <div className="hidden md:flex items-center gap-3">
+                  <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Créditos</p>
+                    <p className="text-xl font-bold text-indigo-600">{semestre.totales.totalCreditos}</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-gray-500">PSem</p>
-                    <p className="font-bold text-green-600">
+                  <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">PSem</p>
+                    <p className="text-xl font-bold text-emerald-600">
                       {semestre.totales.promedioSemestral.toFixed(2)}
                     </p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-gray-500">PAc</p>
-                    <p className="font-bold text-blue-600">
+                  <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">PAc</p>
+                    <p className="text-xl font-bold text-blue-600">
                       {semestre.totales.promedioAcumulado.toFixed(2)}
                     </p>
                   </div>
                 </div>
 
                 {semestreExpandido === semestre.idPeriodo ? (
-                  <ChevronUp className="w-6 h-6 text-gray-400" />
+                  <ChevronUp className="w-6 h-6 text-indigo-600" />
                 ) : (
-                  <ChevronDown className="w-6 h-6 text-gray-400" />
+                  <ChevronDown className="w-6 h-6 text-indigo-600" />
                 )}
               </div>
             </button>
@@ -162,19 +172,19 @@ export default function RegistroNotasPage() {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Código
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Asignatura
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Fecha Examen
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Créditos
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Horas
                         </th>
                         
@@ -182,37 +192,39 @@ export default function RegistroNotasPage() {
                         {semestre.cursos[0]?.evaluaciones.map((evaluacion, i) => (
                           <th 
                             key={i} 
-                            className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
+                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-indigo-50"
                           >
-                            <div>{evaluacion.nombre}</div>
-                            <div className="text-gray-400 normal-case">({evaluacion.peso}%)</div>
+                            <div className="font-bold">{evaluacion.nombre}</div>
+                            <div className="text-gray-500 normal-case font-normal">({evaluacion.peso}%)</div>
                           </th>
                         ))}
 
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                          NF
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-emerald-50">
+                          Nota Final
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Estado
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-emerald-50">
                           PSem
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-blue-50">
                           PAc
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {semestre.cursos.map((curso) => (
-                        <tr key={curso.idMatricula} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                            {curso.codigoCurso}
+                        <tr key={curso.idMatricula} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded font-mono text-xs font-semibold">
+                              {curso.codigoCurso}
+                            </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
                             {curso.nombreCurso}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-600">
+                          <td className="px-6 py-4 text-xs text-center text-gray-600">
                             {curso.fechaExamen 
                               ? new Date(curso.fechaExamen).toLocaleDateString('es-PE', {
                                   day: '2-digit',
@@ -221,37 +233,39 @@ export default function RegistroNotasPage() {
                                 })
                               : '-'}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center font-medium text-gray-900">
-                            {curso.creditos}
+                          <td className="px-6 py-4 text-center">
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm font-semibold">
+                              {curso.creditos}
+                            </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-600">
+                          <td className="px-6 py-4 text-sm text-center text-gray-600">
                             {curso.horasSemanal}
                           </td>
 
                           {/* Notas de evaluaciones */}
                           {curso.evaluaciones.map((evaluacion, i) => (
-                            <td key={i} className="px-4 py-3 text-sm text-center font-medium text-gray-900">
-                              {evaluacion.nota.toFixed(1)}
+                            <td key={i} className="px-6 py-4 text-center bg-indigo-50/30">
+                              <span className="text-base font-bold text-gray-900">{evaluacion.nota.toFixed(1)}</span>
                             </td>
                           ))}
 
                           {/* Nota Final */}
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
+                          <td className="px-6 py-4 text-center bg-emerald-50/30">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-base font-bold shadow-sm ${
                               curso.notaFinal >= 11
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-red-100 text-red-700'
                             }`}>
                               {curso.notaFinal}
                             </span>
                           </td>
 
                           {/* Estado */}
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                               curso.estadoCurso === 'Aprobado'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-red-100 text-red-700'
                             }`}>
                               {curso.estadoCurso}
                             </span>
@@ -260,14 +274,16 @@ export default function RegistroNotasPage() {
                           {semestre.cursos.indexOf(curso) === 0 && (
                             <td 
                               rowSpan={semestre.cursos.length} 
-                              className="px-4 py-3 text-center bg-green-50 border-l-2 border-green-200"
+                              className="px-6 py-4 text-center bg-emerald-50/50 border-l-4 border-emerald-200"
                             >
-                              <div className="flex flex-col items-center">
-                                <TrendingUp className="w-5 h-5 text-green-600 mb-1" />
-                                <span className="text-lg font-bold text-green-700">
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                                  <TrendingUp className="w-5 h-5 text-emerald-600" />
+                                </div>
+                                <span className="text-2xl font-bold text-emerald-700">
                                   {semestre.totales.promedioSemestral.toFixed(2)}
                                 </span>
-                                <span className="text-xs text-gray-500">Semestral</span>
+                                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Semestral</span>
                               </div>
                             </td>
                           )}
@@ -275,14 +291,16 @@ export default function RegistroNotasPage() {
                           {semestre.cursos.indexOf(curso) === 0 && (
                             <td 
                               rowSpan={semestre.cursos.length} 
-                              className="px-4 py-3 text-center bg-blue-50 border-l-2 border-blue-200"
+                              className="px-6 py-4 text-center bg-blue-50/50 border-l-4 border-blue-200"
                             >
-                              <div className="flex flex-col items-center">
-                                <Award className="w-5 h-5 text-blue-600 mb-1" />
-                                <span className="text-lg font-bold text-blue-700">
+                              <div className="flex flex-col items-center gap-2">
+                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <Award className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <span className="text-2xl font-bold text-blue-700">
                                   {semestre.totales.promedioAcumulado.toFixed(2)}
                                 </span>
-                                <span className="text-xs text-gray-500">Acumulado</span>
+                                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Acumulado</span>
                               </div>
                             </td>
                           )}
@@ -290,38 +308,42 @@ export default function RegistroNotasPage() {
                       ))}
 
                       {/* Fila de Totales */}
-                      <tr className="bg-indigo-50 font-bold">
-                        <td colSpan={3} className="px-4 py-3 text-sm text-gray-900">
-                          TOTALES
+                      <tr className="bg-indigo-50 border-t-2 border-indigo-200">
+                        <td colSpan={3} className="px-6 py-4 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                          Totales del Semestre
                         </td>
-                        <td className="px-4 py-3 text-sm text-center text-indigo-900">
-                          {semestre.totales.totalCreditos}
+                        <td className="px-6 py-4 text-center">
+                          <span className="px-3 py-1.5 bg-indigo-200 text-indigo-800 rounded-lg text-sm font-bold">
+                            {semestre.totales.totalCreditos}
+                          </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-center text-gray-900">
-                          {semestre.totales.totalHoras}
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm font-semibold text-gray-700">
+                            {semestre.totales.totalHoras}
+                          </span>
                         </td>
                         <td 
                           colSpan={semestre.cursos[0]?.evaluaciones.length || 0} 
-                          className="px-4 py-3 text-sm text-center text-gray-900"
+                          className="px-6 py-4 text-sm text-center text-gray-500"
                         >
                           {/* Espacio vacío */}
                         </td>
-                        <td className="px-4 py-3 text-sm text-center">
+                        <td className="px-6 py-4 text-sm text-center text-gray-500">
                           -
                         </td>
-                        <td className="px-4 py-3 text-sm text-center">
+                        <td className="px-6 py-4 text-sm text-center text-gray-500">
                           -
                         </td>
-                        <td className="px-4 py-3 text-sm text-center bg-green-50 border-l-2 border-green-200">
-                          <div className="flex items-center justify-center gap-1 text-green-700">
-                            <TrendingUp className="w-4 h-4" />
-                            <span className="font-bold">{semestre.totales.promedioSemestral.toFixed(2)}</span>
+                        <td className="px-6 py-4 text-center bg-emerald-50/50 border-l-4 border-emerald-200">
+                          <div className="flex items-center justify-center gap-2">
+                            <TrendingUp className="w-5 h-5 text-emerald-600" />
+                            <span className="text-lg font-bold text-emerald-700">{semestre.totales.promedioSemestral.toFixed(2)}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-sm text-center bg-blue-50 border-l-2 border-blue-200">
-                          <div className="flex items-center justify-center gap-1 text-blue-700">
-                            <Award className="w-4 h-4" />
-                            <span className="font-bold">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
+                        <td className="px-6 py-4 text-center bg-blue-50/50 border-l-4 border-blue-200">
+                          <div className="flex items-center justify-center gap-2">
+                            <Award className="w-5 h-5 text-blue-600" />
+                            <span className="text-lg font-bold text-blue-700">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
                           </div>
                         </td>
                       </tr>

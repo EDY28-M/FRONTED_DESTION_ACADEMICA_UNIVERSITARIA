@@ -12,7 +12,7 @@ export default function OrdenMeritoPage() {
     queryFn: estudiantesApi.getPromociones,
     retry: false,
   });
-
+  
   // Query para obtener mi posición (ignorar errores 404)
   const { data: miPosicion } = useQuery({
     queryKey: ['mi-posicion-merito'],

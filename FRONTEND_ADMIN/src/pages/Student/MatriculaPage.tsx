@@ -112,26 +112,34 @@ const MatriculaPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Información del estudiante */}
-      <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-lg p-6 text-white">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Matrícula de Cursos</h2>
-            <p className="text-purple-100">
-              Ciclo Actual: {perfil?.cicloActual} | Créditos Acumulados: {perfil?.creditosAcumulados}
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Matrícula de Cursos</h2>
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <span className="flex items-center">
+                <span className="font-medium text-gray-700">Ciclo:</span>
+                <span className="ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-semibold">{perfil?.cicloActual}</span>
+              </span>
+              <span className="text-gray-400">|</span>
+              <span className="flex items-center">
+                <span className="font-medium text-gray-700">Créditos:</span>
+                <span className="ml-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded font-semibold">{perfil?.creditosAcumulados}</span>
+              </span>
+            </div>
             {periodoActivo && (
-              <p className="text-purple-100 mt-1">
+              <p className="text-gray-600 text-sm mt-2">
                 Período: {periodoActivo.nombre} ({new Date(periodoActivo.fechaInicio).toLocaleDateString('es-PE')} - {new Date(periodoActivo.fechaFin).toLocaleDateString('es-PE')})
               </p>
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <label htmlFor="periodo" className="text-sm text-purple-100">Período:</label>
+            <label htmlFor="periodo" className="text-sm text-gray-700 font-medium">Período:</label>
             <select
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-purple-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-white text-gray-900"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
             >
               <option value="">Período Activo</option>
               {periodos?.map((periodo) => (
@@ -145,23 +153,27 @@ const MatriculaPage: React.FC = () => {
       </div>
 
       {/* Cursos Disponibles */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BookOpen className="h-5 w-5 mr-2 text-purple-600" />
-            Seleccionar Cursos Disponibles
+            <BookOpen className="h-5 w-5 mr-2 text-indigo-600" />
+            Cursos Disponibles para Matrícula
           </h3>
-          <div className="flex items-center space-x-4">
-            <span className="px-3 py-1 bg-blue-500 text-white rounded text-xs font-semibold">SEM</span>
-            <span className="px-3 py-1 bg-yellow-500 text-white rounded text-xs font-semibold">REP</span>
-            <span className="px-3 py-1 bg-orange-500 text-white rounded text-xs font-semibold">AUT</span>
-            <span className="px-3 py-1 bg-red-500 text-white rounded text-xs font-semibold">AUT</span>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1">
+              <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+              <span className="text-xs text-gray-600">Disponible</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+              <span className="text-xs text-gray-600">Matriculado</span>
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
               <p className="text-gray-500 mt-4">Cargando cursos...</p>
             </div>
           ) : cursosDisponiblesList.length > 0 || cursosMatriculadosList.length > 0 ? (
@@ -169,85 +181,87 @@ const MatriculaPage: React.FC = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="w-12 px-4 py-3 text-center">
+                    <th className="w-12 px-6 py-4 text-center">
                       <input type="checkbox" className="rounded border-gray-300" disabled />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Código
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Curso
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      C
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Créditos
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Docente
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Vac
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Vacantes
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Act.
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Estado
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Día
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hora
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Horario
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {cursosDisponiblesList.map((curso) => (
-                    <tr key={curso.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-center">
+                    <tr key={curso.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-center">
                         <input 
                           type="checkbox" 
-                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           checked={cursosSeleccionados.includes(curso.id)}
                           onChange={() => handleToggleCurso(curso.id)}
                           disabled={matricularMutation.isPending}
                         />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="px-2 py-1 bg-teal-500 text-white rounded text-xs font-semibold">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded font-mono text-xs font-semibold">
                           {curso.codigo}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{curso.nombreCurso}</p>
-                          <p className="text-xs text-blue-600 italic">Obligatorio</p>
+                          <p className="text-xs text-gray-500">Obligatorio</p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center text-sm text-gray-900">
+                      <td className="px-6 py-4 text-center text-sm text-gray-900 font-medium">
                         {curso.creditos}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-700">
                         {curso.nombreDocente}
                       </td>
-                      <td className="px-4 py-3 text-center text-sm text-gray-900">
-                        {curso.estudiantesMatriculados || 0}/{curso.capacidadMaxima || 30}
+                      <td className="px-6 py-4 text-center text-sm">
+                        <span className="font-medium text-gray-900">{curso.estudiantesMatriculados || 0}</span>
+                        <span className="text-gray-400">/</span>
+                        <span className="text-gray-600">{curso.capacidadMaxima || 30}</span>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold">
-                          SEM
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                          Disponible
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-gray-900">
+                      <td className="px-6 py-4 text-center text-xs text-gray-600">
                         <div>Lu</div>
                         <div>Mi</div>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-gray-900">
+                      <td className="px-6 py-4 text-center text-xs text-gray-600">
                         <div>11-01 pm</div>
                         <div>07-10 pm</div>
                       </td>
                     </tr>
                   ))}
                   {cursosMatriculadosList.map((curso) => (
-                    <tr key={curso.id} className="bg-yellow-50">
-                      <td className="px-4 py-3 text-center">
+                    <tr key={curso.id} className="bg-amber-50/30 hover:bg-amber-50/50 transition-colors">
+                      <td className="px-6 py-4 text-center">
                         <input 
                           type="checkbox" 
                           checked
@@ -255,36 +269,38 @@ const MatriculaPage: React.FC = () => {
                           className="rounded border-gray-300"
                         />
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="px-2 py-1 bg-yellow-500 text-white rounded text-xs font-semibold">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded font-mono text-xs font-semibold">
                           {curso.codigo}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-4">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{curso.nombreCurso}</p>
-                          <p className="text-xs text-blue-600 italic">Obligatorio</p>
+                          <p className="text-xs text-gray-500">Obligatorio</p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-center text-sm text-gray-900">
+                      <td className="px-6 py-4 text-center text-sm text-gray-900 font-medium">
                         {curso.creditos}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-gray-700">
                         {curso.nombreDocente}
                       </td>
-                      <td className="px-4 py-3 text-center text-sm text-gray-900">
-                        {curso.estudiantesMatriculados || 0}/{curso.capacidadMaxima || 30}
+                      <td className="px-6 py-4 text-center text-sm">
+                        <span className="font-medium text-gray-900">{curso.estudiantesMatriculados || 0}</span>
+                        <span className="text-gray-400">/</span>
+                        <span className="text-gray-600">{curso.capacidadMaxima || 30}</span>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="px-2 py-1 bg-yellow-500 text-white rounded text-xs font-semibold">
-                          REP
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                          Matriculado
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-gray-900">
+                      <td className="px-6 py-4 text-center text-xs text-gray-600">
                         <div>Ma</div>
                         <div>Ju</div>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-gray-900">
+                      <td className="px-6 py-4 text-center text-xs text-gray-600">
                         <div>09-12 am</div>
                         <div>02-05 pm</div>
                       </td>
@@ -293,25 +309,35 @@ const MatriculaPage: React.FC = () => {
                 </tbody>
               </table>
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                <div className="flex items-center space-x-6">
-                  <span className="px-3 py-2 bg-teal-600 text-white rounded-lg text-sm font-semibold">
-                    {cursosDisponiblesList.length + cursosMatriculadosList.length}
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    Total: {cursosDisponiblesList.length} disponibles | {cursosMatriculadosList.length} matriculados
-                  </span>
-                  {cursosSeleccionados.length > 0 && (
-                    <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
-                      {cursosSeleccionados.length} seleccionado(s)
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Disponibles:</span>
+                    <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-md text-sm font-semibold">
+                      {cursosDisponiblesList.length}
                     </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Matriculados:</span>
+                    <span className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md text-sm font-semibold">
+                      {cursosMatriculadosList.length}
+                    </span>
+                  </div>
+                  {cursosSeleccionados.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">Seleccionados:</span>
+                      <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-md text-sm font-semibold">
+                        {cursosSeleccionados.length}
+                      </span>
+                    </div>
                   )}
                 </div>
                 <button
-                  className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   onClick={handleMatricularSeleccionados}
                   disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending}
                 >
-                  📋 Registrar Aumento de Cursos ({cursosSeleccionados.length})
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Matricular ({cursosSeleccionados.length})
                 </button>
               </div>
             </>
@@ -327,10 +353,10 @@ const MatriculaPage: React.FC = () => {
 
       {/* Cursos No Disponibles - Opcional, comentado por ahora */}
       {cursosNoDisponiblesList.length > 0 && (
-        <div className="bg-white rounded-lg shadow border-l-4 border-orange-500">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-white rounded-lg shadow border border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 bg-orange-50">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-orange-500" />
+              <AlertCircle className="h-5 w-5 mr-2 text-orange-600" />
               Cursos No Disponibles
             </h3>
           </div>

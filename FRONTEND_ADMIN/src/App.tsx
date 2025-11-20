@@ -24,6 +24,7 @@ import InicioDashboard from './pages/Student/InicioDashboard'
 import MisCursosPage from './pages/Student/MisCursosPage'
 import MatriculaPage from './pages/Student/MatriculaPage'
 import NotasPage from './pages/Student/NotasPage'
+import AsistenciasPage from './pages/Student/AsistenciasPage'
 import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
 import RegistroNotasPage from './pages/Student/RegistroNotasPage'
 import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
@@ -95,6 +96,7 @@ function App() {
         <Route path="matricula" element={<MatriculaPage />} />
         <Route path="notas" element={<NotasPage />} />
         <Route path="registro-notas" element={<RegistroNotasPage />} />
+        <Route path="asistencias" element={<AsistenciasPage />} />
         <Route path="orden-merito" element={<OrdenMeritoPage />} />
         <Route path="perfil" element={<PerfilEstudiantePage />} />
       </Route>

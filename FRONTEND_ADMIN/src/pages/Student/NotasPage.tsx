@@ -141,19 +141,19 @@ const NotasPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header con filtros */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Mis Notas</h2>
-            <p className="text-sm text-gray-500 mt-1">Consulta tus calificaciones por período</p>
+            <h2 className="text-2xl font-bold text-gray-900">Mis Notas</h2>
+            <p className="text-sm text-gray-600 mt-1">Consulta tus calificaciones por período académico</p>
           </div>
           <div className="flex items-center space-x-2">
-            <label htmlFor="periodo" className="text-sm text-gray-700">Período:</label>
+            <label htmlFor="periodo" className="text-sm font-medium text-gray-700">Período:</label>
             <select
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
             >
               <option value="">Periodo Activo</option>
               {periodosActivos?.map((periodo) => (
@@ -168,14 +168,15 @@ const NotasPage: React.FC = () => {
 
       {/* Promedio General */}
       {!isLoading && misCursos && misCursos.length > 0 && (
-        <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-white border border-gray-200 rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-purple-100 mb-1">Promedio General</p>
-              <p className="text-5xl font-bold">{promedioGeneral.toFixed(2)}</p>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Promedio General del Período</p>
+              <p className="text-5xl font-bold text-indigo-600">{promedioGeneral.toFixed(2)}</p>
+              <p className="text-xs text-gray-500 mt-2">Escala: 0 - 20</p>
             </div>
-            <div className="h-20 w-20 bg-purple-700 rounded-full flex items-center justify-center">
-              <TrendingUp className="h-10 w-10" />
+            <div className="h-20 w-20 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-10 w-10 text-indigo-600" />
             </div>
           </div>
         </div>
@@ -200,7 +201,7 @@ const NotasPage: React.FC = () => {
       {/* Notas por curso */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando notas...</p>
         </div>
       ) : periodosActivos.length > 0 && notasPorCurso && Object.keys(notasPorCurso).length > 0 ? (
@@ -213,7 +214,7 @@ const NotasPage: React.FC = () => {
             return (
               <div key={nombreCurso} className="bg-white rounded-lg shadow border border-gray-200">
                 {/* Header del curso */}
-                <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
+                <div className="px-6 py-4 border-b border-gray-200 bg-indigo-50">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-gray-900">{nombreCurso}</h3>
                   </div>
@@ -224,22 +225,22 @@ const NotasPage: React.FC = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
-                          ID
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-20">
+                          Tipo
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                           Evaluación
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-24">
                           Nota
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-24">
                           Prom
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-24">
                           Peso
                         </th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-24">
                           Puntaje
                         </th>
                       </tr>
@@ -251,39 +252,39 @@ const NotasPage: React.FC = () => {
                         const abreviacion = generarAbreviacion(nota.tipoEvaluacion);
                         
                         return (
-                          <tr key={nota.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 whitespace-nowrap">
-                              <span className={`inline-flex items-center justify-center w-10 h-10 rounded text-xs font-bold ${getBadgeClasses(nota.tipoEvaluacion)}`}>
+                          <tr key={nota.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center justify-center w-12 h-10 rounded-lg text-xs font-bold ${getBadgeClasses(nota.tipoEvaluacion)}`}>
                                 {abreviacion}
                               </span>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-6 py-4">
                               <div className="text-sm font-medium text-gray-900">{nota.tipoEvaluacion}</div>
                             </td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-6 py-4 text-center">
                               {nota.notaValor > 0 ? (
-                                <span className={`text-base font-bold ${getNotaColor(nota.notaValor)}`}>
+                                <span className={`text-lg font-bold ${getNotaColor(nota.notaValor)}`}>
                                   {nota.notaValor.toFixed(2)}
                                 </span>
                               ) : (
                                 <span className="text-sm text-gray-400 italic">Pendiente</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-6 py-4 text-center">
                               {nota.notaValor > 0 ? (
-                                <span className="text-sm font-medium text-gray-900">
+                                <span className="text-sm font-medium text-gray-700">
                                   {promPorNota.toFixed(3)}
                                 </span>
                               ) : (
                                 <span className="text-sm text-gray-400">0.000</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-center">
-                              <span className="text-sm font-medium text-gray-700">{nota.peso}%</span>
+                            <td className="px-6 py-4 text-center">
+                              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm font-semibold">{nota.peso}%</span>
                             </td>
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-6 py-4 text-center">
                               {nota.notaValor > 0 ? (
-                                <span className="text-sm font-bold text-purple-700">{puntaje}</span>
+                                <span className="text-sm font-bold text-indigo-600">{puntaje}</span>
                               ) : (
                                 <span className="text-sm text-gray-400">0</span>
                               )}
@@ -293,49 +294,53 @@ const NotasPage: React.FC = () => {
                       })}
 
                       {/* Fila de Promedio General */}
-                      <tr className="bg-gray-50 font-semibold">
-                        <td colSpan={2} className="px-4 py-3 text-left">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-800 border border-gray-400">
-                            PG
-                          </span>
-                          <span className="ml-3 text-sm font-bold text-gray-900">Promedio General</span>
+                      <tr className="bg-gray-50 border-t-2 border-gray-200">
+                        <td colSpan={2} className="px-6 py-4 text-left">
+                          <div className="flex items-center">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-200 text-gray-800">
+                              PG
+                            </span>
+                            <span className="ml-3 text-sm font-bold text-gray-900">Promedio General</span>
+                          </div>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-medium text-gray-600">-</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm text-gray-500">-</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-medium text-gray-600">-</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm text-gray-500">-</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-bold text-gray-900">{pesoTotal}%</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="px-2 py-1 bg-gray-200 text-gray-800 rounded text-sm font-bold">{pesoTotal}%</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`text-base font-bold ${getNotaColor(promedioGeneral)}`}>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`text-xl font-bold ${getNotaColor(promedioGeneral)}`}>
                             {promedioGeneral.toFixed(1)}
                           </span>
                         </td>
                       </tr>
 
                       {/* Fila de Promedio Final */}
-                      <tr className="bg-blue-50 font-semibold border-t-2 border-blue-200">
-                        <td colSpan={2} className="px-4 py-3 text-left">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800 border border-blue-400">
-                            PF
-                          </span>
-                          <span className="ml-3 text-sm font-bold text-gray-900">Promedio Final</span>
+                      <tr className="bg-indigo-50 border-t-2 border-indigo-200">
+                        <td colSpan={2} className="px-6 py-4 text-left">
+                          <div className="flex items-center">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-200 text-indigo-800">
+                              PF
+                            </span>
+                            <span className="ml-3 text-sm font-bold text-gray-900">Promedio Final</span>
+                          </div>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-medium text-gray-600">-</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm text-gray-500">-</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-medium text-gray-600">-</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm text-gray-500">-</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="text-sm font-bold text-gray-900">100%</span>
+                        <td className="px-6 py-4 text-center">
+                          <span className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded text-sm font-bold">100%</span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className={`text-xl font-bold ${
-                            promedioFinal >= 11 ? 'text-green-600' : 'text-red-600'
+                        <td className="px-6 py-4 text-center">
+                          <span className={`text-2xl font-bold ${
+                            promedioFinal >= 11 ? 'text-emerald-600' : 'text-red-600'
                           }`}>
                             {promedioFinal}
                           </span>

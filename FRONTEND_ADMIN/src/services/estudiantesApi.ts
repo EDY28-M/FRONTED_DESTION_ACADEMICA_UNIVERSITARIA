@@ -152,6 +152,29 @@ export const estudiantesApi = {
     const response = await axios.get('/estudiantes/mi-posicion-merito');
     return response.data;
   },
+
+  // Cambiar contraseña del estudiante
+  cambiarContrasena: async (data: {
+    contrasenaActual: string;
+    contrasenaNueva: string;
+  }): Promise<{ mensaje: string }> => {
+    const response = await axios.post('/estudiantes/cambiar-contrasena', data);
+    return response.data;
+  },
+
+  // Actualizar perfil del estudiante
+  actualizarPerfil: async (data: {
+    apellidos?: string;
+    nombres?: string;
+    dni?: string;
+    fechaNacimiento?: string;
+    correo?: string;
+    telefono?: string;
+    direccion?: string;
+  }): Promise<{ mensaje: string; estudiante: any }> => {
+    const response = await axios.put('/estudiantes/actualizar-perfil', data);
+    return response.data;
+  },
 };
 
 // Tipos adicionales

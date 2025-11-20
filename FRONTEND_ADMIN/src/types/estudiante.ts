@@ -3,6 +3,17 @@ export interface Estudiante {
   codigo: string;
   nombreCompleto: string;
   email: string;
+  
+  // Información personal adicional
+  nombres?: string;
+  apellidos?: string;
+  dni?: string;
+  fechaNacimiento?: string;
+  correo?: string;
+  telefono?: string;
+  direccion?: string;
+  
+  // Información académica
   cicloActual: number;
   creditosAcumulados: number;
   promedioAcumulado?: number;
