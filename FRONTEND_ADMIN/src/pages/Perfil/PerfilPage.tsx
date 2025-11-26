@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
 import { User, Lock, Mail, Calendar, Shield, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
@@ -7,7 +8,17 @@ import { useNotifications } from '../../contexts/NotificationContext';
 export default function PerfilPage() {
   const { user } = useAuth();
   const { createNotification } = useNotifications();
+  const location = useLocation();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Abrir formulario de cambio de contraseña si viene desde el dropdown
+  useEffect(() => {
+    if (location.state?.openChangePassword) {
+      setIsChangingPassword(true);
+      // Limpiar el estado para que no se abra de nuevo al recargar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

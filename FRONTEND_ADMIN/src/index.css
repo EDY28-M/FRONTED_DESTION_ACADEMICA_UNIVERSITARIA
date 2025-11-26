@@ -4,11 +4,12 @@
 
 @layer base {
   html {
-    font-family: 'Poppins', system-ui, sans-serif;
+    font-family: 'Montserrat', 'Roboto', system-ui, sans-serif;
   }
   
   body {
     @apply bg-gray-50 text-gray-900;
+    font-family: 'Montserrat', 'Roboto', system-ui, sans-serif;
   }
 }
 
@@ -92,4 +93,33 @@
   .table-cell {
     @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
   }
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.5s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
 }

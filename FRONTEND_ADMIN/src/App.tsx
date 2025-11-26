@@ -7,6 +7,8 @@ import StudentLayout from './components/Layout/StudentLayout'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { ProtectedDocenteRoute } from './components/ProtectedDocenteRoute'
 import LoginPage from './pages/Auth/LoginPage'
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage'
+import ResetPasswordPage from './pages/Auth/ResetPasswordPage'
 import { LoginDocentePage } from './pages/Docente/LoginDocentePage'
 import { DashboardDocentePage } from './pages/Docente/DashboardDocentePage'
 import { GestionCursoDocentePage } from './pages/Docente/GestionCursoDocentePage'
@@ -54,6 +56,30 @@ function App() {
               <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
             ) : (
               <LoginPage />
+            )
+          } 
+        />
+
+        {/* Ruta de recuperación de contraseña - accesible sin autenticación */}
+        <Route 
+          path="/forgot-password" 
+          element={
+            isAuthenticated ? (
+              <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
+            ) : (
+              <ForgotPasswordPage />
+            )
+          } 
+        />
+
+        {/* Ruta de resetear contraseña - accesible sin autenticación */}
+        <Route 
+          path="/reset-password" 
+          element={
+            isAuthenticated ? (
+              <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
+            ) : (
+              <ResetPasswordPage />
             )
           } 
         />

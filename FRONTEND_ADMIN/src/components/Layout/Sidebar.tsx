@@ -83,14 +83,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation()
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="flex items-center h-16 px-6 bg-primary-600">
-        <div className="flex items-center">
-          <AcademicCapIcon className="h-8 w-8 text-white" />
-          <span className="ml-2 text-xl font-bold text-white">
-            Gestión Académica
-          </span>
+    <div className="flex flex-col h-full" style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}>
+      {/* Logo UNIVERSIDAD ACADEMICA */}
+      <div className="flex items-center h-20 px-4 bg-white border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-11 h-11 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#003366' }}
+          >
+            <BookOpenIcon className="w-6 h-6" style={{ color: '#C7A740' }} />
+          </div>
+          <div className="flex flex-col">
+            <span 
+              className="text-base font-bold leading-tight"
+              style={{ color: '#003366' }}
+            >
+              UNIVERSIDAD
+            </span>
+            <span 
+              className="text-base font-bold leading-tight"
+              style={{ color: '#003366' }}
+            >
+              ACADEMICA
+            </span>
+          </div>
         </div>
       </div>
 
