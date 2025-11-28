@@ -1,5 +1,5 @@
 import { useState, Fragment, useEffect } from 'react'
-import { Bars3Icon, ArrowRightOnRectangleIcon, UserCircleIcon, BookOpenIcon, CalendarIcon, GlobeAltIcon, UserIcon, KeyIcon, IdentificationIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, ArrowRightOnRectangleIcon, BookOpenIcon, CalendarIcon, GlobeAltIcon, UserIcon, IdentificationIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       case 'Administrador':
         return 'bg-purple-600'
       case 'Coordinador':
-        return 'bg-blue-600'
+        return 'bg-primary-700'
       case 'Docente':
         return 'bg-green-600'
       default:
@@ -125,9 +125,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
           {/* Profile Dropdown */}
           <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-lg p-2 hover:bg-gray-50 transition-colors">
-              <div className={`h-9 w-9 rounded-full ${user ? getAvatarColor(user.rol) : 'bg-gray-600'} flex items-center justify-center shadow-sm`}>
-                <span className="text-sm font-medium text-white">
+            <Menu.Button className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-lg p-2 hover:bg-gray-50 transition-colors group">
+              <div 
+                className="h-10 w-10 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #003366 0%, #004d99 50%, #0066cc 100%)',
+                  border: '2px solid #C7A740',
+                  boxShadow: '0 4px 6px -1px rgba(0, 51, 102, 0.3), 0 2px 4px -1px rgba(0, 51, 102, 0.2)'
+                }}
+              >
+                <span className="text-sm font-bold text-white drop-shadow-sm">
                   {user ? getInitials(user.nombres, user.apellidos) : 'U'}
                 </span>
               </div>
@@ -165,8 +172,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <Menu.Items className="absolute right-0 mt-2 w-80 origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50" style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}>
                 {/* Header del perfil con avatar grande */}
                 <div className="px-6 py-5 text-center border-b border-gray-100">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                    <UserCircleIcon className="w-14 h-14 text-gray-400" />
+                  <div 
+                    className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-md"
+                    style={{ backgroundColor: '#003366' }}
+                  >
+                    <span className="text-white text-xl font-bold">
+                      {user ? `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}` : 'U'}
+                    </span>
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 uppercase">
                     {user?.nombres || 'USUARIO'}
@@ -174,7 +186,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   <p className="text-sm text-gray-600 uppercase">
                     {user?.apellidos || ''}
                   </p>
-                  <span className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                  <span 
+                    className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-semibold text-white"
+                    style={{ backgroundColor: '#003366' }}
+                  >
                     {user?.rol || 'Sin rol'} {user?.id ? String(user.id).padStart(10, '0') : ''}
                   </span>
                 </div>
@@ -222,7 +237,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                         } flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900`}
                         onClick={() => navigate('/perfil')}
                       >
-                        <IdentificationIcon className="mr-3 h-5 w-5 text-gray-400" />
+                        <IdentificationIcon className="mr-3 h-5 w-5" style={{ color: '#003366' }} />
                         Información Personal
                       </button>
                     )}
@@ -235,7 +250,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                         } flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900`}
                         onClick={() => navigate('/perfil', { state: { openChangePassword: true } })}
                       >
-                        <KeyIcon className="mr-3 h-5 w-5 text-gray-400" />
+                        <LockClosedIcon className="mr-3 h-5 w-5" style={{ color: '#003366' }} />
                         Cambiar Contraseña
                       </button>
                     )}
@@ -269,3 +284,4 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 }
 
 export default Header
+

@@ -8,7 +8,7 @@ import {
   EyeIcon, 
   PencilIcon, 
   TrashIcon,
-  AcademicCapIcon,
+  BookOpenIcon,
   ClockIcon,
   TrophyIcon,
   UserIcon
@@ -210,7 +210,7 @@ const CursosPage = () => {
           </div>
         ) : filteredCursos.length === 0 ? (
           <div className="text-center py-12">
-            <AcademicCapIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <BookOpenIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron cursos</h3>
             <p className="mt-1 text-sm text-gray-500">
               {searchTerm || selectedCiclo ? 'Intenta con otros filtros de búsqueda' : 'Comienza agregando un nuevo curso'}
@@ -250,8 +250,8 @@ const CursosPage = () => {
                   >
                     <td className="table-cell">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                          <AcademicCapIcon className="h-5 w-5 text-green-600" />
+                        <div className="h-10 w-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                          <BookOpenIcon className="h-5 w-5 text-primary-600" />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -298,7 +298,7 @@ const CursosPage = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleView(curso)}
-                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
                           title="Ver detalles"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -351,3 +351,4 @@ const CursosPage = () => {
 }
 
 export default CursosPage
+

@@ -9,7 +9,7 @@ const activities = [
     description: 'Dr. Juan Pérez - Ingeniero de Sistemas',
     time: 'Hace 2 horas',
     icon: UserIcon,
-    color: 'bg-blue-500',
+    color: 'bg-primary-600',
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ const activities = [
     description: 'Dra. María García - Matemática',
     time: 'Ayer',
     icon: UserIcon,
-    color: 'bg-blue-500',
+    color: 'bg-primary-600',
   },
   {
     id: 4,
@@ -88,3 +88,4 @@ const RecentActivity = () => {
 }
 
 export default RecentActivity
+

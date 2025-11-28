@@ -82,7 +82,7 @@ export default function GestionEstudiantesPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <Users className="w-8 h-8 text-blue-600" />
+          <Users className="w-8 h-8 text-primary-700" />
           <h1 className="text-3xl font-bold text-gray-800">Gestión de Estudiantes</h1>
         </div>
         <p className="text-gray-600">Crea nuevos estudiantes y genera sus credenciales de acceso</p>
@@ -91,7 +91,7 @@ export default function GestionEstudiantesPage() {
       {/* Formulario de Creación */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center gap-2 mb-6 pb-4 border-b">
-          <UserPlus className="w-6 h-6 text-blue-600" />
+          <UserPlus className="w-6 h-6 text-primary-700" />
           <h2 className="text-xl font-semibold text-gray-800">Crear Nuevo Estudiante</h2>
         </div>
 
@@ -111,7 +111,7 @@ export default function GestionEstudiantesPage() {
                 value={formData.nombres}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 placeholder="Ej: Juan Carlos"
               />
             </div>
@@ -129,7 +129,7 @@ export default function GestionEstudiantesPage() {
                 value={formData.apellidos}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 placeholder="Ej: Pérez García"
               />
             </div>
@@ -151,7 +151,7 @@ export default function GestionEstudiantesPage() {
                 onChange={handleChange}
                 required
                 maxLength={8}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 placeholder="12345678"
               />
             </div>
@@ -168,7 +168,7 @@ export default function GestionEstudiantesPage() {
                 value={formData.ciclo}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
                   <option key={ciclo} value={ciclo}>
@@ -182,7 +182,7 @@ export default function GestionEstudiantesPage() {
           {/* Credenciales de Acceso */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-blue-600" />
+              <Lock className="w-5 h-5 text-primary-700" />
               Credenciales de Acceso
             </h3>
 
@@ -200,7 +200,7 @@ export default function GestionEstudiantesPage() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                   placeholder="estudiante@email.com"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -222,7 +222,7 @@ export default function GestionEstudiantesPage() {
                   onChange={handleChange}
                   required
                   minLength={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                   placeholder="Mínimo 6 caracteres"
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -237,7 +237,7 @@ export default function GestionEstudiantesPage() {
             <button
               type="submit"
               disabled={crearEstudianteMutation.isPending}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+              className="px-6 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             >
               {crearEstudianteMutation.isPending ? (
                 <>
@@ -256,12 +256,12 @@ export default function GestionEstudiantesPage() {
       </div>
 
       {/* Información Adicional */}
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+      <div className="mt-6 bg-primary-50 border border-primary-200 rounded-lg p-4">
+        <h4 className="font-semibold text-primary-900 mb-2 flex items-center gap-2">
           <Hash className="w-5 h-5" />
           Información Importante
         </h4>
-        <ul className="text-sm text-blue-800 space-y-1 ml-6">
+        <ul className="text-sm text-primary-800 space-y-1 ml-6">
           <li className="list-disc">El código de estudiante se generará automáticamente</li>
           <li className="list-disc">Las credenciales serán mostradas después de la creación</li>
           <li className="list-disc">El estudiante podrá iniciar sesión inmediatamente</li>
@@ -271,3 +271,4 @@ export default function GestionEstudiantesPage() {
     </div>
   );
 }
+

@@ -38,8 +38,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     },
     info: {
       icon: InformationCircleIcon,
-      bgColor: 'bg-blue-100',
-      iconColor: 'text-blue-600',
+      bgColor: 'bg-primary-100',
+      iconColor: 'text-primary-700',
       buttonColor: 'btn-primary',
     },
   }
@@ -113,3 +113,4 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 }
 
 export default ConfirmModal
+

@@ -167,7 +167,7 @@ const createAxiosInstance = () => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // Token expirado o inválido, limpiar localStorage y redirigir
+        // Token expirado o inválido, limpiar localStorage y redirigir al login de docentes
         localStorage.removeItem('docenteToken');
         localStorage.removeItem('docenteData');
         window.location.href = '/docente/login';

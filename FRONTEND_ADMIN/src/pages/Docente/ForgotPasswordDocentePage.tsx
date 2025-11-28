@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { BookOpenIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, AcademicCapIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
+const API_URL = 'http://localhost:5251/api';
 
-const ForgotPasswordPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+export const ForgotPasswordDocentePage: React.FC = () => {
+  const [correo, setCorreo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState('');
 
-  const validateEmail = (emailValue: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
+  const validateEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!email) {
+    if (!correo) {
       setError('El correo es requerido');
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(correo)) {
       setError('El formato del correo no es válido');
       return;
     }
@@ -34,7 +33,7 @@ const ForgotPasswordPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email });
+      const response = await axios.post(`${API_URL}/auth/forgot-password`, { email: correo });
       
       // La API devuelve success: false cuando el correo no existe
       if (response.data?.success === false) {
@@ -47,7 +46,7 @@ const ForgotPasswordPage: React.FC = () => {
       console.error('Error al solicitar recuperación:', error);
       
       if (error.response?.status === 404) {
-        setError('No existe una cuenta con este correo');
+        setError('No existe una cuenta de docente con este correo');
       } else if (error.response?.data?.success === false) {
         setError(error.response?.data?.message || 'No existe una cuenta con este correo');
       } else if (error.response?.status === 400) {
@@ -89,32 +88,11 @@ const ForgotPasswordPage: React.FC = () => {
       >
         {/* Logo y Marca */}
         <div className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 relative mb-4">
-            <div 
-              className="w-full h-full rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #003366 0%, #004080 100%)',
-                boxShadow: '0 4px 14px rgba(0, 51, 102, 0.4)',
-              }}
-            >
-              <div className="relative">
-                <BookOpenIcon 
-                  className="w-10 h-10"
-                  style={{ color: '#C7A740' }}
-                />
-                <div 
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                  style={{ backgroundColor: '#C7A740' }}
-                />
-              </div>
-            </div>
-            <div 
-              className="absolute inset-0 rounded-full"
-              style={{
-                border: '2px solid #C7A740',
-                opacity: 0.6,
-              }}
-            />
+          <div 
+            className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
+            style={{ backgroundColor: '#003366' }}
+          >
+            <AcademicCapIcon className="w-12 h-12 text-white" />
           </div>
           
           <h1 
@@ -128,7 +106,7 @@ const ForgotPasswordPage: React.FC = () => {
           </h1>
           
           <p className="text-gray-500 text-sm">
-            Sistema de Gestión Académica
+            Portal Docente - SIAGE
           </p>
         </div>
 
@@ -142,13 +120,13 @@ const ForgotPasswordPage: React.FC = () => {
               ¡Correo enviado!
             </h2>
             <p className="text-gray-600 mb-6">
-              Si existe una cuenta asociada a <strong>{email}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
+              Si existe una cuenta asociada a <strong>{correo}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
             </p>
             <p className="text-sm text-gray-500 mb-6">
               El enlace expirará en 1 hora.
             </p>
             <Link
-              to="/login"
+              to="/docente/login"
               className="inline-flex items-center justify-center w-full py-3 px-4 rounded-lg text-white font-semibold transition-all duration-200"
               style={{ backgroundColor: '#003366' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#002244'}
@@ -169,22 +147,22 @@ const ForgotPasswordPage: React.FC = () => {
               {/* Campo Correo */}
               <div>
                 <label 
-                  htmlFor="email" 
+                  htmlFor="correo" 
                   className="block text-sm font-semibold mb-2"
                   style={{ color: '#003366' }}
                 >
-                  Correo institucional
+                  Correo Institucional
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
-                    id="email"
+                    id="correo"
                     type="email"
-                    value={email}
+                    value={correo}
                     onChange={(e) => {
-                      setEmail(e.target.value);
+                      setCorreo(e.target.value);
                       setError('');
                     }}
                     className={`
@@ -195,7 +173,7 @@ const ForgotPasswordPage: React.FC = () => {
                         : 'border-gray-300 focus:ring-primary-600 focus:border-primary-600'
                       }
                     `}
-                    placeholder="correo@ejemplo.com"
+                    placeholder="docente@unas.edu.pe"
                   />
                 </div>
                 {error && (
@@ -235,7 +213,7 @@ const ForgotPasswordPage: React.FC = () => {
             {/* Link para volver */}
             <div className="mt-6 text-center">
               <Link 
-                to="/login"
+                to="/docente/login"
                 className="inline-flex items-center text-sm font-medium hover:underline"
                 style={{ color: '#003366' }}
               >
@@ -257,7 +235,5 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage;
-
-
+export default ForgotPasswordDocentePage;
 

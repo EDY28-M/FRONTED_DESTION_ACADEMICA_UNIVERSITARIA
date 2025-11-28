@@ -42,7 +42,7 @@ export default function OrdenMeritoPage() {
       case 'Décimo Superior':
         return 'bg-amber-50 border-l-4 border-amber-500';
       case 'Quinto Superior':
-        return 'bg-blue-50 border-l-4 border-blue-500';
+        return 'bg-primary-50 border-l-4 border-primary-600';
       case 'Tercio Superior':
         return 'bg-emerald-50 border-l-4 border-emerald-500';
       case 'Medio Superior':
@@ -55,7 +55,7 @@ export default function OrdenMeritoPage() {
   const getRangoBadge = (rango: string) => {
     const estilos: Record<string, string> = {
       'Décimo Superior': 'bg-amber-100 text-amber-800 border-amber-300',
-      'Quinto Superior': 'bg-blue-100 text-blue-800 border-blue-300',
+      'Quinto Superior': 'bg-primary-100 text-primary-800 border-primary-300',
       'Tercio Superior': 'bg-emerald-100 text-emerald-800 border-emerald-300',
       'Medio Superior': 'bg-violet-100 text-violet-800 border-violet-300',
     };
@@ -94,7 +94,7 @@ export default function OrdenMeritoPage() {
           <select
             value={promocionSeleccionada}
             onChange={(e) => setPromocionSeleccionada(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white"
           >
             <option value="">📊 Todas las promociones</option>
             {promociones.map((promo) => (
@@ -108,11 +108,11 @@ export default function OrdenMeritoPage() {
 
       {/* Mi Posición */}
       {miPosicion && (
-        <div className={`mb-6 border-l-4 ${getEstiloRango(miPosicion.rangoMerito)} bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-sm overflow-hidden`}>
+        <div className={`mb-6 border-l-4 ${getEstiloRango(miPosicion.rangoMerito)} bg-gradient-to-r from-primary-50 to-white rounded-lg shadow-sm overflow-hidden`}>
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-xl text-3xl font-bold shadow-lg">
+                <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-700 to-primary-800 text-white rounded-xl text-3xl font-bold shadow-lg">
                   {miPosicion.posicion}°
                 </div>
                 <div>
@@ -132,7 +132,7 @@ export default function OrdenMeritoPage() {
               </div>
               <div className="text-right">
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Promedio Acumulado</p>
-                <div className="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-indigo-800 bg-clip-text text-transparent">
+                <div className="text-5xl font-bold bg-gradient-to-r from-primary-700 to-primary-800 bg-clip-text text-transparent">
                   {miPosicion.promedioPonderadoAcumulado.toFixed(2)}
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function OrdenMeritoPage() {
       {/* Tabla de Orden de Mérito */}
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
         </div>
       ) : ordenMerito.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -199,7 +199,7 @@ export default function OrdenMeritoPage() {
                 {ordenMerito.map((estudiante) => {
                   const isMe = miPosicion && estudiante.codigo === miPosicion.codigo;
                   const estiloFila = isMe
-                    ? 'bg-indigo-50 border-l-4 border-indigo-600'
+                    ? 'bg-primary-50 border-l-4 border-primary-700'
                     : getEstiloRango(estudiante.rangoMerito);
 
                   return (
@@ -216,7 +216,7 @@ export default function OrdenMeritoPage() {
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div className="font-medium">{estudiante.apellidos}, {estudiante.nombres}</div>
                         {isMe && (
-                          <span className="inline-block mt-1 text-xs bg-indigo-600 text-white px-2 py-0.5 rounded">
+                          <span className="inline-block mt-1 text-xs bg-primary-700 text-white px-2 py-0.5 rounded">
                             Tu posición
                           </span>
                         )}
@@ -242,7 +242,7 @@ export default function OrdenMeritoPage() {
                       <td className="px-6 py-4 text-sm text-center font-semibold text-gray-900">
                         {estudiante.promedioPonderadoSemestral.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center font-bold text-indigo-600">
+                      <td className="px-6 py-4 text-sm text-center font-bold text-primary-700">
                         {estudiante.promedioPonderadoAcumulado.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -264,9 +264,9 @@ export default function OrdenMeritoPage() {
       {/* Nota informativa */}
       {ordenMerito.length > 0 && (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="text-sm font-semibold text-blue-900 mb-2">📊 Información del Ranking</h4>
-            <ul className="text-xs text-blue-800 space-y-1">
+          <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
+            <h4 className="text-sm font-semibold text-primary-900 mb-2">📊 Información del Ranking</h4>
+            <ul className="text-xs text-primary-800 space-y-1">
               <li>• <strong>CC:</strong> Créditos llevados en el periodo evaluado</li>
               <li>• <strong>CA:</strong> Créditos aprobados en el periodo evaluado</li>
               <li>• <strong>TCC/TCA:</strong> Total acumulado de créditos</li>
@@ -285,3 +285,4 @@ export default function OrdenMeritoPage() {
     </div>
   );
 }
+

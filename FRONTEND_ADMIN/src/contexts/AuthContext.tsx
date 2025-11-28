@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (credentials: LoginRequest) => Promise<void>
+  login: (credentials: LoginRequest) => Promise<User>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => clearInterval(interval)
   }, [user])
 
-  const login = async (credentials: LoginRequest) => {
+  const login = async (credentials: LoginRequest): Promise<User> => {
     try {
       const response = await authService.login(credentials)
       setUser(response.usuario)
@@ -139,6 +139,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           registerLocation(location)
         }
       }, 1000)
+      
+      return response.usuario
     } catch (error) {
       console.error('Error en login:', error)
       throw error

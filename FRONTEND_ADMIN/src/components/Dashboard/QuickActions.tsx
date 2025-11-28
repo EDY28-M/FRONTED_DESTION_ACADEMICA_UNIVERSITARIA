@@ -8,7 +8,7 @@ const actions = [
     description: 'Agregar un nuevo profesor al sistema',
     icon: UserGroupIcon,
     href: '/docentes?action=new',
-    color: 'bg-blue-500 hover:bg-blue-600',
+    color: 'bg-primary-600 hover:bg-primary-700',
   },
   {
     name: 'Nuevo Curso',
@@ -62,3 +62,4 @@ const QuickActions = () => {
 }
 
 export default QuickActions
+

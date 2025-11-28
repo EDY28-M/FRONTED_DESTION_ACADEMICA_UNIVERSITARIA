@@ -91,8 +91,8 @@ const EstadisticasPage = () => {
         transition={{ delay: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        <div className="card p-6 text-center bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
-          <div className="text-5xl text-blue-600 mb-2">{docentes?.length || 0}</div>
+        <div className="card p-6 text-center bg-gradient-to-br from-primary-50 to-primary-100 border-2 border-primary-200">
+          <div className="text-5xl text-primary-700 mb-2">{docentes?.length || 0}</div>
           <div className="text-base text-gray-700">Total Docentes</div>
         </div>
         <div className="card p-6 text-center bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
@@ -155,7 +155,7 @@ const EstadisticasPage = () => {
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: '#fff',
-                    border: '2px solid #3B82F6',
+                    border: '2px solid #003366',
                     borderRadius: '12px',
                     fontSize: '16px',
                     fontWeight: '600',
@@ -172,7 +172,7 @@ const EstadisticasPage = () => {
                 />
                 <Bar 
                   dataKey="cantidad" 
-                  fill="#3B82F6" 
+                  fill="#003366" 
                   radius={[8, 8, 0, 0]}
                   maxBarSize={80}
                   label={{ 
@@ -412,7 +412,7 @@ const EstadisticasPage = () => {
         transition={{ delay: 0.6 }}
         className="card"
       >
-        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-purple-50">
           <h3 className="text-xl text-gray-900">Resumen Detallado por Ciclo</h3>
         </div>
         <div className="overflow-x-auto">
@@ -438,17 +438,17 @@ const EstadisticasPage = () => {
                 return (
                   <motion.tr
                     key={item.ciclo}
-                    className="table-row hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all"
+                    className="table-row hover:bg-gradient-to-r hover:from-primary-50 hover:to-purple-50 transition-all"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
                     <td className="table-cell text-base text-gray-900">{item.ciclo}</td>
-                    <td className="table-cell text-base text-blue-600">{item.cantidad}</td>
+                    <td className="table-cell text-base text-primary-700">{item.cantidad}</td>
                     <td className="table-cell text-base text-purple-600">{item.creditos}</td>
                     <td className="table-cell text-base text-orange-600">{horasSemanales}</td>
                     <td className="table-cell text-base text-green-600">{promedioCreditos}</td>
-                    <td className="table-cell text-base text-indigo-600">{promedioHoras}</td>
+                    <td className="table-cell text-base text-primary-700">{promedioHoras}</td>
                   </motion.tr>
                 )
               })}
@@ -461,3 +461,5 @@ const EstadisticasPage = () => {
 }
 
 export default EstadisticasPage
+
+

@@ -71,15 +71,15 @@ const Dashboard = () => {
         <title>Reporte Académico</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 40px; }
-          h1 { color: #1F2937; border-bottom: 3px solid #3B82F6; padding-bottom: 10px; }
+          h1 { color: #1F2937; border-bottom: 3px solid #003366; padding-bottom: 10px; }
           h2 { color: #374151; margin-top: 30px; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-          th { background-color: #3B82F6; color: white; padding: 12px; text-align: left; }
+          th { background-color: #003366; color: white; padding: 12px; text-align: left; }
           td { padding: 10px; border-bottom: 1px solid #E5E7EB; }
           tr:nth-child(even) { background-color: #F9FAFB; }
           .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 30px 0; }
           .stat-card { background: #F3F4F6; padding: 20px; border-radius: 8px; text-align: center; }
-          .stat-value { font-size: 32px; font-weight: bold; color: #3B82F6; }
+          .stat-value { font-size: 32px; font-weight: bold; color: #003366; }
           .stat-label { color: #6B7280; margin-top: 5px; }
           .footer { margin-top: 40px; text-align: center; color: #6B7280; font-size: 12px; }
         </style>
@@ -185,7 +185,7 @@ const Dashboard = () => {
       name: 'Total Docentes',
       value: docentes?.length || 0,
       icon: UserGroupIcon,
-      color: 'bg-blue-500',
+      color: 'bg-primary-600',
       change: '+12%',
       changeType: 'positive' as const,
     },

@@ -36,11 +36,11 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
       >
         <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Resumen Académico</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <div className="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">
+          <div className="text-center p-3 sm:p-4 bg-primary-50 rounded-lg">
+            <div className="text-xl sm:text-2xl font-bold text-primary-700">
               {cursos.reduce((sum, curso) => sum + curso.creditos, 0)}
             </div>
-            <div className="text-xs sm:text-sm text-blue-600 mt-1">Total Créditos</div>
+            <div className="text-xs sm:text-sm text-primary-700 mt-1">Total Créditos</div>
           </div>
           <div className="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
             <div className="text-xl sm:text-2xl font-bold text-green-600">
@@ -235,9 +235,9 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
                 <h4 className="text-base text-gray-800 mb-3">Cursos por Ciclo</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {cursosPorCiclo.map((item) => (
-                    <div key={item.ciclo} className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border-2 border-blue-200">
+                    <div key={item.ciclo} className="bg-gradient-to-br from-primary-50 to-primary-100 p-4 rounded-xl border-2 border-primary-200">
                       <div className="text-base text-gray-900">{item.ciclo}</div>
-                      <div className="text-2xl text-blue-600">{item.cantidad}</div>
+                      <div className="text-2xl text-primary-700">{item.cantidad}</div>
                       <div className="text-sm text-gray-600">cursos</div>
                     </div>
                   ))}
@@ -284,14 +284,14 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {cursosPorCiclo.map((item) => (
-                  <tr key={item.ciclo} className="hover:bg-blue-50 transition-colors">
+                  <tr key={item.ciclo} className="hover:bg-primary-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-base text-gray-900">
                       Cursos
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-base text-gray-700">
                       {item.ciclo}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-base text-blue-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-base text-primary-700">
                       {item.cantidad}
                     </td>
                   </tr>
@@ -319,3 +319,4 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
 }
 
 export default ChartsSection
+

@@ -74,7 +74,7 @@ export default function VisualizacionEstudiantesPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando estudiantes...</p>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function VisualizacionEstudiantesPage() {
                     <td className="px-6 py-4 text-sm text-gray-600">{estudiante.dni}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{estudiante.email}</td>
                     <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         Ciclo {estudiante.cicloActual}
                       </span>
                     </td>
@@ -201,7 +201,7 @@ export default function VisualizacionEstudiantesPage() {
                       <span className="font-medium">{estudiante.creditosAcumulados}</span>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {estudiante.creditosSemestreActual}
                       </span>
                     </td>
@@ -365,7 +365,7 @@ export default function VisualizacionEstudiantesPage() {
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Semestre Actual</p>
-                      <p className="text-2xl font-bold text-indigo-600">
+                      <p className="text-2xl font-bold text-primary-700">
                         {estudianteDetalle.cursosActuales
                           .filter(c => c.estado === 'Matriculado')
                           .reduce((sum, c) => sum + c.creditos, 0)}
@@ -568,7 +568,7 @@ export default function VisualizacionEstudiantesPage() {
                                     {curso.notas.map((nota, idx) => (
                                       <span key={idx} className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-xs">
                                         <span className="font-medium">{nota.tipoEvaluacion}:</span>
-                                        <span className="ml-1 text-blue-600">{nota.notaValor}</span>
+                                        <span className="ml-1 text-primary-700">{nota.notaValor}</span>
                                         <span className="ml-1 text-gray-500">({nota.peso}%)</span>
                                       </span>
                                     ))}
@@ -692,9 +692,9 @@ export default function VisualizacionEstudiantesPage() {
                   {/* Tab: Estadísticas */}
                   {tabActiva === 'estadisticas' && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                      <div className="bg-primary-50 rounded-lg p-6 border border-primary-200">
                         <div className="flex items-center gap-3 mb-3">
-                          <BookOpen className="w-8 h-8 text-blue-600" />
+                          <BookOpen className="w-8 h-8 text-primary-700" />
                           <h3 className="font-semibold text-gray-800">Matrículas</h3>
                         </div>
                         <div className="space-y-2 text-sm">
@@ -710,7 +710,7 @@ export default function VisualizacionEstudiantesPage() {
                             <span className="text-gray-600">Retirados:</span>
                             <span className="font-semibold text-gray-600">{estudianteDetalle.estadisticas.totalCursosRetirados}</span>
                           </div>
-                          <div className="flex justify-between border-t border-blue-300 pt-2 mt-2">
+                          <div className="flex justify-between border-t border-primary-300 pt-2 mt-2">
                             <span className="text-gray-600">Dirigidos:</span>
                             <span className="font-semibold text-purple-600">{estudianteDetalle.estadisticas.totalCursosDirigidos}</span>
                           </div>
@@ -743,9 +743,9 @@ export default function VisualizacionEstudiantesPage() {
                         </div>
                       </div>
 
-                      <div className="bg-indigo-50 rounded-lg p-6 border border-indigo-200">
+                      <div className="bg-primary-50 rounded-lg p-6 border border-primary-200">
                         <div className="flex items-center gap-3 mb-3">
-                          <TrendingUp className="w-8 h-8 text-indigo-600" />
+                          <TrendingUp className="w-8 h-8 text-primary-700" />
                           <h3 className="font-semibold text-gray-800">Promedios</h3>
                         </div>
                         <div className="space-y-2 text-sm">
@@ -766,7 +766,7 @@ export default function VisualizacionEstudiantesPage() {
                                 : '0.00'}
                             </span>
                           </div>
-                          <div className="flex justify-between border-t border-indigo-300 pt-2 mt-2">
+                          <div className="flex justify-between border-t border-primary-300 pt-2 mt-2">
                             <span className="text-gray-600">Créditos:</span>
                             <span className="font-semibold text-gray-900">
                               {estudianteDetalle.estadisticas.creditosAcumulados}
@@ -785,3 +785,4 @@ export default function VisualizacionEstudiantesPage() {
     </div>
   );
 }
+

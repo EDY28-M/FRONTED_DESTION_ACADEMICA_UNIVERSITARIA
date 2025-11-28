@@ -59,12 +59,18 @@ const LoginPage: React.FC = () => {
     setIsLoading(true)
 
     try {
-      await login({ email, password })
+      const loggedUser = await login({ email, password })
       toast.success('¡Bienvenido! Inicio de sesión exitoso')
-      navigate('/dashboard')
+      
+      // Redirigir según el rol del usuario
+      if (loggedUser.rol?.toLowerCase() === 'estudiante') {
+        navigate('/estudiante/inicio')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (error: any) {
-      console.error('Error al iniciar sesión:', error)
-
+      console.error('Error en login:', error)
+      
       if (error.response?.status === 401) {
         toast.error('Email o contraseña incorrectos')
       } else if (error.response?.status === 400) {
@@ -199,7 +205,7 @@ const LoginPage: React.FC = () => {
                 fontFamily: "'Montserrat', 'Roboto', sans-serif",
               }}
             >
-              Correo Electrónico
+              Correo institucional
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

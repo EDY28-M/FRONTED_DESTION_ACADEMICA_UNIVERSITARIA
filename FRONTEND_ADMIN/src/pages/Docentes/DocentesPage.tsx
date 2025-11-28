@@ -257,7 +257,7 @@ const DocentesPage = () => {
                       )}
                     </td>
                     <td className="table-cell">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {docente.cursos.length} curso{docente.cursos.length !== 1 ? 's' : ''}
                       </span>
                     </td>
@@ -265,14 +265,14 @@ const DocentesPage = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleView(docente)}
-                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
                           title="Ver detalles"
                         >
                           <EyeIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(docente)}
-                          className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
                           title="Editar"
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -317,3 +317,5 @@ const DocentesPage = () => {
 }
 
 export default DocentesPage
+
+

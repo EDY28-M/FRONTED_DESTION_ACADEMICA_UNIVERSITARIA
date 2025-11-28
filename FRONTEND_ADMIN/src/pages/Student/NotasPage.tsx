@@ -66,7 +66,7 @@ const NotasPage: React.FC = () => {
 
   const getNotaColor = (nota: number) => {
     if (nota >= 14) return 'text-green-600';
-    if (nota >= 11) return 'text-blue-600';
+    if (nota >= 11) return 'text-primary-700';
     return 'text-red-600';
   };
 
@@ -76,7 +76,7 @@ const NotasPage: React.FC = () => {
       return 'bg-teal-100 text-teal-800 border border-teal-300';
     }
     if (tipo.includes('trabajo')) {
-      return 'bg-indigo-100 text-indigo-800 border border-indigo-300';
+      return 'bg-primary-100 text-primary-800 border border-primary-300';
     }
     if (tipo.includes('medio curso') || tipo.includes('mediocurso')) {
       return 'bg-cyan-100 text-cyan-800 border border-cyan-300';
@@ -153,7 +153,7 @@ const NotasPage: React.FC = () => {
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
             >
               <option value="">Periodo Activo</option>
               {periodosActivos?.map((periodo) => (
@@ -172,11 +172,11 @@ const NotasPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 uppercase tracking-wide mb-2">Promedio General del Período</p>
-              <p className="text-5xl font-bold text-indigo-600">{promedioGeneral.toFixed(2)}</p>
+              <p className="text-5xl font-bold text-primary-700">{promedioGeneral.toFixed(2)}</p>
               <p className="text-xs text-gray-500 mt-2">Escala: 0 - 20</p>
             </div>
-            <div className="h-20 w-20 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-10 w-10 text-indigo-600" />
+            <div className="h-20 w-20 bg-primary-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-10 w-10 text-primary-700" />
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@ const NotasPage: React.FC = () => {
       {/* Notas por curso */}
       {isLoading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando notas...</p>
         </div>
       ) : periodosActivos.length > 0 && notasPorCurso && Object.keys(notasPorCurso).length > 0 ? (
@@ -214,7 +214,7 @@ const NotasPage: React.FC = () => {
             return (
               <div key={nombreCurso} className="bg-white rounded-lg shadow border border-gray-200">
                 {/* Header del curso */}
-                <div className="px-6 py-4 border-b border-gray-200 bg-indigo-50">
+                <div className="px-6 py-4 border-b border-gray-200 bg-primary-50">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-gray-900">{nombreCurso}</h3>
                   </div>
@@ -284,7 +284,7 @@ const NotasPage: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 text-center">
                               {nota.notaValor > 0 ? (
-                                <span className="text-sm font-bold text-indigo-600">{puntaje}</span>
+                                <span className="text-sm font-bold text-primary-700">{puntaje}</span>
                               ) : (
                                 <span className="text-sm text-gray-400">0</span>
                               )}
@@ -320,10 +320,10 @@ const NotasPage: React.FC = () => {
                       </tr>
 
                       {/* Fila de Promedio Final */}
-                      <tr className="bg-indigo-50 border-t-2 border-indigo-200">
+                      <tr className="bg-primary-50 border-t-2 border-primary-200">
                         <td colSpan={2} className="px-6 py-4 text-left">
                           <div className="flex items-center">
-                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-200 text-indigo-800">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-200 text-primary-800">
                               PF
                             </span>
                             <span className="ml-3 text-sm font-bold text-gray-900">Promedio Final</span>
@@ -336,7 +336,7 @@ const NotasPage: React.FC = () => {
                           <span className="text-sm text-gray-500">-</span>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="px-2 py-1 bg-indigo-200 text-indigo-800 rounded text-sm font-bold">100%</span>
+                          <span className="px-2 py-1 bg-primary-200 text-primary-800 rounded text-sm font-bold">100%</span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <span className={`text-2xl font-bold ${
@@ -369,3 +369,4 @@ const NotasPage: React.FC = () => {
 };
 
 export default NotasPage;
+

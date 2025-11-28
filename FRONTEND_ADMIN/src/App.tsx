@@ -9,9 +9,12 @@ import { ProtectedDocenteRoute } from './components/ProtectedDocenteRoute'
 import LoginPage from './pages/Auth/LoginPage'
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage'
-import { LoginDocentePage } from './pages/Docente/LoginDocentePage'
 import { DashboardDocentePage } from './pages/Docente/DashboardDocentePage'
 import { GestionCursoDocentePage } from './pages/Docente/GestionCursoDocentePage'
+import { LoginDocentePage } from './pages/Docente/LoginDocentePage'
+import { ForgotPasswordDocentePage } from './pages/Docente/ForgotPasswordDocentePage'
+import { ResetPasswordDocentePage } from './pages/Docente/ResetPasswordDocentePage'
+import { PerfilDocentePage } from './pages/Docente/PerfilDocentePage'
 import Dashboard from './pages/Dashboard'
 import DocentesPage from './pages/Docentes/DocentesPage'
 import CursosPage from './pages/Cursos/CursosPage'
@@ -38,7 +41,7 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando aplicación...</p>
         </div>
       </div>
@@ -84,8 +87,14 @@ function App() {
           } 
         />
 
-        {/* Ruta de login para docentes - accesible sin autenticación */}
+        {/* Ruta de login para docentes - página separada */}
         <Route path="/docente/login" element={<LoginDocentePage />} />
+
+        {/* Ruta de recuperación de contraseña para docentes */}
+        <Route path="/docente/forgot-password" element={<ForgotPasswordDocentePage />} />
+
+        {/* Ruta de resetear contraseña para docentes */}
+        <Route path="/docente/reset-password" element={<ResetPasswordDocentePage />} />
 
         {/* Rutas protegidas de docente - requieren autenticación como docente */}
         <Route
@@ -99,6 +108,7 @@ function App() {
           <Route index element={<Navigate to="/docente/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardDocentePage />} />
           <Route path="curso/:id" element={<GestionCursoDocentePage />} />
+          <Route path="perfil" element={<PerfilDocentePage />} />
         </Route>
 
         {/* Rutas de estudiante - requieren autenticación y rol Estudiante */}

@@ -564,7 +564,7 @@ export const GestionCursoDocentePage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando información del curso...</p>
         </div>
       </div>
@@ -596,7 +596,7 @@ export const GestionCursoDocentePage = () => {
               onClick={() => setActiveTab('estudiantes')}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
                 activeTab === 'estudiantes'
-                  ? 'bg-white text-blue-600 border-t-2 border-l border-r border-blue-600'
+                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -607,7 +607,7 @@ export const GestionCursoDocentePage = () => {
               onClick={() => setActiveTab('notas')}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
                 activeTab === 'notas'
-                  ? 'bg-white text-blue-600 border-t-2 border-l border-r border-blue-600'
+                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -618,7 +618,7 @@ export const GestionCursoDocentePage = () => {
               onClick={() => setActiveTab('asistencia')}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
                 activeTab === 'asistencia'
-                  ? 'bg-white text-blue-600 border-t-2 border-l border-r border-blue-600'
+                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -644,7 +644,7 @@ export const GestionCursoDocentePage = () => {
                   placeholder="Buscar por nombre o código..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 />
               </div>
             </div>
@@ -775,7 +775,7 @@ export const GestionCursoDocentePage = () => {
                             <span className="text-gray-400 font-normal">({tipo.peso}%)</span>
                           </th>
                         ))}
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-blue-50">
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-primary-50">
                         Promedio
                       </th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -816,14 +816,14 @@ export const GestionCursoDocentePage = () => {
                                     value={valorActual}
                                     onChange={(e) => handleNotaChange(estudiante.idMatricula, campoNota, e.target.value)}
                                     placeholder="0-20"
-                                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                                   />
                                 </td>
                               );
                             })}
                           
                           {/* Promedio */}
-                          <td className="px-4 py-3 text-center bg-blue-50">
+                          <td className="px-4 py-3 text-center bg-primary-50">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
                               Math.round(estudiante.promedioFinal || 0) >= 11
                                 ? 'bg-green-100 text-green-800'
@@ -838,7 +838,7 @@ export const GestionCursoDocentePage = () => {
                             <button
                               onClick={() => handleGuardarNotasEstudiante(estudiante)}
                               disabled={isSubmittingNotas}
-                              className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                              className="px-3 py-1 bg-primary-700 text-white text-sm font-medium rounded hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                             >
                               Guardar
                             </button>
@@ -866,7 +866,7 @@ export const GestionCursoDocentePage = () => {
                       type="date"
                       value={fechaAsistencia}
                       onChange={(e) => handleCambiarFecha(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -874,7 +874,7 @@ export const GestionCursoDocentePage = () => {
                     <select
                       value={tipoClaseAsistencia}
                       onChange={(e) => setTipoClaseAsistencia(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white"
                     >
                       <option value="Teoría">Teoría</option>
                       <option value="Práctica">Práctica</option>
@@ -956,7 +956,7 @@ export const GestionCursoDocentePage = () => {
                             handleObservacionChange(asistencia.idEstudiante, e.target.value)
                           }
                           placeholder="Observaciones (opcional)"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent text-sm"
                         />
                       </td>
                     </tr>
@@ -978,7 +978,7 @@ export const GestionCursoDocentePage = () => {
               <button
                 onClick={handleSubmitAsistencia}
                 disabled={isSubmittingAsistencia}
-                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                className="w-full py-3 bg-primary-700 text-white font-semibold rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
                 {isSubmittingAsistencia ? 'Guardando...' : 'Guardar Asistencia'}
               </button>
@@ -993,7 +993,7 @@ export const GestionCursoDocentePage = () => {
               
               {isLoadingAsistenciasRegistradas ? (
                 <div className="px-6 py-12 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-700 mx-auto"></div>
                   <p className="mt-3 text-sm text-gray-600">Cargando asistencias...</p>
                 </div>
               ) : asistenciasRegistradas.length === 0 ? (
@@ -1043,7 +1043,7 @@ export const GestionCursoDocentePage = () => {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               asist.tipoClase === 'Teoría'
                                 ? 'bg-purple-100 text-purple-800'
-                                : 'bg-blue-100 text-blue-800'
+                                : 'bg-primary-100 text-primary-800'
                             }`}>
                               {asist.tipoClase}
                             </span>
@@ -1071,7 +1071,7 @@ export const GestionCursoDocentePage = () => {
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => handleAbrirModalEditar(asist)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-700 text-white text-xs font-medium rounded-md hover:bg-primary-800 transition"
                                 title="Editar asistencia"
                               >
                                 <PencilIcon className="w-4 h-4" />
@@ -1119,13 +1119,13 @@ export const GestionCursoDocentePage = () => {
             <div className="flex-1 overflow-y-auto p-6">
               {isLoadingTipos ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
                   <p className="mt-4 text-gray-600">Cargando configuración...</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-900">
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                    <p className="text-sm text-primary-900">
                       <strong>Nota:</strong> Los pesos deben sumar exactamente 100%. Los cambios se aplicarán a todos los estudiantes del curso.
                     </p>
                   </div>
@@ -1164,7 +1164,7 @@ export const GestionCursoDocentePage = () => {
                                 value={tipo.nombre}
                                 onChange={(e) => handleActualizarTipo(index, 'nombre', e.target.value)}
                                 placeholder="Ej: Parcial 1, Prácticas, etc."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                               />
                             </td>
                             <td className="px-4 py-3">
@@ -1175,7 +1175,7 @@ export const GestionCursoDocentePage = () => {
                                 min="0"
                                 max="100"
                                 step="0.01"
-                                className="w-full px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full px-3 py-2 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                               />
                             </td>
                             <td className="px-4 py-3 text-center">
@@ -1183,7 +1183,7 @@ export const GestionCursoDocentePage = () => {
                                 type="checkbox"
                                 checked={tipo.activo}
                                 onChange={(e) => handleActualizarTipo(index, 'activo', e.target.checked)}
-                                className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                className="w-5 h-5 text-primary-700 border-gray-300 rounded focus:ring-2 focus:ring-primary-600"
                               />
                             </td>
                             <td className="px-4 py-3 text-center">
@@ -1220,7 +1220,7 @@ export const GestionCursoDocentePage = () => {
                   {/* Botón para agregar nuevo tipo */}
                   <button
                     onClick={handleAgregarTipo}
-                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition flex items-center justify-center gap-2"
+                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-primary-600 hover:text-primary-700 transition flex items-center justify-center gap-2"
                   >
                     <PlusIcon className="w-5 h-5" />
                     Agregar Nueva Evaluación
@@ -1240,7 +1240,7 @@ export const GestionCursoDocentePage = () => {
               <button
                 onClick={handleGuardarConfiguracion}
                 disabled={isSubmittingNotas || Math.abs(tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0) - 100) > 0.01}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                className="px-6 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
                 {isSubmittingNotas ? 'Guardando...' : 'Guardar Configuración'}
               </button>
@@ -1270,7 +1270,7 @@ export const GestionCursoDocentePage = () => {
                   type="date"
                   value={fechaEditar}
                   onChange={(e) => setFechaEditar(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 />
               </div>
 
@@ -1282,7 +1282,7 @@ export const GestionCursoDocentePage = () => {
                 <select
                   value={tipoClaseEditar}
                   onChange={(e) => setTipoClaseEditar(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white"
                 >
                   <option value="Teoría">Teoría</option>
                   <option value="Práctica">Práctica</option>
@@ -1297,7 +1297,7 @@ export const GestionCursoDocentePage = () => {
                 <select
                   value={estadoEditar ? 'presente' : 'ausente'}
                   onChange={(e) => setEstadoEditar(e.target.value === 'presente')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white"
                 >
                   <option value="presente">Presente</option>
                   <option value="ausente">Ausente</option>
@@ -1314,7 +1314,7 @@ export const GestionCursoDocentePage = () => {
                   onChange={(e) => setObservacionesEditar(e.target.value)}
                   placeholder="Observaciones (opcional)"
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
                 />
               </div>
             </div>
@@ -1331,7 +1331,7 @@ export const GestionCursoDocentePage = () => {
               <button
                 onClick={handleGuardarEdicion}
                 disabled={isSubmittingEdicion}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                className="px-6 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
                 {isSubmittingEdicion ? 'Guardando...' : 'Guardar Cambios'}
               </button>
@@ -1342,3 +1342,4 @@ export const GestionCursoDocentePage = () => {
     </div>
   );
 };
+

@@ -2,23 +2,24 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
-import { User, Lock, Mail, Calendar, Shield, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Mail, Calendar, Shield, CheckCircle, AlertCircle, Eye, EyeOff, X, Clock, CheckCircle2 } from 'lucide-react';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PerfilPage() {
   const { user } = useAuth();
   const { createNotification } = useNotifications();
   const location = useLocation();
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [seccionActiva, setSeccionActiva] = useState<'personal' | 'actividad'>('personal');
 
-  // Abrir formulario de cambio de contraseña si viene desde el dropdown
   useEffect(() => {
     if (location.state?.openChangePassword) {
-      setIsChangingPassword(true);
-      // Limpiar el estado para que no se abra de nuevo al recargar
+      setIsModalOpen(true);
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+  
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,18 +31,27 @@ export default function PerfilPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  };
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
 
-    // Validaciones
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setMessage({ type: 'error', text: 'Las contraseñas nuevas no coinciden' });
+      setMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' });
+      setMessage({ type: 'error', text: 'Mínimo 6 caracteres' });
       return;
     }
 
@@ -52,320 +62,368 @@ export default function PerfilPage() {
         newPassword: passwordData.newPassword
       });
       
-      setMessage({ type: 'success', text: 'Contraseña actualizada correctamente' });
       await createNotification({
         type: 'docente',
         action: 'editar',
         nombre: 'Contraseña actualizada'
       });
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setIsChangingPassword(false);
-      
-      // Limpiar mensaje después de 3 segundos
+      setIsModalOpen(false);
+      setMessage({ type: 'success', text: 'Contraseña actualizada' });
       setTimeout(() => setMessage(null), 3000);
     } catch (error: any) {
       setMessage({ 
         type: 'error', 
-        text: error.response?.data?.message || 'Error al cambiar la contraseña' 
+        text: error.response?.data?.message || 'Error al cambiar contraseña' 
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setMessage(null);
+  };
+
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500">Cargando...</div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
       </div>
     );
   }
 
+  const getInitials = () => {
+    return `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}`.toUpperCase();
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Mi Perfil</h1>
-          <p className="text-gray-600 mt-2">Gestiona tu información personal y seguridad</p>
+    <motion.div 
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      {/* Mensaje flotante de éxito */}
+      {message && !isModalOpen && (
+        <div className={`fixed top-4 right-4 left-4 sm:left-auto sm:right-6 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in ${
+          message.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {message.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span className="text-sm font-medium">{message.text}</span>
+        </div>
+      )}
+
+      {/* Header del perfil */}
+      <motion.div 
+        variants={itemVariants}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      >
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          {/* Avatar */}
+          <motion.div 
+            className="relative"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div 
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg"
+              style={{
+                background: 'linear-gradient(135deg, #003366 0%, #004d99 100%)',
+                border: '3px solid #C7A740'
+              }}
+            >
+              {getInitials()}
+            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+              className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-md border-2 border-white"
+            >
+              <CheckCircle2 className="w-4 h-4 text-white" />
+            </motion.div>
+          </motion.div>
+
+          {/* Info */}
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              {user.nombreCompleto}
+            </h1>
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-3">
+              <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-lg text-sm font-medium flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                {user.rol}
+              </span>
+              <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
+                Activo
+              </span>
+            </div>
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
+              <Mail className="w-4 h-4 text-primary-700" />
+              <span className="text-sm">{user.email}</span>
+            </div>
+          </div>
+
+          {/* Botón */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary-700 text-white rounded-lg font-medium hover:bg-primary-800 transition-colors shadow-sm"
+          >
+            <Lock className="w-4 h-4" />
+            Cambiar Contraseña
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* Tabs de navegación */}
+      <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="border-b border-gray-200">
+          <div className="flex">
+            {[
+              { id: 'personal', label: 'Información Personal', icon: User },
+              { id: 'actividad', label: 'Actividad', icon: Clock },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSeccionActiva(tab.id as any)}
+                className={`relative flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-medium transition-colors ${
+                  seccionActiva === tab.id 
+                    ? 'text-primary-700' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                {seccionActiva === tab.id && (
+                  <motion.div
+                    layoutId="activeTabAdmin"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Mensaje de éxito/error */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-fade-in ${
-            message.type === 'success' 
-              ? 'bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800' 
-              : 'bg-red-50 border-l-4 border-red-500 text-red-800'
-          }`}>
-            {message.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
-            ) : (
-              <AlertCircle className="w-5 h-5 text-red-600" />
-            )}
-            <span className="font-medium">{message.text}</span>
-          </div>
-        )}
+        {/* Contenido de tabs */}
+        <div className="p-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={seccionActiva}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {seccionActiva === 'personal' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { icon: User, label: 'Nombres', value: user.nombres },
+                    { icon: User, label: 'Apellidos', value: user.apellidos },
+                    { icon: Mail, label: 'Correo Electrónico', value: user.email },
+                    { icon: Shield, label: 'Rol en el Sistema', value: user.rol },
+                  ].map((campo, index) => (
+                    <motion.div
+                      key={campo.label}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-primary-200 hover:bg-gray-50/50 transition-all"
+                    >
+                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <campo.icon className="w-5 h-5 text-primary-700" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">{campo.label}</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{campo.value}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+              
+              {seccionActiva === 'actividad' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { 
+                      icon: Calendar, 
+                      label: 'Cuenta Creada', 
+                      value: new Date(user.fechaCreacion).toLocaleDateString('es-ES', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                      })
+                    },
+                    { 
+                      icon: Clock, 
+                      label: 'Último Acceso', 
+                      value: user.ultimoAcceso ? new Date(user.ultimoAcceso).toLocaleDateString('es-ES', {
+                        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                      }) : 'N/A'
+                    },
+                  ].map((campo, index) => (
+                    <motion.div
+                      key={campo.label}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-primary-200 hover:bg-gray-50/50 transition-all"
+                    >
+                      <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <campo.icon className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">{campo.label}</p>
+                        <p className="text-sm font-medium text-gray-900">{campo.value}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Columna Izquierda - Información Principal */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              <div className="text-center">
-                {/* Avatar con iniciales */}
-                <div className="relative inline-block">
-                  <div className="w-32 h-32 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-white text-4xl font-bold">
-                      {user.nombres.charAt(0)}{user.apellidos.charAt(0)}
-                    </span>
+      {/* Modal Cambiar Contraseña */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={(e) => e.target === e.currentTarget && closeModal()}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-primary-700" />
                   </div>
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-white" />
+                  <h3 className="text-lg font-semibold text-gray-900">Cambiar Contraseña</h3>
+                </div>
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handlePasswordChange} className="p-6 space-y-4">
+                {message && (
+                  <div className={`p-3 rounded-lg flex items-center gap-2 text-sm ${
+                    message.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+                  }`}>
+                    {message.type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                    <span>{message.text}</span>
                   </div>
-                </div>
-                
-                <h2 className="text-2xl font-bold text-gray-900 mt-6 mb-2">
-                  {user.nombreCompleto}
-                </h2>
-                
-                {/* Badge de Rol */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold">
-                  <Shield className="w-4 h-4" />
-                  {user.rol}
-                </div>
+                )}
 
-                {/* Divider */}
-                <div className="my-6 border-t border-gray-200"></div>
-
-                {/* Email */}
-                <div className="flex items-center justify-center gap-2 text-gray-600 mb-3">
-                  <Mail className="w-4 h-4" />
-                  <span className="text-sm">{user.email}</span>
-                </div>
-
-                {/* Miembro desde */}
-                <div className="flex items-center justify-center gap-2 text-gray-500">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">
-                    Miembro desde {new Date(user.fechaCreacion).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Columna Derecha - Información Detallada y Seguridad */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Información Personal */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <User className="w-5 h-5 text-indigo-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Información Personal</h3>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
+                {/* Contraseña Actual */}
                 <div>
-                  <label className="text-sm font-medium text-gray-500 block mb-2">Nombres</label>
-                  <div className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-                    <p className="text-gray-900 font-medium">{user.nombres}</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña Actual</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                      className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
+                      placeholder="Ingresa tu contraseña actual"
+                      required
+                      disabled={loading}
+                    />
+                    <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500 block mb-2">Apellidos</label>
-                  <div className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-                    <p className="text-gray-900 font-medium">{user.apellidos}</p>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500 block mb-2">Correo Electrónico</label>
-                  <div className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-                    <p className="text-gray-900 font-medium">{user.email}</p>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-500 block mb-2">Rol</label>
-                  <div className="bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-                    <p className="text-gray-900 font-medium">{user.rol}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Actividad Reciente */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-purple-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Actividad</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Cuenta creada</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {new Date(user.fechaCreacion).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Último acceso</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {user.ultimoAcceso ? new Date(user.ultimoAcceso).toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Seguridad - Cambiar Contraseña */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
-                  <Lock className="w-5 h-5 text-rose-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Seguridad</h3>
-              </div>
-
-              {!isChangingPassword ? (
+                {/* Nueva Contraseña */}
                 <div>
-                  <p className="text-gray-600 mb-6">
-                    Mantén tu cuenta segura actualizando tu contraseña regularmente. Se recomienda usar contraseñas fuertes con combinación de letras, números y símbolos.
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      disabled={loading}
+                      minLength={6}
+                    />
+                    <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirmar Contraseña */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
+                      placeholder="Confirma tu nueva contraseña"
+                      required
+                      disabled={loading}
+                    />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {passwordData.newPassword && (
+                  <p className={`text-sm flex items-center gap-1 ${passwordData.newPassword.length >= 6 ? 'text-emerald-600' : 'text-red-500'}`}>
+                    {passwordData.newPassword.length >= 6 ? '✓' : '✗'} Mínimo 6 caracteres
                   </p>
-                  <button
-                    onClick={() => setIsChangingPassword(true)}
-                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                )}
+
+                {/* Botones */}
+                <div className="flex gap-3 pt-2">
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 py-2.5 bg-primary-700 text-white rounded-lg font-medium hover:bg-primary-800 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                   >
-                    Cambiar Contraseña
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                        </svg>
+                        Guardando...
+                      </>
+                    ) : 'Cambiar Contraseña'}
+                  </motion.button>
+                  <button type="button" onClick={closeModal} disabled={loading} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50">
+                    Cancelar
                   </button>
                 </div>
-              ) : (
-                <form onSubmit={handlePasswordChange} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Contraseña Actual
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showCurrentPassword ? 'text' : 'password'}
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        required
-                        disabled={loading}
-                        placeholder="Ingresa tu contraseña actual"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Nueva Contraseña
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                        className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        required
-                        disabled={loading}
-                        minLength={6}
-                        placeholder="Mínimo 6 caracteres"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Confirmar Nueva Contraseña
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                        className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        required
-                        disabled={loading}
-                        placeholder="Confirma tu nueva contraseña"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Actualizando...
-                        </span>
-                      ) : (
-                        'Actualizar Contraseña'
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsChangingPassword(false);
-                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                        setMessage(null);
-                      }}
-                      disabled={loading}
-                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

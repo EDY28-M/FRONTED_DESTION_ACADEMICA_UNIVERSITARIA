@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminDocentesApi, DocenteAdmin, CrearDocenteConPasswordRequest, AsignarPasswordRequest, ActualizarDocenteRequest } from '../../services/adminDocentesApi';
-import { Users, Plus, Key, Edit, X, Check, AlertCircle, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { GraduationCap, Plus, Key, Edit, X, Check, AlertCircle, Eye, EyeOff, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type ModalType = 'crear' | 'asignarPassword' | 'editar' | 'eliminar' | null;
@@ -190,7 +190,7 @@ export default function GestionDocentesPasswordPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando docentes...</p>
         </div>
       </div>
@@ -218,7 +218,7 @@ export default function GestionDocentesPasswordPage() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Users className="w-8 h-8 text-blue-600" />
+              <GraduationCap className="w-8 h-8 text-primary-700" />
               <h1 className="text-3xl font-bold text-gray-800">Gestión de Docentes</h1>
             </div>
             <p className="text-gray-600">
@@ -227,7 +227,7 @@ export default function GestionDocentesPasswordPage() {
           </div>
           <button
             onClick={abrirModalCrear}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
           >
             <Plus className="w-5 h-5" />
             Nuevo Docente
@@ -244,7 +244,7 @@ export default function GestionDocentesPasswordPage() {
               placeholder="Buscar por nombre, correo o profesión..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
             />
           </div>
           <div className="flex gap-4 text-sm">
@@ -298,7 +298,7 @@ export default function GestionDocentesPasswordPage() {
               {docentesFiltrados.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                    <GraduationCap className="w-12 h-12 mx-auto mb-3 text-gray-400" />
                     <p>No se encontraron docentes</p>
                   </td>
                 </tr>
@@ -307,8 +307,8 @@ export default function GestionDocentesPasswordPage() {
                   <tr key={docente.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-blue-600" />
+                        <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                          <GraduationCap className="w-5 h-5 text-primary-700" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{docente.nombreCompleto}</p>
@@ -335,7 +335,7 @@ export default function GestionDocentesPasswordPage() {
                       {docente.correo || '-'}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {docente.totalCursos}
                       </span>
                     </td>
@@ -356,7 +356,7 @@ export default function GestionDocentesPasswordPage() {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => abrirModalEditar(docente)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className="p-1.5 text-primary-700 hover:bg-primary-50 rounded transition-colors"
                           title="Editar información"
                         >
                           <Edit className="w-4 h-4" />
@@ -393,9 +393,9 @@ export default function GestionDocentesPasswordPage() {
       {modalAbierto === 'crear' && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-blue-600 px-6 py-4 text-white flex items-center justify-between">
+            <div className="bg-primary-700 px-6 py-4 text-white flex items-center justify-between">
               <h2 className="text-xl font-bold">Crear Nuevo Docente</h2>
-              <button onClick={cerrarModal} className="text-white hover:bg-blue-700 p-1 rounded">
+              <button onClick={cerrarModal} className="text-white hover:bg-primary-800 p-1 rounded">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -411,7 +411,7 @@ export default function GestionDocentesPasswordPage() {
                     required
                     value={formData.apellidos}
                     onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
                   />
                 </div>
 
@@ -424,7 +424,7 @@ export default function GestionDocentesPasswordPage() {
                     required
                     value={formData.nombres}
                     onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
                   />
                 </div>
 
@@ -434,7 +434,7 @@ export default function GestionDocentesPasswordPage() {
                     type="text"
                     value={formData.profesion}
                     onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
                   />
                 </div>
 
@@ -446,7 +446,7 @@ export default function GestionDocentesPasswordPage() {
                     type="date"
                     value={formData.fechaNacimiento}
                     onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
                   />
                 </div>
 
@@ -458,7 +458,7 @@ export default function GestionDocentesPasswordPage() {
                     type="email"
                     value={formData.correo}
                     onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
                   />
                 </div>
 
@@ -473,7 +473,7 @@ export default function GestionDocentesPasswordPage() {
                       minLength={6}
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 pr-10"
                       placeholder="Mínimo 6 caracteres"
                     />
                     <button
@@ -501,7 +501,7 @@ export default function GestionDocentesPasswordPage() {
                 <button
                   type="submit"
                   disabled={crearMutation.isPending}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors disabled:opacity-50"
                 >
                   {crearMutation.isPending ? 'Creando...' : 'Crear Docente'}
                 </button>
@@ -652,8 +652,8 @@ export default function GestionDocentesPasswordPage() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
+              <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                <p className="text-sm text-primary-800">
                   <strong>Nota:</strong> Para cambiar la contraseña, usa el botón de contraseña{' '}
                   <Key className="inline w-4 h-4" /> en la tabla.
                 </p>
@@ -746,3 +746,4 @@ export default function GestionDocentesPasswordPage() {
     </div>
   );
 }
+

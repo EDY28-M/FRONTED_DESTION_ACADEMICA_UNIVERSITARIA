@@ -139,7 +139,7 @@ export default function CursosDirigidosPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando datos...</p>
         </div>
       </div>
@@ -160,10 +160,10 @@ export default function CursosDirigidosPage() {
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+      <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-6">
         <div className="flex items-start gap-2">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-900">
+          <Info className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-primary-900">
             <p className="font-semibold mb-1">¿Qué son los Cursos Dirigidos?</p>
             <p>
               Los cursos dirigidos permiten a los administradores autorizar matrículas que normalmente estarían 
@@ -347,7 +347,7 @@ export default function CursosDirigidosPage() {
                         {estudiante.nombreCompleto}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                           Ciclo {estudiante.cicloActual}
                         </span>
                       </td>
@@ -402,3 +402,4 @@ export default function CursosDirigidosPage() {
     </div>
   );
 }
+

@@ -38,7 +38,7 @@ const InicioDashboard: React.FC = () => {
       <div className="bg-white border-b border-gray-200 rounded-lg shadow-sm p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-700 to-primary-800 rounded-lg flex items-center justify-center shadow-md">
               <User className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -64,8 +64,8 @@ const InicioDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+              <BarChart3 className="h-5 w-5 text-primary-700" />
             </div>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Ciclo Académico</p>
@@ -74,8 +74,8 @@ const InicioDashboard: React.FC = () => {
 
         <div className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-primary-700" />
             </div>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cursos Actuales</p>
@@ -141,7 +141,7 @@ const InicioDashboard: React.FC = () => {
             )}
           </div>
           {cursosActivos.length > 0 && (
-            <span className="bg-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1 rounded-md">
+            <span className="bg-primary-100 text-primary-800 text-xs font-medium px-3 py-1 rounded-md">
               {cursosActivos.length} {cursosActivos.length === 1 ? 'curso' : 'cursos'}
             </span>
           )}
@@ -197,7 +197,7 @@ const InicioDashboard: React.FC = () => {
                         {Math.floor(curso.horasSemanal * 0.4) || 2}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded">
+                        <span className="px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded">
                           Obligatorio
                         </span>
                       </td>
@@ -220,7 +220,7 @@ const InicioDashboard: React.FC = () => {
                   <p className="text-sm font-medium text-gray-700">
                     Total de Créditos Matriculados
                   </p>
-                  <span className="text-lg font-bold text-indigo-600">
+                  <span className="text-lg font-bold text-primary-700">
                     {cursosActivos.reduce((sum, c) => sum + c.creditos, 0)} créditos
                   </span>
                 </div>
@@ -234,7 +234,7 @@ const InicioDashboard: React.FC = () => {
               <p className="text-sm text-gray-600 mb-4">No tienes cursos matriculados en este período</p>
               <Link
                 to="/estudiante/matricula"
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-700 text-white text-sm font-medium rounded-lg hover:bg-primary-800 transition-colors shadow-sm"
               >
                 <BookOpen className="h-4 w-4" />
                 Ir a Matrícula
@@ -248,3 +248,6 @@ const InicioDashboard: React.FC = () => {
 };
 
 export default InicioDashboard;
+
+
+

@@ -119,7 +119,7 @@ const MatriculaPage: React.FC = () => {
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <span className="flex items-center">
                 <span className="font-medium text-gray-700">Ciclo:</span>
-                <span className="ml-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded font-semibold">{perfil?.cicloActual}</span>
+                <span className="ml-1 px-2 py-0.5 bg-primary-100 text-primary-800 rounded font-semibold">{perfil?.cicloActual}</span>
               </span>
               <span className="text-gray-400">|</span>
               <span className="flex items-center">
@@ -139,7 +139,7 @@ const MatriculaPage: React.FC = () => {
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
             >
               <option value="">Período Activo</option>
               {periodos?.map((periodo) => (
@@ -156,12 +156,12 @@ const MatriculaPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BookOpen className="h-5 w-5 mr-2 text-indigo-600" />
+            <BookOpen className="h-5 w-5 mr-2 text-primary-700" />
             Cursos Disponibles para Matrícula
           </h3>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+              <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
               <span className="text-xs text-gray-600">Disponible</span>
             </div>
             <div className="flex items-center space-x-1">
@@ -173,7 +173,7 @@ const MatriculaPage: React.FC = () => {
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
               <p className="text-gray-500 mt-4">Cargando cursos...</p>
             </div>
           ) : cursosDisponiblesList.length > 0 || cursosMatriculadosList.length > 0 ? (
@@ -216,14 +216,14 @@ const MatriculaPage: React.FC = () => {
                       <td className="px-6 py-4 text-center">
                         <input 
                           type="checkbox" 
-                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                          className="rounded border-gray-300 text-primary-700 focus:ring-primary-600"
                           checked={cursosSeleccionados.includes(curso.id)}
                           onChange={() => handleToggleCurso(curso.id)}
                           disabled={matricularMutation.isPending}
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded font-mono text-xs font-semibold">
+                        <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded font-mono text-xs font-semibold">
                           {curso.codigo}
                         </span>
                       </td>
@@ -245,7 +245,7 @@ const MatriculaPage: React.FC = () => {
                         <span className="text-gray-600">{curso.capacidadMaxima || 30}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                           Disponible
                         </span>
                       </td>
@@ -312,7 +312,7 @@ const MatriculaPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Disponibles:</span>
-                    <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-md text-sm font-semibold">
+                    <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded-md text-sm font-semibold">
                       {cursosDisponiblesList.length}
                     </span>
                   </div>
@@ -332,7 +332,7 @@ const MatriculaPage: React.FC = () => {
                   )}
                 </div>
                 <button
-                  className="flex items-center px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                  className="flex items-center px-5 py-2.5 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   onClick={handleMatricularSeleccionados}
                   disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending}
                 >
@@ -384,3 +384,4 @@ const MatriculaPage: React.FC = () => {
 };
 
 export default MatriculaPage;
+

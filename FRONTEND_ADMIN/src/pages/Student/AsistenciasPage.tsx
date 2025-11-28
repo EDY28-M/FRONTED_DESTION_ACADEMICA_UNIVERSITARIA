@@ -33,7 +33,7 @@ const AsistenciasPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
       </div>
     );
   }
@@ -156,7 +156,7 @@ const AsistenciasPage: React.FC = () => {
                           e.stopPropagation();
                           setCursoSeleccionado(curso.idCurso);
                         }}
-                        className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700 transition-colors"
+                        className="px-3 py-1 bg-primary-700 text-white text-xs font-medium rounded hover:bg-primary-800 transition-colors"
                       >
                         Ver Detalle
                       </button>
@@ -255,7 +255,7 @@ const AsistenciasPage: React.FC = () => {
                         <td className="px-4 py-3 text-center">
                           <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
                             asistencia.tipoClase === 'Práctica' 
-                              ? 'bg-blue-100 text-blue-800' 
+                              ? 'bg-primary-100 text-primary-800' 
                               : 'bg-purple-100 text-purple-800'
                           }`}>
                             {asistencia.tipoClase}
@@ -301,3 +301,5 @@ const AsistenciasPage: React.FC = () => {
 };
 
 export default AsistenciasPage;
+
+

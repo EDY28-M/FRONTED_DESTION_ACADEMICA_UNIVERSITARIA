@@ -300,7 +300,7 @@ export default function GestionPeriodosPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando períodos...</p>
         </div>
       </div>
@@ -313,14 +313,14 @@ export default function GestionPeriodosPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Calendar className="w-8 h-8 text-indigo-600" />
+            <Calendar className="w-8 h-8 text-primary-700" />
             <h1 className="text-3xl font-bold text-gray-800">Gestión de Períodos</h1>
           </div>
           <p className="text-gray-600">Administra los períodos académicos del sistema</p>
         </div>
         <button
           onClick={abrirModalCrear}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
         >
           <Plus className="w-5 h-5" />
           Nuevo Período
@@ -328,10 +328,10 @@ export default function GestionPeriodosPage() {
       </div>
 
       {/* Info */}
-      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+      <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-6">
         <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-900">
+          <AlertCircle className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-primary-900">
             <p className="font-semibold mb-1">Información importante:</p>
             <ul className="list-disc list-inside space-y-1">
               <li>Solo puede haber un período activo a la vez</li>
@@ -382,7 +382,7 @@ export default function GestionPeriodosPage() {
                     <p>No hay períodos registrados</p>
                     <button
                       onClick={abrirModalCrear}
-                      className="mt-3 text-indigo-600 hover:text-indigo-800 font-medium"
+                      className="mt-3 text-primary-700 hover:text-primary-800 font-medium"
                     >
                       Crear el primer período
                     </button>
@@ -409,7 +409,7 @@ export default function GestionPeriodosPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">{periodo.anio}</td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {periodo.ciclo}
                       </span>
                     </td>
@@ -420,7 +420,7 @@ export default function GestionPeriodosPage() {
                       {new Date(periodo.fechaFin).toLocaleDateString('es-ES')}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {periodo.totalMatriculas}
                       </span>
                     </td>
@@ -456,7 +456,7 @@ export default function GestionPeriodosPage() {
                         )}
                         <button
                           onClick={() => abrirModalEditar(periodo)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className="p-1.5 text-primary-700 hover:bg-primary-50 rounded transition-colors"
                           title="Editar período"
                         >
                           <Edit className="w-4 h-4" />
@@ -510,7 +510,7 @@ export default function GestionPeriodosPage() {
                       onChange={(e) => setFormData({ ...formData, anio: parseInt(e.target.value) })}
                       min={2020}
                       max={2100}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
                       required
                     />
                   </div>
@@ -523,7 +523,7 @@ export default function GestionPeriodosPage() {
                     <select
                       value={formData.ciclo}
                       onChange={(e) => setFormData({ ...formData, ciclo: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
                       required
                     >
                       <option value="I">I (Semestre Impar)</option>
@@ -543,7 +543,7 @@ export default function GestionPeriodosPage() {
                       value={formData.nombre}
                       onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                       placeholder="Ej: 2025-I"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
                       required
                     />
                     <button
@@ -566,7 +566,7 @@ export default function GestionPeriodosPage() {
                       type="date"
                       value={formData.fechaInicio}
                       onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
                       required
                     />
                   </div>
@@ -579,7 +579,7 @@ export default function GestionPeriodosPage() {
                       type="date"
                       value={formData.fechaFin}
                       onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
                       required
                     />
                   </div>
@@ -593,7 +593,7 @@ export default function GestionPeriodosPage() {
                       id="activo"
                       checked={formData.activo}
                       onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                      className="w-4 h-4 text-primary-700 border-gray-300 rounded focus:ring-primary-600"
                     />
                     <label htmlFor="activo" className="text-sm text-gray-700">
                       Marcar como período activo (desactivará otros períodos)
@@ -606,7 +606,7 @@ export default function GestionPeriodosPage() {
                   <button
                     type="submit"
                     disabled={crearMutation.isPending || editarMutation.isPending}
-                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex-1 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {crearMutation.isPending || editarMutation.isPending
                       ? 'Guardando...'
@@ -647,12 +647,12 @@ export default function GestionPeriodosPage() {
 
               {/* Resumen */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="bg-primary-50 p-4 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-900">Total Matrículas</span>
+                    <Users className="w-5 h-5 text-primary-700" />
+                    <span className="text-sm font-medium text-primary-900">Total Matrículas</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{validacionData.totalMatriculas}</p>
+                  <p className="text-2xl font-bold text-primary-700">{validacionData.totalMatriculas}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
@@ -859,10 +859,10 @@ export default function GestionPeriodosPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg text-center">
-                  <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-blue-900 mb-1">Total Procesadas</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                <div className="bg-primary-50 p-4 rounded-lg text-center">
+                  <Users className="w-8 h-8 text-primary-700 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-primary-900 mb-1">Total Procesadas</p>
+                  <p className="text-2xl font-bold text-primary-700">
                     {resultadoCierre.estadisticas.totalMatriculas}
                   </p>
                 </div>
@@ -891,7 +891,7 @@ export default function GestionPeriodosPage() {
 
               <button
                 onClick={cerrarModalResultado}
-                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="w-full px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
               >
                 Entendido
               </button>
@@ -916,12 +916,12 @@ export default function GestionPeriodosPage() {
               </div>
 
               <div className="mb-6">
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-4">
                   <div className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="font-semibold text-blue-900">Avance Automático de Ciclos</p>
-                      <p className="text-sm text-blue-800 mt-1">
+                      <p className="font-semibold text-primary-900">Avance Automático de Ciclos</p>
+                      <p className="text-sm text-primary-800 mt-1">
                         Los estudiantes que tengan al menos un curso con nota en el período anterior 
                         avanzarán automáticamente al siguiente ciclo.
                       </p>
@@ -999,13 +999,13 @@ export default function GestionPeriodosPage() {
               </div>
 
               {resultadoApertura.resumenCiclos && resultadoApertura.resumenCiclos.length > 0 && (
-                <div className="bg-blue-50 p-4 rounded-lg mb-6">
-                  <h3 className="font-semibold text-blue-900 mb-3">Distribución por Ciclos:</h3>
+                <div className="bg-primary-50 p-4 rounded-lg mb-6">
+                  <h3 className="font-semibold text-primary-900 mb-3">Distribución por Ciclos:</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {resultadoApertura.resumenCiclos.map((resumen: any, idx: number) => (
                       <div key={idx} className="bg-white p-3 rounded text-center">
                         <p className="text-xs text-gray-600 mb-1">Ciclo {resumen.ciclo}</p>
-                        <p className="text-xl font-bold text-blue-600">{resumen.cantidadEstudiantes}</p>
+                        <p className="text-xl font-bold text-primary-700">{resumen.cantidadEstudiantes}</p>
                         <p className="text-xs text-gray-500">estudiantes</p>
                       </div>
                     ))}
@@ -1022,7 +1022,7 @@ export default function GestionPeriodosPage() {
 
               <button
                 onClick={cerrarModalResultadoApertura}
-                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                className="w-full px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
               >
                 Entendido
               </button>
@@ -1033,3 +1033,4 @@ export default function GestionPeriodosPage() {
     </div>
   );
 }
+

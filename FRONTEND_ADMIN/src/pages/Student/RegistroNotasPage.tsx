@@ -33,7 +33,7 @@ export default function RegistroNotasPage() {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-indigo-600 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-primary-700 mx-auto mb-4" />
           <p className="text-gray-600">Cargando registro de notas...</p>
         </div>
       </div>
@@ -50,10 +50,10 @@ export default function RegistroNotasPage() {
 
   if (!registroNotas || registroNotas.semestres.length === 0) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-        <BookOpen className="w-12 h-12 text-blue-500 mx-auto mb-3" />
-        <p className="text-blue-800 font-medium">No hay semestres cerrados registrados</p>
-        <p className="text-blue-600 text-sm mt-1">
+      <div className="bg-primary-50 border border-primary-200 rounded-lg p-6 text-center">
+        <BookOpen className="w-12 h-12 text-primary-600 mx-auto mb-3" />
+        <p className="text-primary-800 font-medium">No hay semestres cerrados registrados</p>
+        <p className="text-primary-700 text-sm mt-1">
           Los registros aparecerán cuando se cierren los periodos académicos
         </p>
       </div>
@@ -83,7 +83,7 @@ export default function RegistroNotasPage() {
           </div>
           <button
             onClick={exportarAPDF}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm print:hidden"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors shadow-sm print:hidden"
           >
             <Download className="w-5 h-5" />
             Exportar PDF
@@ -101,10 +101,10 @@ export default function RegistroNotasPage() {
             {/* Cabecera del Semestre - Clickeable */}
             <button
               onClick={() => toggleSemestre(semestre.idPeriodo)}
-              className="w-full px-6 py-5 flex items-center justify-between bg-indigo-50 hover:bg-indigo-100 transition-colors"
+              className="w-full px-6 py-5 flex items-center justify-between bg-primary-50 hover:bg-primary-100 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <div className="bg-indigo-600 text-white w-14 h-14 rounded-lg flex items-center justify-center font-bold text-xl shadow-sm">
+                <div className="bg-primary-700 text-white w-14 h-14 rounded-lg flex items-center justify-center font-bold text-xl shadow-sm">
                   {index + 1}
                 </div>
                 <div className="text-left">
@@ -113,7 +113,7 @@ export default function RegistroNotasPage() {
                   </h2>
                   <div className="flex items-center gap-3 mt-1.5 text-sm text-gray-600">
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-indigo-600" />
+                      <Calendar className="w-4 h-4 text-primary-700" />
                       {semestre.anio} - Ciclo {semestre.ciclo}
                     </span>
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
@@ -132,7 +132,7 @@ export default function RegistroNotasPage() {
                 <div className="hidden md:flex items-center gap-3">
                   <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Créditos</p>
-                    <p className="text-xl font-bold text-indigo-600">{semestre.totales.totalCreditos}</p>
+                    <p className="text-xl font-bold text-primary-700">{semestre.totales.totalCreditos}</p>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">PSem</p>
@@ -142,16 +142,16 @@ export default function RegistroNotasPage() {
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg px-4 py-2.5 text-center shadow-sm">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">PAc</p>
-                    <p className="text-xl font-bold text-blue-600">
+                    <p className="text-xl font-bold text-primary-700">
                       {semestre.totales.promedioAcumulado.toFixed(2)}
                     </p>
                   </div>
                 </div>
 
                 {semestreExpandido === semestre.idPeriodo ? (
-                  <ChevronUp className="w-6 h-6 text-indigo-600" />
+                  <ChevronUp className="w-6 h-6 text-primary-700" />
                 ) : (
-                  <ChevronDown className="w-6 h-6 text-indigo-600" />
+                  <ChevronDown className="w-6 h-6 text-primary-700" />
                 )}
               </div>
             </button>
@@ -192,7 +192,7 @@ export default function RegistroNotasPage() {
                         {semestre.cursos[0]?.evaluaciones.map((evaluacion, i) => (
                           <th 
                             key={i} 
-                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-indigo-50"
+                            className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-primary-50"
                           >
                             <div className="font-bold">{evaluacion.nombre}</div>
                             <div className="text-gray-500 normal-case font-normal">({evaluacion.peso}%)</div>
@@ -208,7 +208,7 @@ export default function RegistroNotasPage() {
                         <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-emerald-50">
                           PSem
                         </th>
-                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-blue-50">
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider bg-primary-50">
                           PAc
                         </th>
                       </tr>
@@ -217,7 +217,7 @@ export default function RegistroNotasPage() {
                       {semestre.cursos.map((curso) => (
                         <tr key={curso.idMatricula} className="hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded font-mono text-xs font-semibold">
+                            <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded font-mono text-xs font-semibold">
                               {curso.codigoCurso}
                             </span>
                           </td>
@@ -244,7 +244,7 @@ export default function RegistroNotasPage() {
 
                           {/* Notas de evaluaciones */}
                           {curso.evaluaciones.map((evaluacion, i) => (
-                            <td key={i} className="px-6 py-4 text-center bg-indigo-50/30">
+                            <td key={i} className="px-6 py-4 text-center bg-primary-50/30">
                               <span className="text-base font-bold text-gray-900">{evaluacion.nota.toFixed(1)}</span>
                             </td>
                           ))}
@@ -291,13 +291,13 @@ export default function RegistroNotasPage() {
                           {semestre.cursos.indexOf(curso) === 0 && (
                             <td 
                               rowSpan={semestre.cursos.length} 
-                              className="px-6 py-4 text-center bg-blue-50/50 border-l-4 border-blue-200"
+                              className="px-6 py-4 text-center bg-primary-50/50 border-l-4 border-primary-200"
                             >
                               <div className="flex flex-col items-center gap-2">
-                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <Award className="w-5 h-5 text-blue-600" />
+                                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                                  <Award className="w-5 h-5 text-primary-700" />
                                 </div>
-                                <span className="text-2xl font-bold text-blue-700">
+                                <span className="text-2xl font-bold text-primary-800">
                                   {semestre.totales.promedioAcumulado.toFixed(2)}
                                 </span>
                                 <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">Acumulado</span>
@@ -308,12 +308,12 @@ export default function RegistroNotasPage() {
                       ))}
 
                       {/* Fila de Totales */}
-                      <tr className="bg-indigo-50 border-t-2 border-indigo-200">
+                      <tr className="bg-primary-50 border-t-2 border-primary-200">
                         <td colSpan={3} className="px-6 py-4 text-sm font-bold text-gray-900 uppercase tracking-wide">
                           Totales del Semestre
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="px-3 py-1.5 bg-indigo-200 text-indigo-800 rounded-lg text-sm font-bold">
+                          <span className="px-3 py-1.5 bg-primary-200 text-primary-800 rounded-lg text-sm font-bold">
                             {semestre.totales.totalCreditos}
                           </span>
                         </td>
@@ -340,10 +340,10 @@ export default function RegistroNotasPage() {
                             <span className="text-lg font-bold text-emerald-700">{semestre.totales.promedioSemestral.toFixed(2)}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center bg-blue-50/50 border-l-4 border-blue-200">
+                        <td className="px-6 py-4 text-center bg-primary-50/50 border-l-4 border-primary-200">
                           <div className="flex items-center justify-center gap-2">
-                            <Award className="w-5 h-5 text-blue-600" />
-                            <span className="text-lg font-bold text-blue-700">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
+                            <Award className="w-5 h-5 text-primary-700" />
+                            <span className="text-lg font-bold text-primary-800">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
                           </div>
                         </td>
                       </tr>
@@ -379,3 +379,4 @@ export default function RegistroNotasPage() {
     </div>
   );
 }
+

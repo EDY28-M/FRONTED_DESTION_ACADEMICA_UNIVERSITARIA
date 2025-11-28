@@ -101,7 +101,7 @@ const MisCursosPage: React.FC = () => {
       case 'Retirado':
         return 'bg-red-500';
       case 'Aprobado':
-        return 'bg-blue-500';
+        return 'bg-primary-600';
       case 'Desaprobado':
         return 'bg-orange-500';
       default:
@@ -137,7 +137,7 @@ const MisCursosPage: React.FC = () => {
               id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
             >
               <option value="">Período Activo</option>
               {periodos?.map((periodo) => (
@@ -154,7 +154,7 @@ const MisCursosPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BookOpen className="h-5 w-5 mr-2 text-indigo-600" />
+            <BookOpen className="h-5 w-5 mr-2 text-primary-700" />
             Cursos Activos
           </h3>
           <div className="flex items-center space-x-2">
@@ -171,7 +171,7 @@ const MisCursosPage: React.FC = () => {
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
               <p className="text-gray-500 mt-4">Cargando cursos...</p>
             </div>
           ) : cursosMatriculados.length > 0 ? (
@@ -221,7 +221,7 @@ const MisCursosPage: React.FC = () => {
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded font-mono text-xs font-semibold">
+                        <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded font-mono text-xs font-semibold">
                           {curso.codigoCurso}
                         </span>
                       </td>
@@ -246,7 +246,7 @@ const MisCursosPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-center">
                         {curso.promedioFinal !== null && curso.promedioFinal !== undefined ? (
-                          <span className="text-base font-bold text-indigo-600">{curso.promedioFinal.toFixed(1)}</span>
+                          <span className="text-base font-bold text-primary-700">{curso.promedioFinal.toFixed(1)}</span>
                         ) : (
                           <span className="text-sm text-gray-400">-</span>
                         )}
@@ -269,7 +269,7 @@ const MisCursosPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Total:</span>
-                    <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-md text-sm font-semibold">
+                    <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded-md text-sm font-semibold">
                       {cursosMatriculados.length}
                     </span>
                     <span className="text-sm text-gray-500">curso(s)</span>
@@ -393,3 +393,4 @@ const MisCursosPage: React.FC = () => {
 };
 
 export default MisCursosPage;
+

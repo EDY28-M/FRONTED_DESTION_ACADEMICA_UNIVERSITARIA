@@ -273,7 +273,7 @@ const ResetPasswordPage = () => {
             <button
               onClick={() => navigate('/login?passwordReset=success')}
               autoFocus
-              className="w-full py-4 px-6 text-white font-bold rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              className="w-full py-4 px-6 text-white font-bold rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-300"
               style={{
                 backgroundColor: '#003366',
                 fontFamily: "'Montserrat', 'Roboto', sans-serif",
@@ -361,7 +361,7 @@ const ResetPasswordPage = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     disabled={isLoading}
-                    className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all"
                     placeholder="Nueva Contraseña"
                     style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
                   />
@@ -403,7 +403,7 @@ const ResetPasswordPage = () => {
                         ? passwordsMatch
                           ? 'border-green-400 focus:ring-green-500'
                           : 'border-red-400 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-blue-500'
+                        : 'border-gray-300 focus:ring-primary-600'
                     }`}
                     placeholder="Confirmar Contraseña"
                     style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -539,3 +539,5 @@ const ResetPasswordPage = () => {
 };
 
 export default ResetPasswordPage;
+
+

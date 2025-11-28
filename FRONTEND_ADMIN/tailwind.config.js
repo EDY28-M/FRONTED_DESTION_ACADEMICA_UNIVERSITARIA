@@ -7,17 +7,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Azul oscuro institucional - escala basada en #003366
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#e6eef5',
+          100: '#ccdded',
+          200: '#99bbdb',
+          300: '#6699c9',
+          400: '#3377b7',
+          500: '#004488',  // Un poco más claro que el base
+          600: '#003366',  // Color base institucional
+          700: '#002244',  // Más oscuro
+          800: '#001a33',  // Muy oscuro
+          900: '#001122',  // El más oscuro
         },
         secondary: {
           50: '#f8fafc',

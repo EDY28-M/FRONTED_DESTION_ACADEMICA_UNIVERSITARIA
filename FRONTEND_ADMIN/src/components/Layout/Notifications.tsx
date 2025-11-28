@@ -68,7 +68,7 @@ export const Notifications = ({ notifications, onClear, onMarkAsRead }: Notifica
   const getActionColor = (action: string) => {
     switch (action) {
       case 'crear': return 'text-green-600'
-      case 'editar': return 'text-blue-600'
+      case 'editar': return 'text-primary-700'
       case 'eliminar': return 'text-red-600'
       case 'iniciar': return 'text-purple-600'
       case 'matricula': return 'text-green-600'
@@ -170,7 +170,7 @@ export const Notifications = ({ notifications, onClear, onMarkAsRead }: Notifica
                           {/* Icono */}
                           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                             notification.action === 'crear' ? 'bg-green-100' :
-                            notification.action === 'editar' ? 'bg-blue-100' :
+                            notification.action === 'editar' ? 'bg-primary-100' :
                             notification.action === 'eliminar' ? 'bg-red-100' :
                             notification.action === 'iniciar' ? 'bg-purple-100' :
                             notification.action === 'matricula' ? 'bg-green-100' :
@@ -183,7 +183,7 @@ export const Notifications = ({ notifications, onClear, onMarkAsRead }: Notifica
                               </svg>
                             )}
                             {notification.action === 'editar' && (
-                              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-4 h-4 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                               </svg>
                             )}
@@ -271,3 +271,4 @@ export const Notifications = ({ notifications, onClear, onMarkAsRead }: Notifica
     </div>
   )
 }
+

@@ -2,16 +2,15 @@ import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import {
-  HomeIcon,
-  AcademicCapIcon,
-  UserGroupIcon,
-  ChartBarIcon,
-  UserCircleIcon,
-  UsersIcon,
+  Squares2X2Icon,
+  IdentificationIcon,
   BookOpenIcon,
-  CalendarIcon,
-  EyeIcon,
-  KeyIcon,
+  UserPlusIcon,
+  MagnifyingGlassCircleIcon,
+  ClipboardDocumentListIcon,
+  CalendarDaysIcon,
+  PresentationChartBarIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -26,55 +25,55 @@ const navigation = [
   {
     name: 'Dashboard',
     href: '/dashboard',
-    icon: HomeIcon,
+    icon: Squares2X2Icon,
     description: 'Resumen general del sistema'
   },
   {
     name: 'Gestión Credenciales',
     href: '/docentes/gestion-passwords',
-    icon: KeyIcon,
+    icon: IdentificationIcon,
     description: 'Administrar contraseñas de docentes'
   },
   {
     name: 'Cursos',
     href: '/cursos',
-    icon: AcademicCapIcon,
+    icon: BookOpenIcon,
     description: 'Gestión de materias'
   },
   {
     name: 'Estudiantes',
     href: '/estudiantes',
-    icon: UsersIcon,
+    icon: UserPlusIcon,
     description: 'Crear credenciales de estudiantes'
   },
   {
     name: 'Ver Estudiantes',
     href: '/estudiantes/visualizar',
-    icon: EyeIcon,
+    icon: MagnifyingGlassCircleIcon,
     description: 'Visualizar datos completos de estudiantes'
   },
   {
     name: 'Cursos Dirigidos',
     href: '/cursos-dirigidos',
-    icon: BookOpenIcon,
+    icon: ClipboardDocumentListIcon,
     description: 'Autorizar matrículas especiales'
   },
   {
     name: 'Períodos',
     href: '/periodos',
-    icon: CalendarIcon,
+    icon: CalendarDaysIcon,
     description: 'Gestionar períodos académicos'
   },
   {
     name: 'Estadísticas',
     href: '/estadisticas',
-    icon: ChartBarIcon,
+    icon: PresentationChartBarIcon,
     description: 'Reportes y análisis'
   },
   {
     name: 'Mi Perfil',
     href: '/perfil',
-    icon: UserCircleIcon,
+    icon: Cog6ToothIcon,
     description: 'Configuración de cuenta'
   },
 ]
@@ -111,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-2">
+      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
         {navigation.map((item, index) => {
           const isActive = location.pathname === item.href
           
@@ -120,29 +119,44 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               key={item.name}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
               <Link
                 to={item.href}
                 onClick={onClose}
                 className={clsx(
-                  'group flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200',
+                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
                   isActive
-                    ? 'bg-primary-100 text-primary-900 border-r-2 border-primary-600'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
-                <item.icon
+                <div
                   className={clsx(
-                    'mr-3 h-5 w-5 transition-colors',
+                    'flex items-center justify-center w-9 h-9 rounded-lg mr-3 transition-all duration-200',
                     isActive
-                      ? 'text-primary-600'
-                      : 'text-gray-400 group-hover:text-gray-600'
+                      ? 'bg-primary-100'
+                      : 'bg-gray-100 group-hover:bg-primary-50'
                   )}
-                />
-                <div className="flex flex-col">
-                  <span className="font-medium">{item.name}</span>
-                  <span className="text-xs text-gray-500 group-hover:text-gray-600">
+                >
+                  <item.icon
+                    className={clsx(
+                      'h-5 w-5 transition-colors',
+                      isActive
+                        ? 'text-primary-600'
+                        : 'text-gray-500 group-hover:text-primary-600'
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className={clsx(
+                    'font-semibold truncate',
+                    isActive ? 'text-primary-700' : ''
+                  )}>{item.name}</span>
+                  <span className={clsx(
+                    'text-xs truncate',
+                    isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
+                  )}>
                     {item.description}
                   </span>
                 </div>
@@ -153,11 +167,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="text-xs text-gray-500 text-center">
-          Panel Administrativo v1.0
-          <br />
-          © 2025 Sistema Académico
+      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+        <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span>Sistema Activo</span>
+        </div>
+        <div className="text-xs text-gray-400 text-center mt-1">
+          Panel Admin v1.0 • © 2025
         </div>
       </div>
     </div>
