@@ -2,3 +2,8 @@ export { LoginDocentePage } from './LoginDocentePage';
 export { DashboardDocentePage } from './DashboardDocentePage';
 export { GestionCursoDocentePage } from './GestionCursoDocentePage';
 export { PerfilDocentePage } from './PerfilDocentePage';
+export { MisCursosDocentePage } from './MisCursosDocentePage';
+export { EstudiantesDocentePage } from './EstudiantesDocentePage';
+export { AsistenciasDocentePage } from './AsistenciasDocentePage';
+export { ForgotPasswordDocentePage } from './ForgotPasswordDocentePage';
+export { ResetPasswordDocentePage } from './ResetPasswordDocentePage';

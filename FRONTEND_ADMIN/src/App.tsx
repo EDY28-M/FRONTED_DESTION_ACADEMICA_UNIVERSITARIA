@@ -4,17 +4,23 @@ import { useAuth } from './contexts/AuthContext'
 import { DocenteAuthProvider } from './contexts/DocenteAuthContext'
 import Layout from './components/Layout/Layout'
 import StudentLayout from './components/Layout/StudentLayout'
+import DocenteLayout from './components/Layout/DocenteLayout'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { ProtectedDocenteRoute } from './components/ProtectedDocenteRoute'
 import LoginPage from './pages/Auth/LoginPage'
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage'
-import { DashboardDocentePage } from './pages/Docente/DashboardDocentePage'
-import { GestionCursoDocentePage } from './pages/Docente/GestionCursoDocentePage'
-import { LoginDocentePage } from './pages/Docente/LoginDocentePage'
-import { ForgotPasswordDocentePage } from './pages/Docente/ForgotPasswordDocentePage'
-import { ResetPasswordDocentePage } from './pages/Docente/ResetPasswordDocentePage'
-import { PerfilDocentePage } from './pages/Docente/PerfilDocentePage'
+import { 
+  DashboardDocentePage,
+  GestionCursoDocentePage,
+  LoginDocentePage,
+  ForgotPasswordDocentePage,
+  ResetPasswordDocentePage,
+  PerfilDocentePage,
+  MisCursosDocentePage,
+  EstudiantesDocentePage,
+  AsistenciasDocentePage
+} from './pages/Docente'
 import Dashboard from './pages/Dashboard'
 import DocentesPage from './pages/Docentes/DocentesPage'
 import CursosPage from './pages/Cursos/CursosPage'
@@ -101,12 +107,15 @@ function App() {
           path="/docente"
           element={
             <ProtectedDocenteRoute>
-              <Outlet />
+              <DocenteLayout />
             </ProtectedDocenteRoute>
           }
         >
           <Route index element={<Navigate to="/docente/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardDocentePage />} />
+          <Route path="mis-cursos" element={<MisCursosDocentePage />} />
+          <Route path="estudiantes" element={<EstudiantesDocentePage />} />
+          <Route path="asistencias" element={<AsistenciasDocentePage />} />
           <Route path="curso/:id" element={<GestionCursoDocentePage />} />
           <Route path="perfil" element={<PerfilDocentePage />} />
         </Route>
