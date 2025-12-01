@@ -2,88 +2,24 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { asistenciasApi } from '../../services/asistenciasApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { Calendar, Check, X, AlertTriangle, ChevronRight, Clock } from 'lucide-react';
-
-// Progress Bar Component
-const ProgressBar = ({ value, alert }: { value: number; alert: boolean }) => (
-  <div className="w-20 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-    <div
-      className={`h-full rounded-full transition-all ${alert ? 'bg-red-500' : 'bg-emerald-500'}`}
-      style={{ width: `${Math.min(value, 100)}%` }}
-    />
-  </div>
-);
-
-// Course Card Component
-const CursoCard = ({
-  curso,
-  isSelected,
-  onClick
-}: {
-  curso: any;
-  isSelected: boolean;
-  onClick: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`w-full text-left p-4 rounded-xl border transition-all ${
-      isSelected 
-        ? 'border-zinc-900 bg-zinc-50 ring-1 ring-zinc-900' 
-        : 'border-zinc-200 hover:border-zinc-300 bg-white'
-    }`}
-  >
-    <div className="flex items-start justify-between mb-3">
-      <div className="flex-1 min-w-0">
-        <h3 className="text-[13px] font-medium text-zinc-900 truncate">{curso.nombreCurso}</h3>
-        <p className="text-[11px] text-zinc-500">{curso.codigoCurso} · {curso.creditos} créd.</p>
-      </div>
-      <ChevronRight className={`w-4 h-4 text-zinc-400 transition-transform ${isSelected ? 'rotate-90' : ''}`} />
-    </div>
-    
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1">
-          <Check className="w-3 h-3 text-emerald-500" />
-          <span className="text-[11px] font-medium text-zinc-600">{curso.totalAsistencias}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <X className="w-3 h-3 text-red-500" />
-          <span className="text-[11px] font-medium text-zinc-600">{curso.totalFaltas}</span>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-2">
-        <ProgressBar value={curso.porcentajeAsistencia} alert={curso.alertaBajaAsistencia} />
-        <span className={`text-[13px] font-semibold tabular-nums ${
-          curso.alertaBajaAsistencia ? 'text-red-600' : 'text-emerald-600'
-        }`}>
-          {curso.porcentajeAsistencia.toFixed(0)}%
-        </span>
-      </div>
-    </div>
-
-    {curso.alertaBajaAsistencia && (
-      <div className="mt-2 flex items-center gap-1.5 text-[11px] text-red-600">
-        <AlertTriangle className="w-3 h-3" />
-        <span>Asistencia baja</span>
-      </div>
-    )}
-  </button>
-);
+import { Calendar, CheckCircle2, XCircle, AlertTriangle, X, Eye } from 'lucide-react';
 
 const AsistenciasPage: React.FC = () => {
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | null>(null);
 
+  // Obtener perfil del estudiante
   const { data: perfil } = useQuery({
     queryKey: ['estudiante-perfil'],
     queryFn: estudiantesApi.getPerfil,
   });
 
+  // Obtener período activo
   const { data: periodoActivo } = useQuery({
     queryKey: ['periodo-activo'],
     queryFn: estudiantesApi.getPeriodoActivo,
   });
 
+  // Obtener asistencias del estudiante
   const { data: asistenciasPorCurso, isLoading } = useQuery({
     queryKey: ['asistencias-estudiante', perfil?.id, periodoActivo?.id],
     queryFn: () => asistenciasApi.getAsistenciasEstudiante(perfil!.id, periodoActivo?.id),
@@ -94,168 +30,231 @@ const AsistenciasPage: React.FC = () => {
     ? asistenciasPorCurso?.find(c => c.idCurso === cursoSeleccionado)
     : null;
 
-  const cursosConAlerta = asistenciasPorCurso?.filter(c => c.alertaBajaAsistencia).length || 0;
-
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
-          <p className="mt-3 text-sm text-zinc-500">Cargando asistencias...</p>
-        </div>
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="animate-pulse text-zinc-400 text-sm">Cargando asistencias...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="space-y-6">
       {/* Header */}
-      <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-medium text-zinc-900">Mis Asistencias</h1>
-              <p className="text-[11px] text-zinc-500">{periodoActivo?.nombre || 'Sin período activo'}</p>
-            </div>
-          </div>
+      <div className="bg-white border border-zinc-200 rounded-xl p-5">
+        <h1 className="text-lg font-semibold text-zinc-900">Mis Asistencias</h1>
+        <p className="text-sm text-zinc-500 mt-0.5">
+          Período: {periodoActivo?.nombre || 'Sin período activo'}
+        </p>
+      </div>
 
-          {cursosConAlerta > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-100 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              <span className="text-[13px] text-red-700">
-                {cursosConAlerta} curso{cursosConAlerta > 1 ? 's' : ''} con asistencia baja
-              </span>
-            </div>
-          )}
+      {/* Alerta de baja asistencia */}
+      {asistenciasPorCurso?.some(c => c.alertaBajaAsistencia) && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
+          <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800">
+            Tienes cursos con menos del 70% de asistencia
+          </p>
         </div>
-      </header>
+      )}
 
-      {/* Main Content */}
-      <div className="p-6 max-w-7xl mx-auto">
+      {/* Tabla de Cursos */}
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
         {asistenciasPorCurso && asistenciasPorCurso.length > 0 ? (
-          <div className="grid grid-cols-12 gap-6">
-            {/* Sidebar - Cursos */}
-            <div className="col-span-4 space-y-3">
-              <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider px-1">
-                Cursos ({asistenciasPorCurso.length})
-              </p>
-              {asistenciasPorCurso.map((curso) => (
-                <CursoCard
-                  key={curso.idCurso}
-                  curso={curso}
-                  isSelected={cursoSeleccionado === curso.idCurso}
-                  onClick={() => setCursoSeleccionado(curso.idCurso === cursoSeleccionado ? null : curso.idCurso)}
-                />
-              ))}
-            </div>
-
-            {/* Detail Panel */}
-            <div className="col-span-8">
-              {cursoDetallado ? (
-                <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-                  {/* Detail Header */}
-                  <div className="px-5 py-4 border-b border-zinc-100">
-                    <h2 className="text-sm font-medium text-zinc-900">{cursoDetallado.nombreCurso}</h2>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">
-                      {cursoDetallado.nombreDocente} · {cursoDetallado.codigoCurso}
-                    </p>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-4 divide-x divide-zinc-100 border-b border-zinc-100">
-                    {[
-                      { label: 'Total Clases', value: cursoDetallado.totalClases, color: 'zinc' },
-                      { label: 'Asistencias', value: cursoDetallado.totalAsistencias, color: 'emerald' },
-                      { label: 'Faltas', value: cursoDetallado.totalFaltas, color: 'red' },
-                      { label: 'Porcentaje', value: `${cursoDetallado.porcentajeAsistencia.toFixed(1)}%`, color: cursoDetallado.alertaBajaAsistencia ? 'red' : 'emerald' },
-                    ].map((stat) => (
-                      <div key={stat.label} className="p-4 text-center">
-                        <p className="text-[11px] text-zinc-500 mb-1">{stat.label}</p>
-                        <p className={`text-xl font-semibold tabular-nums text-${stat.color}-600`}>
-                          {stat.value}
-                        </p>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50/50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Curso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Docente</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Clases</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Asistencias</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Faltas</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-40">Porcentaje</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Estado</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {asistenciasPorCurso.map((curso) => (
+                  <tr key={curso.idCurso} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</div>
+                      <div className="text-xs text-zinc-500">{curso.codigoCurso} • {curso.creditos} cr.</div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-zinc-600">{curso.nombreDocente || '-'}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-sm font-mono tabular-nums text-zinc-700">{curso.totalClases}</span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-emerald-600">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        {curso.totalAsistencias}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-red-600">
+                        <XCircle className="h-3.5 w-3.5" />
+                        {curso.totalFaltas}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all ${
+                              curso.alertaBajaAsistencia ? 'bg-red-500' : 'bg-emerald-500'
+                            }`}
+                            style={{ width: `${Math.min(curso.porcentajeAsistencia, 100)}%` }}
+                          />
+                        </div>
+                        <span className={`text-sm font-mono tabular-nums font-medium ${
+                          curso.alertaBajaAsistencia ? 'text-red-600' : 'text-emerald-600'
+                        }`}>
+                          {curso.porcentajeAsistencia.toFixed(0)}%
+                        </span>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Attendance Table */}
-                  <div className="max-h-96 overflow-y-auto">
-                    <table className="w-full">
-                      <thead className="sticky top-0 bg-zinc-50 z-10">
-                        <tr className="border-b border-zinc-100">
-                          <th className="py-2.5 px-4 text-left text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Fecha</th>
-                          <th className="py-2.5 px-4 text-center text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Tipo</th>
-                          <th className="py-2.5 px-4 text-center text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
-                          <th className="py-2.5 px-4 text-left text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Observaciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cursoDetallado.asistencias.map((asistencia) => (
-                          <tr key={asistencia.id} className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50/50">
-                            <td className="py-3 px-4">
-                              <span className="text-[13px] text-zinc-900 font-mono">
-                                {new Date(asistencia.fecha).toLocaleDateString('es-PE', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric'
-                                })}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <span className={`inline-flex px-2 py-0.5 text-[11px] font-medium rounded ${
-                                asistencia.tipoClase === 'Práctica'
-                                  ? 'bg-violet-50 text-violet-700 ring-1 ring-violet-200'
-                                  : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
-                              }`}>
-                                {asistencia.tipoClase}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              {asistencia.presente ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-medium rounded ring-1 ring-emerald-200">
-                                  <Check className="w-3 h-3" />
-                                  Presente
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 text-[11px] font-medium rounded ring-1 ring-red-200">
-                                  <X className="w-3 h-3" />
-                                  Ausente
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="text-[13px] text-zinc-500">
-                                {asistencia.observaciones || '—'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                <div className="h-full flex items-center justify-center bg-white rounded-xl border border-zinc-200 min-h-[400px]">
-                  <div className="text-center">
-                    <Calendar className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
-                    <p className="text-sm text-zinc-500">Selecciona un curso</p>
-                    <p className="text-[11px] text-zinc-400 mt-1">para ver el detalle de asistencias</p>
-                  </div>
-                </div>
-              )}
-            </div>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {curso.alertaBajaAsistencia ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 text-xs font-medium rounded-full">
+                          <AlertTriangle className="h-3 w-3" />
+                          Alerta
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium rounded-full">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Normal
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => setCursoSeleccionado(curso.idCurso)}
+                        className="p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded transition-colors"
+                        title="Ver detalle"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
-          <div className="py-16 text-center bg-white rounded-xl border border-zinc-200">
-            <Clock className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
-            <p className="text-sm text-zinc-500">No hay asistencias registradas</p>
-            <p className="text-[11px] text-zinc-400 mt-1">Tus docentes aún no han registrado asistencias</p>
+          <div className="py-16 text-center">
+            <Calendar className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
+            <p className="text-sm text-zinc-500 mb-1">No hay asistencias registradas</p>
+            <p className="text-xs text-zinc-400">Tus docentes aún no han registrado asistencias</p>
           </div>
         )}
       </div>
+
+      {/* Modal de Detalle */}
+      {cursoDetallado && (
+        <div 
+          className="fixed inset-0 bg-zinc-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setCursoSeleccionado(null)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-zinc-900">{cursoDetallado.nombreCurso}</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">Detalle de asistencias</p>
+              </div>
+              <button
+                onClick={() => setCursoSeleccionado(null)}
+                className="p-1 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Resumen */}
+            <div className="px-5 py-4 border-b border-zinc-200">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-zinc-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-zinc-700">{cursoDetallado.totalClases}</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">Total Clases</div>
+                </div>
+                <div className="bg-emerald-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600">{cursoDetallado.totalAsistencias}</div>
+                  <div className="text-xs text-emerald-700 mt-0.5">Asistencias</div>
+                </div>
+                <div className="bg-red-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-red-600">{cursoDetallado.totalFaltas}</div>
+                  <div className="text-xs text-red-700 mt-0.5">Faltas</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabla de asistencias */}
+            <div className="overflow-y-auto max-h-[calc(85vh-240px)]">
+              <table className="w-full">
+                <thead className="sticky top-0">
+                  <tr className="border-b border-zinc-200 bg-zinc-50/80 backdrop-blur-sm">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Fecha</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Tipo</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Estado</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Observaciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {cursoDetallado.asistencias.map((asistencia) => (
+                    <tr key={asistencia.id} className="hover:bg-zinc-50/50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-zinc-700 font-mono tabular-nums">
+                        {new Date(asistencia.fecha).toLocaleDateString('es-PE', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-block px-2 py-0.5 text-xs font-medium rounded border ${
+                          asistencia.tipoClase === 'Práctica' 
+                            ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                            : 'bg-violet-50 text-violet-700 border-violet-200'
+                        }`}>
+                          {asistencia.tipoClase}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {asistencia.presente ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs rounded-full">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Presente
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 text-xs rounded-full">
+                            <XCircle className="h-3 w-3" />
+                            Ausente
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-zinc-500">{asistencia.observaciones || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer del modal */}
+            <div className="px-5 py-3 border-t border-zinc-200 bg-zinc-50/50">
+              <button
+                onClick={() => setCursoSeleccionado(null)}
+                className="w-full px-4 py-2 bg-zinc-900 text-white text-sm font-medium rounded-lg hover:bg-zinc-800 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

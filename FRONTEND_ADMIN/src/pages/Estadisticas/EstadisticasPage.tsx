@@ -61,7 +61,7 @@ const EstadisticasPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
       </div>
     )
   }
@@ -75,10 +75,10 @@ const EstadisticasPage = () => {
         className="md:flex md:items-center md:justify-between"
       >
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+          <h2 className="text-2xl font-semibold text-zinc-900 tracking-tight">
             Estadísticas y Reportes
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-zinc-500">
             Análisis detallado del sistema académico
           </p>
         </div>
@@ -91,25 +91,25 @@ const EstadisticasPage = () => {
         transition={{ delay: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        <div className="card p-6 text-center bg-gradient-to-br from-primary-50 to-primary-100 border-2 border-primary-200">
-          <div className="text-5xl text-primary-700 mb-2">{docentes?.length || 0}</div>
-          <div className="text-base text-gray-700">Total Docentes</div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-zinc-900 mb-2">{docentes?.length || 0}</div>
+          <div className="text-sm font-medium text-zinc-500">Total Docentes</div>
         </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
-          <div className="text-5xl text-green-600 mb-2">{cursos?.length || 0}</div>
-          <div className="text-base text-gray-700">Total Cursos</div>
+        <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-zinc-900 mb-2">{cursos?.length || 0}</div>
+          <div className="text-sm font-medium text-zinc-500">Total Cursos</div>
         </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
-          <div className="text-5xl text-purple-600 mb-2">
+        <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-zinc-900 mb-2">
             {cursos?.reduce((sum, curso) => sum + curso.creditos, 0) || 0}
           </div>
-          <div className="text-base text-gray-700">Total Créditos</div>
+          <div className="text-sm font-medium text-zinc-500">Total Créditos</div>
         </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200">
-          <div className="text-5xl text-orange-600 mb-2">
+        <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center shadow-sm">
+          <div className="text-4xl font-bold text-zinc-900 mb-2">
             {cursos?.reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0}
           </div>
-          <div className="text-base text-gray-700">Horas Semanales</div>
+          <div className="text-sm font-medium text-zinc-500">Horas Semanales</div>
         </div>
       </motion.div>
 
@@ -120,67 +120,40 @@ const EstadisticasPage = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          className="card p-6"
+          className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm"
         >
-          <h3 className="text-xl text-gray-900 mb-6">Cursos por Ciclo</h3>
-          <div className="h-96">
+          <h3 className="text-lg font-semibold text-zinc-900 mb-6">Cursos por Ciclo</h3>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cursosPorCiclo} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis 
                   dataKey="ciclo" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Ciclo Académico', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={{ stroke: '#e4e4e7' }}
+                  tickLine={false}
                 />
                 <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: '#fff',
-                    border: '2px solid #003366',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    border: '1px solid #e4e4e7',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number) => [`${value} cursos`, 'Cantidad']}
+                  cursor={{ fill: '#f4f4f5' }}
                 />
                 <Bar 
                   dataKey="cantidad" 
-                  fill="#003366" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={80}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 16, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
+                  fill="#18181b" 
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={50}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -192,64 +165,42 @@ const EstadisticasPage = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
-          className="card p-6"
+          className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm"
         >
-          <h3 className="text-xl text-gray-900 mb-6">Estado de Asignación de Docentes</h3>
-          <div className="h-96">
+          <h3 className="text-lg font-semibold text-zinc-900 mb-6">Estado de Asignación de Docentes</h3>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={asignacionDocentesData} margin={{ top: 20, right: 30, left: 30, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis 
                   dataKey="estado" 
-                  fontSize={18}
-                  tick={{ fontSize: 16, fontWeight: 700 }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={{ stroke: '#e4e4e7' }}
+                  tickLine={false}
                 />
                 <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: '#fff',
-                    border: '2px solid #8B5CF6',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    border: '1px solid #e4e4e7',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number, _name: string, props: any) => {
-                    return [`${value} cursos (${props.payload.porcentaje}%)`, 'Cantidad'];
-                  }}
+                  cursor={{ fill: '#f4f4f5' }}
                 />
                 <Bar 
                   dataKey="cantidad" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={150}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 18, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={80}
                 >
-                  <Cell fill="#10B981" /> {/* Verde para "Con Docente" */}
-                  <Cell fill="#EF4444" /> {/* Rojo para "Sin Docente" */}
+                  <Cell fill="#10b981" /> {/* Verde para "Con Docente" */}
+                  <Cell fill="#ef4444" /> {/* Rojo para "Sin Docente" */}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -261,67 +212,41 @@ const EstadisticasPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="card p-6"
+          className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm"
         >
-          <h3 className="text-xl text-gray-900 mb-6">Distribución de Créditos</h3>
-          <div className="h-96">
+          <h3 className="text-lg font-semibold text-zinc-900 mb-6">Distribución de Créditos</h3>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={creditosDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis 
                   dataKey="creditos" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Número de Créditos', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={{ stroke: '#e4e4e7' }}
+                  tickLine={false}
+                  label={{ value: 'Créditos', position: 'insideBottom', offset: -10, fontSize: 12, fill: '#71717a' }}
                 />
                 <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: '#fff',
-                    border: '2px solid #10B981',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    border: '1px solid #e4e4e7',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number, name: string) => [`${value} cursos`, name === 'cantidad' ? 'Cantidad' : name]}
+                  cursor={{ fill: '#f4f4f5' }}
                 />
                 <Bar 
                   dataKey="cantidad" 
-                  fill="#10B981" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={80}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 16, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
+                  fill="#18181b" 
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={50}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -333,71 +258,41 @@ const EstadisticasPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="card p-6"
+          className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm"
         >
-          <h3 className="text-xl text-gray-900 mb-6">Carga Horaria por Ciclo</h3>
-          <div className="h-96">
+          <h3 className="text-lg font-semibold text-zinc-900 mb-6">Carga Horaria por Ciclo</h3>
+          <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={cargaHoraria} margin={{ top: 40, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
                 <XAxis 
                   dataKey="ciclo" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Ciclo Académico', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={{ stroke: '#e4e4e7' }}
+                  tickLine={false}
                 />
                 <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Horas Semanales', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
+                  fontSize={12}
+                  tick={{ fill: '#71717a' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip 
                   contentStyle={{
                     backgroundColor: '#fff',
-                    border: '2px solid #8B5CF6',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    border: '1px solid #e4e4e7',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number) => [`${value} horas`, 'Carga Horaria']}
                 />
                 <Line 
                   type="monotone" 
                   dataKey="horas" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={4}
-                  dot={{ fill: '#8B5CF6', stroke: '#fff', strokeWidth: 3, r: 10 }}
-                  activeDot={{ r: 12, strokeWidth: 3 }}
-                  label={{ 
-                    position: 'top', 
-                    offset: 15,
-                    fontSize: 18, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937',
-                    formatter: (value: number) => value
-                  }}
+                  stroke="#18181b" 
+                  strokeWidth={2}
+                  dot={{ fill: '#18181b', stroke: '#fff', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -410,24 +305,24 @@ const EstadisticasPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="card"
+        className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm"
       >
-        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-purple-50">
-          <h3 className="text-xl text-gray-900">Resumen Detallado por Ciclo</h3>
+        <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50">
+          <h3 className="text-lg font-semibold text-zinc-900">Resumen Detallado por Ciclo</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="table">
-            <thead className="table-header bg-gradient-to-r from-gray-100 to-gray-200">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-zinc-50 border-b border-zinc-200">
               <tr>
-                <th className="table-header-cell text-base">Ciclo</th>
-                <th className="table-header-cell text-base">Cursos</th>
-                <th className="table-header-cell text-base">Créditos Totales</th>
-                <th className="table-header-cell text-base">Horas Semanales</th>
-                <th className="table-header-cell text-base">Promedio Créditos</th>
-                <th className="table-header-cell text-base">Promedio Horas</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Ciclo</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Cursos</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Créditos Totales</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Horas Semanales</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Promedio Créditos</th>
+                <th className="px-6 py-3 font-medium text-zinc-900">Promedio Horas</th>
               </tr>
             </thead>
-            <tbody className="table-body">
+            <tbody className="divide-y divide-zinc-100">
               {cursosPorCiclo.map((item, index) => {
                 const cicloNum = parseInt(item.ciclo.split(' ')[1])
                 const cursosDelCiclo = cursos?.filter(curso => curso.ciclo === cicloNum) || []
@@ -438,17 +333,17 @@ const EstadisticasPage = () => {
                 return (
                   <motion.tr
                     key={item.ciclo}
-                    className="table-row hover:bg-gradient-to-r hover:from-primary-50 hover:to-purple-50 transition-all"
+                    className="hover:bg-zinc-50/50 transition-colors"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <td className="table-cell text-base text-gray-900">{item.ciclo}</td>
-                    <td className="table-cell text-base text-primary-700">{item.cantidad}</td>
-                    <td className="table-cell text-base text-purple-600">{item.creditos}</td>
-                    <td className="table-cell text-base text-orange-600">{horasSemanales}</td>
-                    <td className="table-cell text-base text-green-600">{promedioCreditos}</td>
-                    <td className="table-cell text-base text-primary-700">{promedioHoras}</td>
+                    <td className="px-6 py-4 font-medium text-zinc-900">{item.ciclo}</td>
+                    <td className="px-6 py-4 text-zinc-600">{item.cantidad}</td>
+                    <td className="px-6 py-4 text-zinc-600">{item.creditos}</td>
+                    <td className="px-6 py-4 text-zinc-600">{horasSemanales}</td>
+                    <td className="px-6 py-4 text-zinc-600">{promedioCreditos}</td>
+                    <td className="px-6 py-4 text-zinc-600">{promedioHoras}</td>
                   </motion.tr>
                 )
               })}

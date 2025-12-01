@@ -9,18 +9,8 @@ import {
   Calendar,
   Award,
   TrendingUp,
-  Download,
-  FileText,
-  AlertCircle
+  Download
 } from 'lucide-react';
-
-// Stat Card Mini Component
-const StatMini = ({ label, value, color = 'zinc' }: { label: string; value: string | number; color?: string }) => (
-  <div className="bg-white border border-zinc-200 rounded-lg px-3 py-2 text-center min-w-[70px]">
-    <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{label}</p>
-    <p className={`text-lg font-bold tabular-nums text-${color}-700`}>{value}</p>
-  </div>
-);
 
 export default function RegistroNotasPage() {
   const [semestreExpandido, setSemestreExpandido] = useState<number | null>(null);
@@ -34,106 +24,103 @@ export default function RegistroNotasPage() {
     setSemestreExpandido(semestreExpandido === idPeriodo ? null : idPeriodo);
   };
 
-  const exportarAPDF = () => window.print();
+  const exportarAPDF = () => {
+    window.print();
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-zinc-500 text-sm">Cargando registro de notas...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-50 p-6">
-        <div className="max-w-5xl mx-auto bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-red-500" />
-          <p className="text-[13px] text-red-700">Error al cargar el registro de notas</p>
-        </div>
+      <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+        <p className="text-red-700 text-sm">Error al cargar el registro de notas</p>
       </div>
     );
   }
 
   if (!registroNotas || registroNotas.semestres.length === 0) {
     return (
-      <div className="min-h-screen bg-zinc-50 p-6">
-        <div className="max-w-5xl mx-auto bg-white rounded-xl border border-zinc-200 p-8 text-center">
-          <div className="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="w-6 h-6 text-zinc-400" />
-          </div>
-          <p className="text-[13px] font-medium text-zinc-900 mb-1">No hay semestres registrados</p>
-          <p className="text-[11px] text-zinc-500">Los registros aparecerán cuando se cierren los periodos académicos</p>
+      <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center">
+        <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <BookOpen className="w-6 h-6 text-zinc-400" />
         </div>
+        <h3 className="text-sm font-medium text-zinc-900">No hay semestres cerrados</h3>
+        <p className="text-zinc-500 text-sm mt-1">
+          Los registros aparecerán cuando se cierren los periodos académicos
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-medium text-zinc-900">Registro de Notas</h1>
-              <p className="text-[11px] text-zinc-500">Historial académico completo</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Legend */}
-            <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                Aprobado
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-red-500 rounded-full" />
-                Desaprobado
-              </span>
-            </div>
-            
-            <button
-              onClick={exportarAPDF}
-              className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors print:hidden"
-            >
-              <Download className="w-4 h-4" />
-              Exportar PDF
-            </button>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Registro de Notas</h1>
+          <p className="text-zinc-500 text-sm mt-1">
+            Historial académico completo de todos los semestres
+          </p>
         </div>
-      </header>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 text-xs">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-zinc-500">Aprobado</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="text-zinc-500">Desaprobado</span>
+            </span>
+          </div>
+          <button
+            onClick={exportarAPDF}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-sm font-medium rounded-lg hover:bg-zinc-800 transition-colors print:hidden"
+          >
+            <Download className="w-4 h-4" />
+            Exportar
+          </button>
+        </div>
+      </div>
 
-      <div className="p-6 max-w-6xl mx-auto space-y-4">
+      {/* Lista de Semestres */}
+      <div className="space-y-4">
         {registroNotas.semestres.map((semestre: SemestreRegistro, index: number) => (
           <div 
             key={semestre.idPeriodo} 
-            className="bg-white rounded-xl border border-zinc-200 overflow-hidden"
+            className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden"
           >
-            {/* Semester Header - Clickable */}
+            {/* Cabecera del Semestre */}
             <button
               onClick={() => toggleSemestre(semestre.idPeriodo)}
-              className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors"
+              className="w-full px-6 py-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-lg tabular-nums">
+                <div className="bg-zinc-900 text-white w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm">
                   {index + 1}
                 </div>
                 <div className="text-left">
-                  <h2 className="text-[13px] font-semibold text-zinc-900">{semestre.periodo}</h2>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                      <Calendar className="w-3 h-3" />
+                  <h2 className="text-base font-semibold text-zinc-900">
+                    {semestre.periodo}
+                  </h2>
+                  <div className="flex items-center gap-3 mt-1 text-sm">
+                    <span className="flex items-center gap-1.5 text-zinc-500">
+                      <Calendar className="w-3.5 h-3.5" />
                       {semestre.anio} - Ciclo {semestre.ciclo}
                     </span>
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
                       semestre.estado === 'Cerrado' 
-                        ? 'bg-emerald-100 text-emerald-700' 
-                        : 'bg-amber-100 text-amber-700'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
                     }`}>
                       {semestre.estado}
                     </span>
@@ -142,120 +129,211 @@ export default function RegistroNotasPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                {/* Quick Stats */}
-                <div className="hidden md:flex items-center gap-2">
-                  <StatMini label="Créditos" value={semestre.totales.totalCreditos} color="zinc" />
-                  <StatMini label="PSem" value={semestre.totales.promedioSemestral.toFixed(2)} color="emerald" />
-                  <StatMini label="PAc" value={semestre.totales.promedioAcumulado.toFixed(2)} color="blue" />
+                {/* Stats */}
+                <div className="hidden md:flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-400 uppercase tracking-wider">Créditos</p>
+                    <p className="text-lg font-semibold text-zinc-900 tabular-nums">{semestre.totales.totalCreditos}</p>
+                  </div>
+                  <div className="w-px h-8 bg-zinc-200" />
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-400 uppercase tracking-wider">PSem</p>
+                    <p className="text-lg font-semibold text-emerald-600 tabular-nums">
+                      {semestre.totales.promedioSemestral.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="w-px h-8 bg-zinc-200" />
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-400 uppercase tracking-wider">PAc</p>
+                    <p className="text-lg font-semibold text-zinc-900 tabular-nums">
+                      {semestre.totales.promedioAcumulado.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center">
-                  {semestreExpandido === semestre.idPeriodo ? (
-                    <ChevronUp className="w-4 h-4 text-zinc-500" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-500" />
-                  )}
-                </div>
+                {semestreExpandido === semestre.idPeriodo ? (
+                  <ChevronUp className="w-5 h-5 text-zinc-400" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-zinc-400" />
+                )}
               </div>
             </button>
 
-            {/* Expandable Content */}
+            {/* Contenido Expandible */}
             {semestreExpandido === semestre.idPeriodo && (
-              <div className="border-t border-zinc-100 p-5">
+              <div className="border-t border-zinc-100 p-6">
                 {semestre.estado === 'Abierto' && (
-                  <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-500" />
-                    <p className="text-[12px] text-amber-700">Periodo en curso. Las notas se consolidarán al cierre del semestre.</p>
+                  <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-amber-700 text-sm">
+                      Periodo en curso. Las notas se consolidarán al cierre del semestre.
+                    </p>
                   </div>
                 )}
 
-                {/* Courses Table */}
-                <div className="overflow-x-auto rounded-lg border border-zinc-200">
-                  <table className="w-full text-[12px]">
+                {/* Tabla de Cursos */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
                     <thead>
-                      <tr className="bg-zinc-50">
-                        <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">Código</th>
-                        <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">Asignatura</th>
-                        <th className="px-3 py-2.5 text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">Créditos</th>
+                      <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Código
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Asignatura
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Fecha
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Créd
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Hrs
+                        </th>
                         
-                        {/* Dynamic Evaluation Columns */}
+                        {/* Columnas dinámicas de evaluaciones */}
                         {semestre.cursos[0]?.evaluaciones.map((evaluacion, i) => (
-                          <th key={i} className="px-3 py-2.5 text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-wider bg-zinc-100/50">
+                          <th 
+                            key={i} 
+                            className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-100/50"
+                          >
                             <div>{evaluacion.nombre}</div>
-                            <div className="text-zinc-400 font-normal">({evaluacion.peso}%)</div>
+                            <div className="text-zinc-400 normal-case font-normal">({evaluacion.peso}%)</div>
                           </th>
                         ))}
 
-                        <th className="px-3 py-2.5 text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-wider bg-emerald-50">Nota Final</th>
-                        <th className="px-3 py-2.5 text-center text-[10px] font-semibold text-zinc-600 uppercase tracking-wider">Estado</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider bg-emerald-50/50">
+                          Final
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                          Estado
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider bg-emerald-50/50">
+                          PSem
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-100/50">
+                          PAc
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
                       {semestre.cursos.map((curso) => (
                         <tr key={curso.idMatricula} className="hover:bg-zinc-50/50 transition-colors">
-                          <td className="px-3 py-2.5">
-                            <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-700 rounded font-mono text-[11px]">
+                          <td className="px-4 py-3">
+                            <span className="text-xs font-mono text-zinc-500">
                               {curso.codigoCurso}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-[12px] font-medium text-zinc-900">{curso.nombreCurso}</td>
-                          <td className="px-3 py-2.5 text-center">
-                            <span className="text-[12px] font-medium tabular-nums text-zinc-600">{curso.creditos}</span>
+                          <td className="px-4 py-3 text-sm font-medium text-zinc-900">
+                            {curso.nombreCurso}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-center text-zinc-500 tabular-nums">
+                            {curso.fechaExamen 
+                              ? new Date(curso.fechaExamen).toLocaleDateString('es-PE', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric'
+                                })
+                              : '-'}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-zinc-500">
+                            {curso.horasSemanal}
                           </td>
 
-                          {/* Evaluation Grades */}
+                          {/* Notas de evaluaciones */}
                           {curso.evaluaciones.map((evaluacion, i) => (
-                            <td key={i} className="px-3 py-2.5 text-center bg-zinc-50/30">
-                              <span className="text-[12px] font-semibold tabular-nums text-zinc-700">{evaluacion.nota.toFixed(1)}</span>
+                            <td key={i} className="px-4 py-3 text-center bg-zinc-50/30">
+                              <span className="text-sm font-semibold text-zinc-900 tabular-nums">{evaluacion.nota.toFixed(1)}</span>
                             </td>
                           ))}
 
-                          {/* Final Grade */}
-                          <td className="px-3 py-2.5 text-center bg-emerald-50/30">
-                            <span className={`inline-flex px-2 py-0.5 rounded text-[12px] font-bold tabular-nums ${
-                              curso.notaFinal >= 11 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          {/* Nota Final */}
+                          <td className="px-4 py-3 text-center bg-emerald-50/30">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-semibold border tabular-nums ${
+                              curso.notaFinal >= 11
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
                             }`}>
                               {curso.notaFinal}
                             </span>
                           </td>
 
-                          {/* Status */}
-                          <td className="px-3 py-2.5 text-center">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                              curso.estadoCurso === 'Aprobado' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                          {/* Estado */}
+                          <td className="px-4 py-3 text-center">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                              curso.estadoCurso === 'Aprobado'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
                             }`}>
-                              {curso.estadoCurso}
+                              {curso.estadoCurso === 'Aprobado' ? 'Aprob' : 'Desap'}
                             </span>
                           </td>
+                          {/* PSem - Solo en la primera fila */}
+                          {semestre.cursos.indexOf(curso) === 0 && (
+                            <td 
+                              rowSpan={semestre.cursos.length} 
+                              className="px-4 py-3 text-center bg-emerald-50/50 border-l border-zinc-200"
+                            >
+                              <div className="flex flex-col items-center gap-1">
+                                <TrendingUp className="w-4 h-4 text-emerald-600" />
+                                <span className="text-xl font-semibold text-emerald-700 tabular-nums">
+                                  {semestre.totales.promedioSemestral.toFixed(2)}
+                                </span>
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Semestral</span>
+                              </div>
+                            </td>
+                          )}
+                          {/* PAc - Solo en la primera fila */}
+                          {semestre.cursos.indexOf(curso) === 0 && (
+                            <td 
+                              rowSpan={semestre.cursos.length} 
+                              className="px-4 py-3 text-center bg-zinc-50/50 border-l border-zinc-200"
+                            >
+                              <div className="flex flex-col items-center gap-1">
+                                <Award className="w-4 h-4 text-zinc-600" />
+                                <span className="text-xl font-semibold text-zinc-900 tabular-nums">
+                                  {semestre.totales.promedioAcumulado.toFixed(2)}
+                                </span>
+                                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Acumulado</span>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       ))}
+
+                      {/* Fila de Totales */}
+                      <tr className="bg-zinc-50 border-t border-zinc-200">
+                        <td colSpan={3} className="px-4 py-3 text-xs font-semibold text-zinc-700 uppercase tracking-wider">
+                          Totales del Semestre
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="text-sm font-semibold text-zinc-900 tabular-nums">
+                            {semestre.totales.totalCreditos}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="text-sm text-zinc-600 tabular-nums">
+                            {semestre.totales.totalHoras}
+                          </span>
+                        </td>
+                        <td 
+                          colSpan={semestre.cursos[0]?.evaluaciones.length || 0} 
+                          className="px-4 py-3"
+                        />
+                        <td className="px-4 py-3 text-center text-zinc-400">-</td>
+                        <td className="px-4 py-3 text-center text-zinc-400">-</td>
+                        <td className="px-4 py-3 text-center bg-emerald-50/50 border-l border-zinc-200">
+                          <span className="text-sm font-semibold text-emerald-700 tabular-nums">{semestre.totales.promedioSemestral.toFixed(2)}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center bg-zinc-50/50 border-l border-zinc-200">
+                          <span className="text-sm font-semibold text-zinc-900 tabular-nums">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
-                </div>
-
-                {/* Summary Row */}
-                <div className="mt-4 flex items-center justify-between p-4 bg-zinc-50 rounded-xl">
-                  <div className="flex items-center gap-4">
-                    <span className="text-[11px] font-semibold text-zinc-600 uppercase tracking-wider">Totales del Semestre</span>
-                    <span className="px-2 py-1 bg-zinc-200 text-zinc-700 rounded text-[12px] font-bold tabular-nums">
-                      {semestre.totales.totalCreditos} créditos
-                    </span>
-                    <span className="text-[12px] text-zinc-500 tabular-nums">
-                      {semestre.totales.totalHoras} horas
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-emerald-600" />
-                      <span className="text-[11px] text-zinc-500 uppercase">PSem</span>
-                      <span className="text-lg font-bold text-emerald-700 tabular-nums">{semestre.totales.promedioSemestral.toFixed(2)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Award className="w-4 h-4 text-blue-600" />
-                      <span className="text-[11px] text-zinc-500 uppercase">PAc</span>
-                      <span className="text-lg font-bold text-blue-700 tabular-nums">{semestre.totales.promedioAcumulado.toFixed(2)}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
@@ -263,13 +341,24 @@ export default function RegistroNotasPage() {
         ))}
       </div>
 
-      {/* Print Styles */}
+      {/* Estilos para impresión */}
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          .print-container, .print-container * { visibility: visible; }
-          .print-container { position: absolute; left: 0; top: 0; width: 100%; }
-          button { display: none !important; }
+          body * {
+            visibility: hidden;
+          }
+          .print-container, .print-container * {
+            visibility: visible;
+          }
+          .print-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          button {
+            display: none !important;
+          }
         }
       `}</style>
     </div>

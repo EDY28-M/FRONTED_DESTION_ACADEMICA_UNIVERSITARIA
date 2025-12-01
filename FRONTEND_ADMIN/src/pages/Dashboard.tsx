@@ -1,11 +1,12 @@
-import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { 
-  UserGroupIcon, 
-  AcademicCapIcon, 
-  ClockIcon,
-  TrophyIcon 
-} from '@heroicons/react/24/outline'
+  Users, 
+  BookOpen, 
+  Clock,
+  Award,
+  Download,
+  FileText
+} from 'lucide-react'
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
 import StatsCard from '../components/Dashboard/StatsCard'
@@ -184,32 +185,28 @@ const Dashboard = () => {
     {
       name: 'Total Docentes',
       value: docentes?.length || 0,
-      icon: UserGroupIcon,
-      color: 'bg-primary-600',
+      icon: Users,
       change: '+12%',
       changeType: 'positive' as const,
     },
     {
       name: 'Total Cursos',
       value: cursos?.length || 0,
-      icon: AcademicCapIcon,
-      color: 'bg-green-500',
+      icon: BookOpen,
       change: '+8%',
       changeType: 'positive' as const,
     },
     {
       name: 'Total Créditos',
       value: cursos?.reduce((sum, curso) => sum + curso.creditos, 0) || 0,
-      icon: TrophyIcon,
-      color: 'bg-purple-500',
+      icon: Award,
       change: '+5%',
       changeType: 'positive' as const,
     },
     {
       name: 'Horas Semanales',
       value: cursos?.reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0,
-      icon: ClockIcon,
-      color: 'bg-orange-500',
+      icon: Clock,
       change: '+15%',
       changeType: 'positive' as const,
     },
@@ -218,85 +215,56 @@ const Dashboard = () => {
   const isLoading = loadingDocentes || loadingCursos
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-7 text-gray-900 tracking-tight">
-              Dashboard
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Resumen general del sistema de gestión académica
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={handleExportarDatos}
-              className="inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
-            >
-              Exportar Datos
-            </button>
-            <button
-              type="button"
-              onClick={handleGenerarReporte}
-              className="inline-flex items-center justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
-            >
-              Generar Reporte
-            </button>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Resumen general del sistema de gestión académica
+          </p>
         </div>
-      </motion.div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleExportarDatos}
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Exportar
+          </button>
+          <button
+            type="button"
+            onClick={handleGenerarReporte}
+            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
+          >
+            <FileText className="h-4 w-4" />
+            Generar Reporte
+          </button>
+        </div>
+      </div>
 
       {/* Stats Cards */}
-      <motion.div
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        {stats.map((stat, index) => (
-          <motion.div
-            key={stat.name}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <StatsCard {...stat} isLoading={isLoading} />
-          </motion.div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <StatsCard key={stat.name} {...stat} isLoading={isLoading} />
         ))}
-      </motion.div>
+      </div>
 
-      {/* Main Content Grid - Stack en móvil, grid en desktop */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Charts Section */}
-        <motion.div
-          className="xl:col-span-2 order-2 xl:order-1"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <div className="xl:col-span-2">
           <ChartsSection cursos={cursos} />
-        </motion.div>
+        </div>
 
-        {/* Sidebar Content - Aparece primero en móvil para mejor UX */}
-        <motion.div
-          className="space-y-4 sm:space-y-6 order-1 xl:order-2"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          {/* Quick Actions */}
+        {/* Sidebar Content */}
+        <div className="space-y-6">
           <QuickActions />
-          
-          {/* Recent Activity */}
           <RecentActivity />
-        </motion.div>
+        </div>
       </div>
     </div>
   )

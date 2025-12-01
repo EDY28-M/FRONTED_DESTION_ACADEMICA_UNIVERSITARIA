@@ -266,21 +266,21 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
+  // Validaciones en tiempo real
+  const validaciones = {
+    minLength: contrasenaNueva.length >= 6,
+    hasUppercase: /[A-Z]/.test(contrasenaNueva),
+    hasNumber: /[0-9]/.test(contrasenaNueva),
+    passwordsMatch: contrasenaNueva === confirmarContrasena && confirmarContrasena.length > 0,
+  };
+
+  const todasValidacionesPasan = validaciones.minLength && validaciones.passwordsMatch;
+  const puedeEnviar = contrasenaActual.length > 0 && todasValidacionesPasan;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!contrasenaActual || !contrasenaNueva || !confirmarContrasena) {
-      toast.error('Todos los campos son obligatorios');
-      return;
-    }
-    if (contrasenaNueva.length < 6) {
-      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    if (contrasenaNueva !== confirmarContrasena) {
-      toast.error('Las contraseñas no coinciden');
-      return;
-    }
+    if (!puedeEnviar) return;
 
     setIsSubmitting(true);
     try {
@@ -295,110 +295,180 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div ref={modalRef} className="bg-white rounded-lg shadow-sm border border-zinc-200 max-w-md w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200">
-          <h2 className="text-sm font-medium text-zinc-900">Cambiar Contraseña</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div 
+        ref={modalRef} 
+        className="bg-white rounded-2xl shadow-2xl border border-zinc-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+      >
+        {/* Header con gradiente sutil */}
+        <div className="relative px-6 py-5 bg-gradient-to-b from-zinc-50 to-white border-b border-zinc-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-zinc-900 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-zinc-900">Cambiar Contraseña</h2>
+              <p className="text-xs text-zinc-500">Actualiza tu contraseña de acceso</p>
+            </div>
+          </div>
           <button 
             onClick={onClose} 
-            className="text-zinc-400 hover:text-zinc-600 p-1 hover:bg-zinc-100 rounded transition-colors"
+            className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Contraseña Actual */}
           <div>
-            <label className="block text-xs text-zinc-500 mb-1.5">Contraseña Actual</label>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">Contraseña Actual</label>
             <div className="relative">
               <input
                 type={mostrarActual ? 'text' : 'password'}
                 value={contrasenaActual}
                 onChange={(e) => setContrasenaActual(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-md bg-white
-                           focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 
+                           focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 
+                           transition-all placeholder:text-zinc-400"
                 placeholder="Ingresa tu contraseña actual"
               />
               <button 
                 type="button" 
                 onClick={() => setMostrarActual(!mostrarActual)} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
-                {mostrarActual ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                {mostrarActual ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
               </button>
+            </div>
+          </div>
+
+          {/* Separador visual */}
+          <div className="relative py-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200"></div>
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-3 bg-white text-xs text-zinc-400">Nueva contraseña</span>
             </div>
           </div>
 
           {/* Nueva Contraseña */}
           <div>
-            <label className="block text-xs text-zinc-500 mb-1.5">Nueva Contraseña</label>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">Nueva Contraseña</label>
             <div className="relative">
               <input
                 type={mostrarNueva ? 'text' : 'password'}
                 value={contrasenaNueva}
                 onChange={(e) => setContrasenaNueva(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-md bg-white
-                           focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 
+                           focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 
+                           transition-all placeholder:text-zinc-400"
                 placeholder="Ingresa tu nueva contraseña"
               />
               <button 
                 type="button" 
                 onClick={() => setMostrarNueva(!mostrarNueva)} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
-                {mostrarNueva ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                {mostrarNueva ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
           {/* Confirmar Contraseña */}
           <div>
-            <label className="block text-xs text-zinc-500 mb-1.5">Confirmar Contraseña</label>
+            <label className="block text-sm font-medium text-zinc-700 mb-2">Confirmar Contraseña</label>
             <div className="relative">
               <input
                 type={mostrarConfirmar ? 'text' : 'password'}
                 value={confirmarContrasena}
                 onChange={(e) => setConfirmarContrasena(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-md bg-white
-                           focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                className={`w-full h-11 px-4 pr-11 text-sm border rounded-xl bg-zinc-50 
+                           focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 
+                           transition-all placeholder:text-zinc-400 ${
+                             confirmarContrasena.length > 0
+                               ? validaciones.passwordsMatch
+                                 ? 'border-emerald-300 focus:border-emerald-400'
+                                 : 'border-red-300 focus:border-red-400'
+                               : 'border-zinc-200 focus:border-zinc-400'
+                           }`}
                 placeholder="Confirma tu nueva contraseña"
               />
               <button 
                 type="button" 
                 onClick={() => setMostrarConfirmar(!mostrarConfirmar)} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
-                {mostrarConfirmar ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                {mostrarConfirmar ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
+          {/* Validaciones visuales */}
           {contrasenaNueva && (
-            <p className={`text-xs ${contrasenaNueva.length >= 6 ? 'text-green-600' : 'text-red-500'}`}>
-              {contrasenaNueva.length >= 6 ? '✓' : '✗'} Mínimo 6 caracteres
-            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                validaciones.minLength 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+              }`}>
+                {validaciones.minLength ? '✓' : '○'} 6+ caracteres
+              </span>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                validaciones.hasUppercase 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+              }`}>
+                {validaciones.hasUppercase ? '✓' : '○'} Mayúscula
+              </span>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                validaciones.hasNumber 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+              }`}>
+                {validaciones.hasNumber ? '✓' : '○'} Número
+              </span>
+              {confirmarContrasena && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  validaciones.passwordsMatch 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-red-50 text-red-600 border-red-200'
+                }`}>
+                  {validaciones.passwordsMatch ? '✓' : '✗'} Coinciden
+                </span>
+              )}
+            </div>
           )}
 
           {/* Botones */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-3">
             <button
               type="button" 
               onClick={onClose} 
-              className="flex-1 px-4 py-2 border border-zinc-200 rounded-md text-sm font-medium text-zinc-700 
-                         hover:bg-zinc-50 transition-colors"
+              className="flex-1 h-11 px-4 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 
+                         hover:bg-zinc-50 hover:border-zinc-300 transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2 bg-zinc-900 text-white rounded-md text-sm font-medium
-                         hover:bg-zinc-800 disabled:opacity-50 transition-colors"
+              disabled={isSubmitting || !puedeEnviar}
+              className="flex-1 h-11 px-4 bg-zinc-900 text-white rounded-xl text-sm font-medium
+                         hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all
+                         flex items-center justify-center gap-2"
             >
-              {isSubmitting ? 'Cambiando...' : 'Cambiar Contraseña'}
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Guardando...
+                </>
+              ) : (
+                'Cambiar Contraseña'
+              )}
             </button>
           </div>
         </form>

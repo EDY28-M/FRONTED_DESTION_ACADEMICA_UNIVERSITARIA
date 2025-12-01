@@ -1,63 +1,60 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { BookOpen, Calendar, TrendingUp, GraduationCap, ArrowRight, Clock } from 'lucide-react';
+import { 
+  BookOpen, 
+  GraduationCap, 
+  Clock, 
+  TrendingUp,
+  ArrowRight,
+  LayoutGrid,
+  FileText,
+  ClipboardList,
+  Layers,
+  Calendar as CalendarIcon
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Horario } from '../../types/horario';
 
-// ============================================
-// Extracted Components
-// ============================================
+// Helper to get greeting
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 18) return 'Buenas tardes';
+  return 'Buenas noches';
+};
 
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  sublabel?: string;
-  trend?: 'up' | 'down' | 'neutral';
-}
+// Helper to find next class
+const getNextClass = (horarios: Horario[] = []) => {
+  if (!horarios.length) return null;
+  
+  const now = new Date();
+  const currentDay = now.getDay() || 7; // 1 (Mon) - 7 (Sun)
+  const currentTime = now.getHours() * 60 + now.getMinutes();
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, sublabel }) => (
-  <div className="flex flex-col justify-between h-full">
-    <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">{label}</p>
-    <div className="mt-2">
-      <p className="text-3xl font-semibold text-zinc-900 tracking-tight">{value}</p>
-      {sublabel && <p className="text-[12px] text-zinc-500 mt-0.5">{sublabel}</p>}
-    </div>
-  </div>
-);
+  // Sort schedules: Day first, then time
+  const sortedHorarios = [...horarios].sort((a, b) => {
+    if (a.diaSemana !== b.diaSemana) return a.diaSemana - b.diaSemana;
+    const timeA = parseInt(a.horaInicio.split(':')[0]) * 60 + parseInt(a.horaInicio.split(':')[1]);
+    const timeB = parseInt(b.horaInicio.split(':')[0]) * 60 + parseInt(b.horaInicio.split(':')[1]);
+    return timeA - timeB;
+  });
 
-interface CourseRowProps {
-  codigo: string;
-  nombre: string;
-  docente: string;
-  creditos: number;
-  horasTeorica: number;
-  horasPractica: number;
-}
+  // Find next class today
+  const nextToday = sortedHorarios.find(h => {
+    const start = parseInt(h.horaInicio.split(':')[0]) * 60 + parseInt(h.horaInicio.split(':')[1]);
+    return h.diaSemana === currentDay && start > currentTime;
+  });
 
-const CourseRow: React.FC<CourseRowProps> = ({ codigo, nombre, docente, creditos, horasTeorica, horasPractica }) => (
-  <div className="group flex items-center gap-4 py-3 px-4 -mx-4 rounded-lg hover:bg-zinc-50 transition-colors cursor-default">
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2">
-        <span className="text-[11px] font-mono font-medium text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded">
-          {codigo}
-        </span>
-        <h4 className="text-[13px] font-medium text-zinc-900 truncate">{nombre}</h4>
-      </div>
-      <p className="text-[12px] text-zinc-500 mt-0.5 truncate">{docente}</p>
-    </div>
-    <div className="flex items-center gap-3 text-[12px] text-zinc-500">
-      <span className="font-mono">{horasTeorica}T</span>
-      <span className="font-mono">{horasPractica}P</span>
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-zinc-100 font-semibold text-zinc-700">
-        {creditos}
-      </span>
-    </div>
-  </div>
-);
+  if (nextToday) return { ...nextToday, label: 'Hoy' };
 
-// ============================================
-// Main Component
-// ============================================
+  // Find first class in upcoming days
+  const nextUpcoming = sortedHorarios.find(h => h.diaSemana > currentDay);
+  if (nextUpcoming) return { ...nextUpcoming, label: nextUpcoming.diaSemanaTexto };
+
+  // If no classes later this week, return first class of next week
+  return sortedHorarios[0] ? { ...sortedHorarios[0], label: sortedHorarios[0].diaSemanaTexto } : null;
+};
 
 const InicioDashboard: React.FC = () => {
   const { data: perfil } = useQuery({
@@ -82,211 +79,356 @@ const InicioDashboard: React.FC = () => {
     enabled: !!periodo,
   });
 
-  const cursosActivos = misCursos?.filter(c => c.estado === 'Matriculado') || [];
-  const promedioGeneral = estadisticas?.promedioGeneral || perfil?.promedioAcumulado || 0;
-  const totalCreditos = cursosActivos.reduce((sum, c) => sum + c.creditos, 0);
+  const { data: horarios } = useQuery({
+    queryKey: ['mi-horario'],
+    queryFn: estudiantesApi.getMiHorario,
+  });
 
-  // Get greeting based on time
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Buenos días';
-    if (hour < 19) return 'Buenas tardes';
-    return 'Buenas noches';
-  };
+  const cursosActivos = useMemo(() => misCursos?.filter(c => c.estado === 'Matriculado') || [], [misCursos]);
+  const promedioGeneral = estadisticas?.promedioGeneral || perfil?.promedioAcumulado || 0;
+  const nextClass = useMemo(() => getNextClass(horarios), [horarios]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* ==================== Welcome Section ==================== */}
-      <div className="pb-4">
-        <p className="text-[13px] text-zinc-500">{getGreeting()},</p>
-        <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight mt-0.5">
-          {perfil?.nombreCompleto?.split(' ').slice(0, 2).join(' ') || 'Estudiante'}
-        </h1>
-        <p className="text-[13px] text-zinc-500 mt-1">
-          {perfil?.carrera} · Ciclo {perfil?.cicloActual}
-        </p>
-      </div>
-
-      {/* ==================== Bento Grid ==================== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Card: Periodo Activo (spans 2 cols on lg) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200 p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-zinc-400" />
-                <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Periodo Activo</p>
-              </div>
-              <p className="text-xl font-semibold text-zinc-900 tracking-tight mt-2">
-                {periodo?.nombre || '—'}
-              </p>
-              {periodo && (
-                <p className="text-[12px] text-zinc-500 mt-1">
-                  {new Date(periodo.fechaInicio).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })} 
-                  {' — '}
-                  {new Date(periodo.fechaFin).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </p>
-              )}
-            </div>
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20">
-              En curso
-            </span>
-          </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-zinc-900">
+            {getGreeting()}, {perfil?.nombreCompleto?.split(' ')[0]}
+          </h1>
+          <p className="text-zinc-500 text-sm mt-1">
+            {perfil?.carrera} • Ciclo {perfil?.cicloActual}
+          </p>
         </div>
-
-        {/* Card: Ciclo */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-6">
-          <StatCard 
-            label="Ciclo Actual" 
-            value={perfil?.cicloActual || '—'} 
-            sublabel="de 10 ciclos"
-          />
-        </div>
-
-        {/* Card: Cursos */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-6">
-          <StatCard 
-            label="Cursos Activos" 
-            value={cursosActivos.length} 
-            sublabel={`${totalCreditos} créditos`}
-          />
-        </div>
-
-        {/* Card: Promedio (featured) */}
-        <div className="bg-zinc-900 rounded-2xl p-6 text-white">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-zinc-400" />
-                <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">Promedio General</p>
-              </div>
-              <p className="text-4xl font-semibold tracking-tight mt-3">
-                {promedioGeneral.toFixed(2)}
-              </p>
-              <p className="text-[12px] text-zinc-500 mt-1">Escala vigesimal</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Card: Créditos */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-6">
-          <StatCard 
-            label="Créditos Aprobados" 
-            value={perfil?.creditosAcumulados || 0}
-            sublabel="acumulados"
-          />
-        </div>
-
-        {/* Card: Quick Actions (spans 2 cols) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200 p-6">
-          <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-4">Acceso Rápido</p>
-          <div className="grid grid-cols-2 gap-3">
-            <Link 
-              to="/estudiante/matricula"
-              className="group flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white border border-zinc-200 flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 text-zinc-600" />
-                </div>
-                <span className="text-[13px] font-medium text-zinc-700">Matrícula</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-            <Link 
-              to="/estudiante/notas"
-              className="group flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white border border-zinc-200 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-zinc-600" />
-                </div>
-                <span className="text-[13px] font-medium text-zinc-700">Mis Notas</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-            <Link 
-              to="/estudiante/horario"
-              className="group flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white border border-zinc-200 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-zinc-600" />
-                </div>
-                <span className="text-[13px] font-medium text-zinc-700">Mi Horario</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-            <Link 
-              to="/estudiante/orden-merito"
-              className="group flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white border border-zinc-200 flex items-center justify-center">
-                  <GraduationCap className="w-4 h-4 text-zinc-600" />
-                </div>
-                <span className="text-[13px] font-medium text-zinc-700">Orden de Mérito</span>
-              </div>
-              <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================== Courses List ==================== */}
-      <div className="bg-white rounded-2xl border border-zinc-200">
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-zinc-100">
-          <div>
-            <h2 className="text-[15px] font-semibold text-zinc-900">Cursos Matriculados</h2>
-            <p className="text-[12px] text-zinc-500 mt-0.5">{periodo?.nombre}</p>
-          </div>
-          {cursosActivos.length > 0 && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-medium bg-zinc-100 text-zinc-700">
-              {cursosActivos.length} {cursosActivos.length === 1 ? 'curso' : 'cursos'}
-            </span>
-          )}
-        </div>
-        
-        <div className="p-6 pt-2">
-          {cursosActivos.length > 0 ? (
-            <div className="divide-y divide-zinc-100">
-              {cursosActivos.map((curso) => (
-                <CourseRow
-                  key={curso.id}
-                  codigo={curso.codigoCurso}
-                  nombre={curso.nombreCurso}
-                  docente={curso.nombreDocente}
-                  creditos={curso.creditos}
-                  horasTeorica={Math.floor(curso.horasSemanal * 0.6) || 3}
-                  horasPractica={Math.floor(curso.horasSemanal * 0.4) || 2}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 text-center">
-              <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-3">
-                <BookOpen className="w-5 h-5 text-zinc-400" />
-              </div>
-              <p className="text-[13px] text-zinc-500 mb-4">No tienes cursos matriculados</p>
-              <Link
-                to="/estudiante/matricula"
-                className="inline-flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors"
-              >
-                <BookOpen className="w-4 h-4" />
-                Ir a Matrícula
-              </Link>
-            </div>
-          )}
-        </div>
-        
-        {/* Footer with totals */}
-        {cursosActivos.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 bg-zinc-50/50 border-t border-zinc-100 rounded-b-2xl">
-            <p className="text-[12px] text-zinc-500">Total de créditos matriculados</p>
-            <p className="text-[15px] font-semibold text-zinc-900">{totalCreditos}</p>
+        {periodo && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full shadow-sm w-fit">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-medium text-zinc-600">{periodo.nombre}</span>
           </div>
         )}
+      </div>
+
+      {/* MÓVIL: Próxima Clase primero */}
+      <div className="md:hidden">
+        <div className="bg-zinc-900 rounded-xl p-5 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <Clock className="w-20 h-20" />
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Próxima Clase</span>
+              {nextClass && (
+                <span className="px-2 py-0.5 bg-white/10 rounded text-[10px] font-medium text-white border border-white/10">
+                  {nextClass.label}
+                </span>
+              )}
+            </div>
+
+            {nextClass ? (
+              <>
+                <h3 className="text-lg font-semibold mb-1 line-clamp-2">{nextClass.nombreCurso}</h3>
+                <p className="text-zinc-400 text-xs mb-4">{nextClass.aula ? `Aula ${nextClass.aula}` : 'Aula por asignar'}</p>
+                
+                <div className="flex items-center justify-between text-sm font-mono text-zinc-300 bg-white/5 p-2.5 rounded-lg border border-white/5">
+                  <span>{nextClass.horaInicio}</span>
+                  <div className="h-px w-6 bg-zinc-600" />
+                  <span>{nextClass.horaFin}</span>
+                </div>
+              </>
+            ) : (
+              <p className="text-zinc-400 text-sm py-4 text-center">No hay clases programadas</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* MÓVIL: KPIs en una sola card */}
+      <div className="md:hidden">
+        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="grid grid-cols-3 divide-x divide-zinc-100">
+            {/* Promedio */}
+            <div className="p-4 text-center">
+              <div className="flex justify-center mb-2">
+                <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-zinc-600" />
+                </div>
+              </div>
+              <span className="text-2xl font-semibold text-zinc-900 tabular-nums block">
+                {promedioGeneral.toFixed(1)}
+              </span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Promedio</span>
+            </div>
+
+            {/* Créditos */}
+            <div className="p-4 text-center">
+              <div className="flex justify-center mb-2">
+                <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-zinc-600" />
+                </div>
+              </div>
+              <span className="text-2xl font-semibold text-zinc-900 tabular-nums block">
+                {perfil?.creditosAcumulados || 0}
+              </span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Créditos</span>
+            </div>
+
+            {/* Cursos */}
+            <div className="p-4 text-center">
+              <div className="flex justify-center mb-2">
+                <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-zinc-600" />
+                </div>
+              </div>
+              <span className="text-2xl font-semibold text-zinc-900 tabular-nums block">
+                {cursosActivos.length}
+              </span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Cursos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MÓVIL: Accesos Rápidos - Diseño mejorado */}
+      <div className="md:hidden">
+        <div className="space-y-2">
+          {/* Acceso principal - Horario */}
+          <Link 
+            to="/estudiante/horario" 
+            className="flex items-center gap-4 p-4 bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-xl text-white shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10 group-hover:bg-white/20 transition-colors">
+              <LayoutGrid className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <span className="text-sm font-semibold block">Ver Horario</span>
+              <span className="text-xs text-zinc-400">Consulta tu horario semanal</span>
+            </div>
+            <ArrowRight className="w-5 h-5 text-zinc-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+          </Link>
+
+          {/* Fila de 3 accesos secundarios */}
+          <div className="grid grid-cols-3 gap-2">
+            <Link 
+              to="/estudiante/notas" 
+              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
+            >
+              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
+                <FileText className="w-5 h-5 text-zinc-600" />
+              </div>
+              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Notas</span>
+            </Link>
+            
+            <Link 
+              to="/estudiante/matricula" 
+              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
+            >
+              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
+                <ClipboardList className="w-5 h-5 text-zinc-600" />
+              </div>
+              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Matrícula</span>
+            </Link>
+            
+            <Link 
+              to="/estudiante/mis-cursos" 
+              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
+            >
+              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
+                <Layers className="w-5 h-5 text-zinc-600" />
+              </div>
+              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Cursos</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* MÓVIL: Cursos como lista compacta */}
+      <div className="md:hidden">
+        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">Cursos Matriculados</h3>
+            <Link to="/estudiante/mis-cursos" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1">
+              Ver todos <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="divide-y divide-zinc-50">
+            {cursosActivos.slice(0, 4).map((curso) => (
+              <div key={curso.id} className="px-4 py-3 flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-zinc-900 truncate">{curso.nombreCurso}</p>
+                  <p className="text-xs text-zinc-500">{curso.nombreDocente || 'Sin docente'}</p>
+                </div>
+                <span className="ml-3 text-xs font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded">
+                  {curso.creditos} cr
+                </span>
+              </div>
+            ))}
+            {cursosActivos.length === 0 && (
+              <div className="px-4 py-8 text-center">
+                <p className="text-sm text-zinc-400">Sin cursos matriculados</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* DESKTOP: Layout original con grid */}
+      <div className="hidden md:grid md:grid-cols-3 gap-6">
+        {/* Columna izquierda: KPIs + Tabla */}
+        <div className="md:col-span-2 space-y-4">
+          {/* KPIs en fila */}
+          <div className="grid grid-cols-3 gap-4">
+            {/* Promedio */}
+            <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm flex flex-col justify-between h-32">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Promedio</span>
+                <TrendingUp className="w-4 h-4 text-zinc-400" />
+              </div>
+              <div>
+                <span className="text-3xl font-semibold text-zinc-900 tracking-tight tabular-nums">
+                  {promedioGeneral.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Créditos */}
+            <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm flex flex-col justify-between h-32">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</span>
+                <GraduationCap className="w-4 h-4 text-zinc-400" />
+              </div>
+              <div>
+                <span className="text-3xl font-semibold text-zinc-900 tracking-tight tabular-nums">
+                  {perfil?.creditosAcumulados}
+                </span>
+                <span className="text-sm text-zinc-400 ml-1">aprobados</span>
+              </div>
+            </div>
+
+            {/* Cursos */}
+            <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm flex flex-col justify-between h-32">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Cursos</span>
+                <BookOpen className="w-4 h-4 text-zinc-400" />
+              </div>
+              <div>
+                <span className="text-3xl font-semibold text-zinc-900 tracking-tight tabular-nums">
+                  {cursosActivos.length}
+                </span>
+                <span className="text-sm text-zinc-400 ml-1">activos</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabla de Cursos */}
+          <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-900">Cursos Matriculados</h3>
+              <Link to="/estudiante/mis-cursos" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors">
+                Ver todos <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Tipo</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50">
+                  {cursosActivos.slice(0, 5).map((curso) => (
+                    <tr key={curso.id} className="group hover:bg-zinc-50/50 transition-colors">
+                      <td className="px-6 py-3">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</span>
+                          <span className="text-xs text-zinc-500 font-mono">{curso.codigoCurso}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-zinc-100 text-zinc-700 border-zinc-200">
+                          Obligatorio
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-right">
+                        <span className="text-sm text-zinc-500">{curso.nombreDocente || 'Por asignar'}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Columna derecha: Próxima Clase + Accesos */}
+        <div className="space-y-6">
+          {/* Next Class Card */}
+          <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Clock className="w-24 h-24" />
+            </div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Próxima Clase</span>
+                {nextClass && (
+                  <span className="px-2 py-1 bg-white/10 rounded text-xs font-medium text-white border border-white/10">
+                    {nextClass.label}
+                  </span>
+                )}
+              </div>
+
+              {nextClass ? (
+                <>
+                  <h3 className="text-xl font-semibold mb-1 line-clamp-2">{nextClass.nombreCurso}</h3>
+                  <p className="text-zinc-400 text-sm mb-6">{nextClass.aula ? `Aula ${nextClass.aula}` : 'Aula por asignar'}</p>
+                  
+                  <div className="flex items-center justify-between text-sm font-mono text-zinc-300 bg-white/5 p-3 rounded-lg border border-white/5">
+                    <span>{nextClass.horaInicio}</span>
+                    <div className="h-px w-8 bg-zinc-600" />
+                    <span>{nextClass.horaFin}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="text-zinc-400 text-sm">No hay clases programadas próximamente</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900 mb-4">Accesos Rápidos</h3>
+            <div className="space-y-2">
+              <Link to="/estudiante/horario" className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
+                    <CalendarIcon className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900">Ver Horario Completo</span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
+              </Link>
+              
+              <Link to="/estudiante/notas" className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all group">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900">Consultar Notas</span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

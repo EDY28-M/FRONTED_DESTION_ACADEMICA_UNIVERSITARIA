@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import toast from 'react-hot-toast';
-import { UserPlus, Users, Mail, Lock, Hash, GraduationCap, CreditCard } from 'lucide-react';
+import { UserPlus, Users, Mail, Lock, Hash, GraduationCap, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface CrearEstudianteForm {
   email: string;
@@ -27,7 +27,7 @@ export default function GestionEstudiantesPage() {
   const crearEstudianteMutation = useMutation({
     mutationFn: (datos: CrearEstudianteForm) => estudiantesApi.crearEstudiante(datos),
     onSuccess: (data: any) => {
-      toast.success('✅ Estudiante creado exitosamente');
+      toast.success('Estudiante creado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
       
       // Limpiar formulario
@@ -41,10 +41,37 @@ export default function GestionEstudiantesPage() {
       });
 
       // Mostrar credenciales
-      toast.success(
-        `Credenciales:\nEmail: ${data.estudiante.email}\nCódigo: ${data.estudiante.codigo}`,
-        { duration: 8000 }
-      );
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 pt-0.5">
+                <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-zinc-900">
+                  Estudiante Creado
+                </p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Credenciales generadas:
+                </p>
+                <div className="mt-2 bg-zinc-50 p-2 rounded border border-zinc-100 text-xs font-mono text-zinc-600">
+                  <p>Email: {data.estudiante.email}</p>
+                  <p>Código: {data.estudiante.codigo}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex border-l border-zinc-200">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-zinc-600 hover:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      ), { duration: 8000 });
     },
     onError: (error: any) => {
       const mensaje = error.response?.data?.mensaje || 'Error al crear estudiante';
@@ -78,195 +105,237 @@ export default function GestionEstudiantesPage() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto space-y-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Users className="w-8 h-8 text-primary-700" />
-          <h1 className="text-3xl font-bold text-gray-800">Gestión de Estudiantes</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <Users className="w-6 h-6 text-zinc-900" />
+            </div>
+            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Estudiantes</h1>
+          </div>
+          <p className="text-zinc-500">
+            Crea nuevos estudiantes y genera sus credenciales de acceso al sistema.
+          </p>
         </div>
-        <p className="text-gray-600">Crea nuevos estudiantes y genera sus credenciales de acceso</p>
       </div>
 
-      {/* Formulario de Creación */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center gap-2 mb-6 pb-4 border-b">
-          <UserPlus className="w-6 h-6 text-primary-700" />
-          <h2 className="text-xl font-semibold text-gray-800">Crear Nuevo Estudiante</h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Datos Personales */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <span className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Nombres *
-                </span>
-              </label>
-              <input
-                type="text"
-                name="nombres"
-                value={formData.nombres}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                placeholder="Ej: Juan Carlos"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <span className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Apellidos *
-                </span>
-              </label>
-              <input
-                type="text"
-                name="apellidos"
-                value={formData.apellidos}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                placeholder="Ej: Pérez García"
-              />
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Formulario de Creación */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50 flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-zinc-500" />
+            <h2 className="font-semibold text-zinc-900">Crear Nuevo Estudiante</h2>
           </div>
 
-          {/* Documento y Ciclo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <span className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Número de Documento (DNI) *
-                </span>
-              </label>
-              <input
-                type="text"
-                name="numeroDocumento"
-                value={formData.numeroDocumento}
-                onChange={handleChange}
-                required
-                maxLength={8}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                placeholder="12345678"
-              />
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Datos Personales */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-zinc-900 border-b border-zinc-100 pb-2 mb-4">Datos Personales</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Nombres <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      name="nombres"
+                      value={formData.nombres}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                      placeholder="Ej: Juan Carlos"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Apellidos <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      name="apellidos"
+                      value={formData.apellidos}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                      placeholder="Ej: Pérez García"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <span className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4" />
-                  Ciclo Académico *
-                </span>
-              </label>
-              <select
-                name="ciclo"
-                value={formData.ciclo}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+            {/* Documento y Ciclo */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-zinc-900 border-b border-zinc-100 pb-2 mb-4">Información Académica</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Número de Documento (DNI) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      name="numeroDocumento"
+                      value={formData.numeroDocumento}
+                      onChange={handleChange}
+                      required
+                      maxLength={8}
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                      placeholder="12345678"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Ciclo Académico <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <select
+                      name="ciclo"
+                      value={formData.ciclo}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all appearance-none bg-white"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
+                        <option key={ciclo} value={ciclo}>
+                          Ciclo {ciclo}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Credenciales de Acceso */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-zinc-900 border-b border-zinc-100 pb-2 mb-4">Credenciales de Acceso</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Email (Usuario) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                      placeholder="estudiante@email.com"
+                    />
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1.5">
+                    Este email será usado para iniciar sesión
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                    Contraseña <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      minLength={6}
+                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-1.5">
+                    Mínimo 6 caracteres
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón Crear */}
+            <div className="flex justify-end pt-4 border-t border-zinc-100">
+              <button
+                type="submit"
+                disabled={crearEstudianteMutation.isPending}
+                className="px-6 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium shadow-sm hover:shadow-md"
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
-                  <option key={ciclo} value={ciclo}>
-                    Ciclo {ciclo}
-                  </option>
-                ))}
-              </select>
+                {crearEstudianteMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    Crear Estudiante
+                  </>
+                )}
+              </button>
             </div>
-          </div>
+          </form>
+        </div>
 
-          {/* Credenciales de Acceso */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <Lock className="w-5 h-5 text-primary-700" />
-              Credenciales de Acceso
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <span className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
-                    Email (Usuario) *
-                  </span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                  placeholder="estudiante@email.com"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Este email será usado para iniciar sesión
-                </p>
+        {/* Información Adicional */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6">
+            <h4 className="font-semibold text-zinc-900 mb-4 flex items-center gap-2">
+              <div className="p-1.5 bg-white rounded-md border border-zinc-200 shadow-sm">
+                <Hash className="w-4 h-4 text-zinc-600" />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <span className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    Contraseña *
-                  </span>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                  placeholder="Mínimo 6 caracteres"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Mínimo 6 caracteres
-                </p>
-              </div>
-            </div>
+              Información Importante
+            </h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-sm text-zinc-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                El código de estudiante se generará automáticamente por el sistema.
+              </li>
+              <li className="flex items-start gap-3 text-sm text-zinc-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                Las credenciales completas serán mostradas en una notificación después de la creación.
+              </li>
+              <li className="flex items-start gap-3 text-sm text-zinc-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                El estudiante podrá iniciar sesión inmediatamente con su correo y contraseña.
+              </li>
+              <li className="flex items-start gap-3 text-sm text-zinc-600">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                Se recomienda usar contraseñas seguras que incluyan números y letras.
+              </li>
+            </ul>
           </div>
 
-          {/* Botón Crear */}
-          <div className="flex justify-end pt-4 border-t">
-            <button
-              type="submit"
-              disabled={crearEstudianteMutation.isPending}
-              className="px-6 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
-            >
-              {crearEstudianteMutation.isPending ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creando...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5" />
-                  Crear Estudiante
-                </>
-              )}
-            </button>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+              Nota de Seguridad
+            </h4>
+            <p className="text-sm text-amber-800 leading-relaxed">
+              Asegúrate de verificar la identidad del estudiante antes de crear su cuenta. 
+              Las credenciales son personales e intransferibles.
+            </p>
           </div>
-        </form>
-      </div>
-
-      {/* Información Adicional */}
-      <div className="mt-6 bg-primary-50 border border-primary-200 rounded-lg p-4">
-        <h4 className="font-semibold text-primary-900 mb-2 flex items-center gap-2">
-          <Hash className="w-5 h-5" />
-          Información Importante
-        </h4>
-        <ul className="text-sm text-primary-800 space-y-1 ml-6">
-          <li className="list-disc">El código de estudiante se generará automáticamente</li>
-          <li className="list-disc">Las credenciales serán mostradas después de la creación</li>
-          <li className="list-disc">El estudiante podrá iniciar sesión inmediatamente</li>
-          <li className="list-disc">Recomendación: Usa contraseñas seguras</li>
-        </ul>
+        </div>
       </div>
     </div>
   );

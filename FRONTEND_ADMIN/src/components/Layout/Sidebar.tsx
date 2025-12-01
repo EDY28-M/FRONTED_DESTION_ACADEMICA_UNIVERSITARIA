@@ -1,179 +1,141 @@
 import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import {
-  Squares2X2Icon,
-  IdentificationIcon,
-  BookOpenIcon,
-  UserPlusIcon,
-  MagnifyingGlassCircleIcon,
-  ClipboardDocumentListIcon,
-  CalendarDaysIcon,
-  PresentationChartBarIcon,
-  Cog6ToothIcon,
-} from '@heroicons/react/24/outline'
+  Home,
+  Users,
+  BookOpenCheck,
+  FolderOpen,
+  TrendingUp,
+  Calendar,
+  UserCog,
+  Shield,
+  Eye,
+  X,
+  Zap
+} from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import clsx from 'clsx'
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
+  isCollapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
 const navigation = [
   {
     name: 'Dashboard',
     href: '/dashboard',
-    icon: Squares2X2Icon,
-    description: 'Resumen general del sistema'
+    icon: Home,
   },
   {
     name: 'Gestión Credenciales',
     href: '/docentes/gestion-passwords',
-    icon: IdentificationIcon,
-    description: 'Administrar contraseñas de docentes'
+    icon: Shield,
   },
   {
     name: 'Cursos',
     href: '/cursos',
-    icon: BookOpenIcon,
-    description: 'Gestión de materias'
+    icon: BookOpenCheck,
   },
   {
     name: 'Estudiantes',
     href: '/estudiantes',
-    icon: UserPlusIcon,
-    description: 'Crear credenciales de estudiantes'
+    icon: Users,
   },
   {
     name: 'Ver Estudiantes',
     href: '/estudiantes/visualizar',
-    icon: MagnifyingGlassCircleIcon,
-    description: 'Visualizar datos completos de estudiantes'
+    icon: Eye,
   },
   {
     name: 'Cursos Dirigidos',
     href: '/cursos-dirigidos',
-    icon: ClipboardDocumentListIcon,
-    description: 'Autorizar matrículas especiales'
+    icon: FolderOpen,
   },
   {
     name: 'Períodos',
     href: '/periodos',
-    icon: CalendarDaysIcon,
-    description: 'Gestionar períodos académicos'
+    icon: Calendar,
   },
   {
     name: 'Estadísticas',
     href: '/estadisticas',
-    icon: PresentationChartBarIcon,
-    description: 'Reportes y análisis'
+    icon: TrendingUp,
   },
   {
     name: 'Mi Perfil',
     href: '/perfil',
-    icon: Cog6ToothIcon,
-    description: 'Configuración de cuenta'
+    icon: UserCog,
   },
 ]
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => {
   const location = useLocation()
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full" style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}>
-      {/* Logo UNIVERSIDAD ACADEMICA */}
-      <div className="flex items-center h-20 px-4 bg-white border-b border-gray-100">
+  const isActive = (path: string) => {
+    if (path === '/dashboard') {
+      return location.pathname === '/' || location.pathname === '/dashboard'
+    }
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
+
+  const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+    <div className="flex flex-col h-full bg-white border-r border-zinc-200">
+      {/* Logo */}
+      <div className="flex items-center h-16 px-6 border-b border-zinc-200">
         <div className="flex items-center gap-3">
-          <div 
-            className="w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#003366' }}
-          >
-            <BookOpenIcon className="w-6 h-6" style={{ color: '#C7A740' }} />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900">
+            <Users className="h-5 w-5 text-white" />
           </div>
-          <div className="flex flex-col">
-            <span 
-              className="text-base font-bold leading-tight"
-              style={{ color: '#003366' }}
-            >
-              UNIVERSIDAD
-            </span>
-            <span 
-              className="text-base font-bold leading-tight"
-              style={{ color: '#003366' }}
-            >
-              ACADEMICA
-            </span>
-          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-zinc-900 tracking-tight">
+                Admin Panel
+              </span>
+              <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                Gestión Académica
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
-        {navigation.map((item, index) => {
-          const isActive = location.pathname === item.href
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {navigation.map((item) => {
+          const active = isActive(item.href)
           
           return (
-            <motion.div
+            <Link
               key={item.name}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              to={item.href}
+              onClick={onClose}
+              className={`
+                group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center' : ''}
+                ${active 
+                  ? 'bg-zinc-100 text-zinc-900' 
+                  : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                }
+              `}
+              title={collapsed ? item.name : undefined}
             >
-              <Link
-                to={item.href}
-                onClick={onClose}
-                className={clsx(
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200',
-                  isActive
-                    ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                )}
-              >
-                <div
-                  className={clsx(
-                    'flex items-center justify-center w-9 h-9 rounded-lg mr-3 transition-all duration-200',
-                    isActive
-                      ? 'bg-primary-100'
-                      : 'bg-gray-100 group-hover:bg-primary-50'
-                  )}
-                >
-                  <item.icon
-                    className={clsx(
-                      'h-5 w-5 transition-colors',
-                      isActive
-                        ? 'text-primary-600'
-                        : 'text-gray-500 group-hover:text-primary-600'
-                    )}
-                  />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className={clsx(
-                    'font-semibold truncate',
-                    isActive ? 'text-primary-700' : ''
-                  )}>{item.name}</span>
-                  <span className={clsx(
-                    'text-xs truncate',
-                    isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500'
-                  )}>
-                    {item.description}
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
+              <item.icon 
+                className={`h-[18px] w-[18px] shrink-0 transition-colors
+                  ${active ? 'text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-600'}
+                `} 
+              />
+              {!collapsed && item.name}
+            </Link>
           )
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-        <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span>Sistema Activo</span>
-        </div>
-        <div className="text-xs text-gray-400 text-center mt-1">
-          Panel Admin v1.0 • © 2025
+      <div className="p-4 border-t border-zinc-200">
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200 ${collapsed ? 'justify-center' : ''}`}>
+          <Zap className="h-4 w-4 text-emerald-500" />
+          {!collapsed && <span className="text-xs font-medium text-zinc-600">Sistema Activo</span>}
         </div>
       </div>
     </div>
@@ -186,49 +148,49 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <Dialog as="div" className="relative z-50 lg:hidden" onClose={onClose}>
           <Transition.Child
             as={Fragment}
-            enter="transition-opacity ease-linear duration-300"
+            enter="transition-opacity ease-linear duration-200"
             enterFrom="opacity-0"
             enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-300"
+            leave="transition-opacity ease-linear duration-200"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-900/80" />
+            <div className="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
             <Transition.Child
               as={Fragment}
-              enter="transition ease-in-out duration-300 transform"
+              enter="transition ease-out duration-200 transform"
               enterFrom="-translate-x-full"
               enterTo="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
+              leave="transition ease-in duration-200 transform"
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+              <Dialog.Panel className="relative mr-16 flex w-full max-w-64 flex-1">
                 <Transition.Child
                   as={Fragment}
-                  enter="ease-in-out duration-300"
+                  enter="ease-in-out duration-200"
                   enterFrom="opacity-0"
                   enterTo="opacity-100"
-                  leave="ease-in-out duration-300"
+                  leave="ease-in-out duration-200"
                   leaveFrom="opacity-100"
                   leaveTo="opacity-0"
                 >
                   <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
                     <button
                       type="button"
-                      className="-m-2.5 p-2.5"
+                      className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
                       onClick={onClose}
                     >
                       <span className="sr-only">Cerrar sidebar</span>
-                      <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                      <X className="h-5 w-5 text-white" />
                     </button>
                   </div>
                 </Transition.Child>
-                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white">
-                  <SidebarContent />
+                <div className="flex grow flex-col overflow-y-auto bg-white">
+                  <SidebarContent collapsed={false} />
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -237,9 +199,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       </Transition.Root>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 shadow-sm">
-          <SidebarContent />
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col transition-all duration-300 ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
+        <div className="flex grow flex-col overflow-y-auto border-r border-zinc-200 bg-white">
+          <SidebarContent collapsed={isCollapsed} />
         </div>
       </div>
     </>

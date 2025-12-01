@@ -1,50 +1,56 @@
 import { useState, Fragment, useEffect } from 'react'
-import { Bars3Icon, ArrowRightOnRectangleIcon, BookOpenIcon, CalendarIcon, GlobeAltIcon, UserIcon, IdentificationIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
-import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useAuth } from '../../contexts/AuthContext'
 import { Notifications } from './Notifications'
 import { useNotifications } from '../../contexts/NotificationContext'
+import {
+  Menu as MenuIcon,
+  LogOut,
+  User,
+  KeyRound,
+  ChevronRight
+} from 'lucide-react'
 
 interface HeaderProps {
   onMenuClick: () => void
+  onToggleCollapse?: () => void
+  isCollapsed?: boolean
 }
 
-const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+// Breadcrumb mapping
+const routeNames: Record<string, string> = {
+  'dashboard': 'Dashboard',
+  'docentes': 'Docentes',
+  'gestion-passwords': 'Gestión Credenciales',
+  'cursos': 'Cursos',
+  'estudiantes': 'Estudiantes',
+  'visualizar': 'Visualizar',
+  'cursos-dirigidos': 'Cursos Dirigidos',
+  'periodos': 'Períodos',
+  'estadisticas': 'Estadísticas',
+  'perfil': 'Mi Perfil',
+}
+
+const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollapsed = false }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, logout } = useAuth()
   const { notifications, clearNotifications, markAsRead } = useNotifications()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const [userIP, setUserIP] = useState<string>('Obteniendo...')
-  const [currentDate, setCurrentDate] = useState<string>('')
 
-  // Obtener IP del usuario
-  useEffect(() => {
-    const fetchIP = async () => {
-      try {
-        const response = await fetch('https://api.ipify.org?format=json')
-        const data = await response.json()
-        setUserIP(data.ip)
-      } catch (error) {
-        setUserIP('No disponible')
-      }
-    }
-    fetchIP()
+  // Generate breadcrumbs from current path
+  const getBreadcrumbs = () => {
+    const pathSegments = location.pathname.split('/').filter(Boolean)
+    return pathSegments.map((segment, index) => ({
+      name: routeNames[segment] || segment,
+      path: '/' + pathSegments.slice(0, index + 1).join('/'),
+      isLast: index === pathSegments.length - 1
+    }))
+  }
 
-    // Obtener fecha y hora actual
-    const now = new Date()
-    const formattedDate = now.toLocaleDateString('es-PE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }) + ' ' + now.toLocaleTimeString('es-PE', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-    setCurrentDate(formattedDate)
-  }, [])
+  const breadcrumbs = getBreadcrumbs()
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -60,101 +66,79 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     }
   }
 
-  // Obtener iniciales del usuario
+  // Get user initials
   const getInitials = (nombres: string, apellidos: string): string => {
     const firstInitial = nombres?.charAt(0)?.toUpperCase() || ''
     const lastInitial = apellidos?.charAt(0)?.toUpperCase() || ''
     return `${firstInitial}${lastInitial}`
   }
 
-  // Obtener color del avatar basado en el rol
-  const getAvatarColor = (rol: string): string => {
-    switch (rol) {
-      case 'Administrador':
-        return 'bg-purple-600'
-      case 'Coordinador':
-        return 'bg-primary-700'
-      case 'Docente':
-        return 'bg-green-600'
-      default:
-        return 'bg-gray-600'
-    }
-  }
-
   return (
-    <motion.header 
-      className="bg-white border-b border-gray-200 shadow-sm"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
-    >
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6">
-        {/* Mobile menu button */}
-        <div className="flex items-center lg:hidden">
+    <header className="sticky top-0 z-30 bg-white border-b border-zinc-200">
+      <div className="flex items-center justify-between h-14 px-4 sm:px-6">
+        {/* Left: Mobile menu + Breadcrumbs */}
+        <div className="flex items-center gap-4">
+          {/* Mobile menu button */}
           <button
             type="button"
-            className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+            className="lg:hidden flex items-center justify-center h-9 w-9 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
             onClick={onMenuClick}
           >
             <span className="sr-only">Abrir menú</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            <MenuIcon className="h-5 w-5" />
           </button>
-        </div>
 
-        {/* Bienvenido al sistema SIAGE */}
-        <div className="hidden lg:flex items-center">
-          <h1 
-            className="text-lg font-bold tracking-wide"
-            style={{ 
-              color: '#003366',
-              fontFamily: "'Montserrat', 'Roboto', sans-serif"
-            }}
-          >
-            Bienvenido al sistema SIAGE
-          </h1>
-        </div>
+          {/* Desktop collapse button */}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+              onClick={onToggleCollapse}
+            >
+              <span className="sr-only">{isCollapsed ? 'Expandir menú' : 'Contraer menú'}</span>
+              <MenuIcon className="h-5 w-5" />
+            </button>
+          )}
 
-        {/* Spacer */}
-        <div className="flex-1"></div>
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-1 text-sm overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
+            <span className="text-zinc-400 shrink-0">Admin</span>
+            {breadcrumbs.map((crumb, index) => (
+              <Fragment key={crumb.path}>
+                <ChevronRight className="h-4 w-4 text-zinc-300" />
+                {crumb.isLast ? (
+                  <span className="font-medium text-zinc-900">{crumb.name}</span>
+                ) : (
+                  <button
+                    onClick={() => navigate(crumb.path)}
+                    className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                  >
+                    {crumb.name}
+                  </button>
+                )}
+              </Fragment>
+            ))}
+          </nav>
+        </div>
 
         {/* Right side */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2">
           {/* Notifications */}
           <Notifications notifications={notifications} onClear={clearNotifications} onMarkAsRead={markAsRead} />
 
           {/* Profile Dropdown */}
           <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center space-x-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 rounded-lg p-2 hover:bg-gray-50 transition-colors group">
-              <div 
-                className="h-10 w-10 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"
-                style={{
-                  background: 'linear-gradient(135deg, #003366 0%, #004d99 50%, #0066cc 100%)',
-                  border: '2px solid #C7A740',
-                  boxShadow: '0 4px 6px -1px rgba(0, 51, 102, 0.3), 0 2px 4px -1px rgba(0, 51, 102, 0.2)'
-                }}
-              >
-                <span className="text-sm font-bold text-white drop-shadow-sm">
+            <Menu.Button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-100 transition-colors">
+              <div className="h-8 w-8 rounded-full bg-zinc-900 flex items-center justify-center">
+                <span className="text-xs font-semibold text-white">
                   {user ? getInitials(user.nombres, user.apellidos) : 'U'}
                 </span>
               </div>
               <div className="hidden md:block text-left">
-                <div 
-                  className="text-sm font-semibold"
-                  style={{ 
-                    color: '#003366',
-                    fontFamily: "'Montserrat', 'Roboto', sans-serif" 
-                  }}
-                >
-                  Hola, {user?.nombres || 'Usuario'}
+                <div className="text-sm font-medium text-zinc-900">
+                  {user?.nombres || 'Usuario'}
                 </div>
-                <div 
-                  className="text-xs"
-                  style={{ 
-                    color: '#6B7280',
-                    fontFamily: "'Montserrat', 'Roboto', sans-serif" 
-                  }}
-                >
+                <div className="text-xs text-zinc-500">
                   {user?.rol || 'Sin rol'}
                 </div>
               </div>
@@ -169,75 +153,35 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-80 origin-top-right rounded-lg bg-white shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50" style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}>
-                {/* Header del perfil con avatar grande */}
-                <div className="px-6 py-5 text-center border-b border-gray-100">
-                  <div 
-                    className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-md"
-                    style={{ backgroundColor: '#003366' }}
-                  >
-                    <span className="text-white text-xl font-bold">
-                      {user ? `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}` : 'U'}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 uppercase">
-                    {user?.nombres || 'USUARIO'}
-                  </h3>
-                  <p className="text-sm text-gray-600 uppercase">
-                    {user?.apellidos || ''}
-                  </p>
-                  <span 
-                    className="inline-flex items-center px-3 py-1 mt-2 rounded-full text-xs font-semibold text-white"
-                    style={{ backgroundColor: '#003366' }}
-                  >
-                    {user?.rol || 'Sin rol'} {user?.id ? String(user.id).padStart(10, '0') : ''}
-                  </span>
-                </div>
-
-                {/* Último Acceso */}
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Último Acceso:</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center text-gray-500">
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        Fecha:
+              <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-zinc-200 focus:outline-none z-50">
+                {/* Profile Header */}
+                <div className="px-4 py-3 border-b border-zinc-100">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-white">
+                        {user ? getInitials(user.nombres, user.apellidos) : 'U'}
                       </span>
-                      <span className="text-gray-700">{currentDate}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center text-gray-500">
-                        <GlobeAltIcon className="w-4 h-4 mr-2" />
-                        Dirección IP:
-                      </span>
-                      <span className="text-gray-700">{userIP}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 truncate">
+                        {user?.nombres} {user?.apellidos}
+                      </p>
+                      <p className="text-xs text-zinc-500 truncate">
+                        {user?.rol}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Roles Asignados */}
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <h4 className="text-sm font-semibold text-gray-800 mb-2">Roles Asignados:</h4>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center text-emerald-600 font-medium">
-                      <UserIcon className="w-4 h-4 mr-2" />
-                      {user?.rol || 'Sin rol'}
-                    </span>
-                    <span className="text-gray-600">{user?.id ? String(user.id).padStart(10, '0') : ''}</span>
-                  </div>
-                </div>
-
-                {/* Opciones del menú */}
-                <div className="py-2">
+                {/* Menu Items */}
+                <div className="py-1">
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${
-                          active ? 'bg-gray-50' : ''
-                        } flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900`}
+                        className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
                         onClick={() => navigate('/perfil')}
                       >
-                        <IdentificationIcon className="mr-3 h-5 w-5" style={{ color: '#003366' }} />
+                        <User className="h-4 w-4 text-zinc-400" />
                         Información Personal
                       </button>
                     )}
@@ -245,30 +189,26 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${
-                          active ? 'bg-gray-50' : ''
-                        } flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900`}
+                        className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
                         onClick={() => navigate('/perfil', { state: { openChangePassword: true } })}
                       >
-                        <LockClosedIcon className="mr-3 h-5 w-5" style={{ color: '#003366' }} />
+                        <KeyRound className="h-4 w-4 text-zinc-400" />
                         Cambiar Contraseña
                       </button>
                     )}
                   </Menu.Item>
                 </div>
 
-                {/* Cerrar Sesión */}
-                <div className="border-t border-gray-100 py-2">
+                {/* Logout */}
+                <div className="border-t border-zinc-100 py-1">
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${
-                          active ? 'bg-red-50' : ''
-                        } flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:text-red-700`}
+                        className={`${active ? 'bg-red-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600`}
                         onClick={handleLogout}
                         disabled={isLoggingOut}
                       >
-                        <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-red-400" />
+                        <LogOut className="h-4 w-4" />
                         {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar Sesión'}
                       </button>
                     )}
@@ -279,7 +219,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           </Menu>
         </div>
       </div>
-    </motion.header>
+    </header>
   )
 }
 

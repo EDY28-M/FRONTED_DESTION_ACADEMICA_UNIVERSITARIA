@@ -11,7 +11,13 @@ import {
   Send, 
   AlertCircle,
   Info,
-  UserCheck
+  UserCheck,
+  Search,
+  Filter,
+  Calendar,
+  GraduationCap,
+  Clock,
+  CheckCircle2
 } from 'lucide-react';
 import { Curso } from '../../types';
 import { Periodo } from '../../types/estudiante';
@@ -137,268 +143,290 @@ export default function CursosDirigidosPage() {
 
   if (loadingCursos || loadingEstudiantes || loadingPeriodos) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando datos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
+          <p className="mt-4 text-zinc-600">Cargando datos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <div className="flex items-center gap-3 mb-2">
-          <BookOpen className="w-8 h-8 text-purple-600" />
-          <h1 className="text-3xl font-bold text-gray-800">Cursos Dirigidos</h1>
+          <div className="p-2 bg-zinc-100 rounded-lg">
+            <BookOpen className="w-6 h-6 text-zinc-900" />
+          </div>
+          <h1 className="text-2xl font-bold text-zinc-900">Cursos Dirigidos</h1>
         </div>
-        <p className="text-gray-600">
-          Autoriza a estudiantes específicos para matricularse en cursos fuera de su ciclo actual
+        <p className="text-zinc-500">
+          Autoriza a estudiantes específicos para matricularse en cursos fuera de su ciclo actual.
         </p>
       </div>
 
       {/* Info Box */}
-      <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-6">
-        <div className="flex items-start gap-2">
-          <Info className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-primary-900">
-            <p className="font-semibold mb-1">¿Qué son los Cursos Dirigidos?</p>
-            <p>
-              Los cursos dirigidos permiten a los administradores autorizar matrículas que normalmente estarían 
-              restringidas por ciclo. Por ejemplo, un estudiante de ciclo 2 podría matricularse en un curso de ciclo 4.
-            </p>
-          </div>
+      <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+        <div className="text-sm text-blue-900">
+          <p className="font-medium mb-1">¿Qué son los Cursos Dirigidos?</p>
+          <p className="text-blue-700 leading-relaxed">
+            Los cursos dirigidos permiten a los administradores autorizar matrículas que normalmente estarían 
+            restringidas por ciclo. Por ejemplo, un estudiante de ciclo 2 podría matricularse en un curso de ciclo 4.
+          </p>
         </div>
       </div>
 
-      {/* Selección de Curso y Período */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">1. Selecciona el Curso y Período</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Selector de Período */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Período Académico *
-            </label>
-            <select
-              value={periodoSeleccionado || ''}
-              onChange={handlePeriodoChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Seleccione un período</option>
-              {periodos.map(periodo => (
-                <option key={periodo.id} value={periodo.id}>
-                  {periodo.nombre} {periodo.activo && '(Activo)'}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Selector de Curso */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Curso *
-            </label>
-            <select
-              value={cursoSeleccionado || ''}
-              onChange={handleCursoChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">Seleccione un curso</option>
-              {cursos.map(curso => (
-                <option key={curso.id} value={curso.id}>
-                  {curso.nombreCurso} - Ciclo {curso.ciclo} ({curso.creditos} créditos)
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Información del curso seleccionado */}
-        {cursoSeleccionadoData && (
-          <div className="mt-4 p-4 bg-purple-50 rounded-lg">
-            <h3 className="font-semibold text-purple-900 mb-2">Curso Seleccionado:</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Nombre:</span>
-                <p className="font-medium text-gray-900">{cursoSeleccionadoData.nombreCurso}</p>
-              </div>
-              <div>
-                <span className="text-gray-600">Ciclo:</span>
-                <p className="font-medium text-gray-900">{cursoSeleccionadoData.ciclo}</p>
-              </div>
-              <div>
-                <span className="text-gray-600">Créditos:</span>
-                <p className="font-medium text-gray-900">{cursoSeleccionadoData.creditos}</p>
-              </div>
-              <div>
-                <span className="text-gray-600">Horas/Semana:</span>
-                <p className="font-medium text-gray-900">{cursoSeleccionadoData.horasSemanal}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Selección de Estudiantes */}
-      {cursoSeleccionado && periodoSeleccionado && (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              2. Selecciona los Estudiantes
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Columna Izquierda: Configuración */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 sticky top-6">
+            <h2 className="text-lg font-semibold text-zinc-900 mb-6 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">1</span>
+              Configuración
             </h2>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <UserCheck className="w-4 h-4" />
-              <span>{estudiantesSeleccionados.length} seleccionados</span>
-            </div>
-          </div>
-
-          {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="md:col-span-2">
-              <input
-                type="text"
-                placeholder="Buscar por nombre o código..."
-                value={filtroNombre}
-                onChange={(e) => setFiltroNombre(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
-            <div>
-              <select
-                value={filtroCiclo || ''}
-                onChange={(e) => setFiltroCiclo(e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="">Todos los ciclos</option>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
-                  <option key={ciclo} value={ciclo}>Ciclo {ciclo}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Tabla de estudiantes */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left">
-                    <button
-                      onClick={handleToggleAll}
-                      className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-purple-600"
-                    >
-                      {estudiantesSeleccionados.length === estudiantesFiltrados.length ? (
-                        <CheckSquare className="w-5 h-5" />
-                      ) : (
-                        <Square className="w-5 h-5" />
-                      )}
-                      Todos
-                    </button>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Código
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nombre Completo
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ciclo Actual
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Créditos
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {estudiantesFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                      <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      No se encontraron estudiantes activos
-                    </td>
-                  </tr>
-                ) : (
-                  estudiantesFiltrados.map(estudiante => (
-                    <tr
-                      key={estudiante.id}
-                      className={`hover:bg-gray-50 cursor-pointer transition-colors ${
-                        estudiantesSeleccionados.includes(estudiante.id) ? 'bg-purple-50' : ''
-                      }`}
-                      onClick={() => handleToggleEstudiante(estudiante.id)}
-                    >
-                      <td className="px-4 py-3">
-                        {estudiantesSeleccionados.includes(estudiante.id) ? (
-                          <CheckSquare className="w-5 h-5 text-purple-600" />
-                        ) : (
-                          <Square className="w-5 h-5 text-gray-400" />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {estudiante.codigo}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {estudiante.nombreCompleto}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                          Ciclo {estudiante.cicloActual}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {estudiante.email}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {estudiante.creditosAcumulados}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Botón de envío */}
-          {estudiantesSeleccionados.length > 0 && (
-            <div className="mt-6 flex items-center justify-between p-4 bg-purple-50 rounded-lg">
-              <div className="text-sm text-purple-900">
-                <p className="font-semibold">
-                  {estudiantesSeleccionados.length} estudiante(s) seleccionado(s)
-                </p>
-                <p className="text-purple-700">
-                  Se matricularán en: <span className="font-medium">{cursoSeleccionadoData?.nombreCurso}</span>
-                  {periodoSeleccionadoData && (
-                    <span> - Período: <span className="font-medium">{periodoSeleccionadoData.nombre}</span></span>
-                  )}
-                </p>
+            
+            <div className="space-y-6">
+              {/* Selector de Período */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  Período Académico
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                  <select
+                    value={periodoSeleccionado || ''}
+                    onChange={handlePeriodoChange}
+                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all appearance-none"
+                  >
+                    <option value="">Seleccione un período</option>
+                    {periodos.map(periodo => (
+                      <option key={periodo.id} value={periodo.id}>
+                        {periodo.nombre} {periodo.activo && '(Activo)'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <button
-                onClick={handleSubmit}
-                disabled={crearDirigidosMutation.isPending}
-                className="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {crearDirigidosMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Crear Matrículas Dirigidas
-                  </>
-                )}
-              </button>
+
+              {/* Selector de Curso */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  Curso a Asignar
+                </label>
+                <div className="relative">
+                  <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                  <select
+                    value={cursoSeleccionado || ''}
+                    onChange={handleCursoChange}
+                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all appearance-none"
+                  >
+                    <option value="">Seleccione un curso</option>
+                    {cursos.map(curso => (
+                      <option key={curso.id} value={curso.id}>
+                        {curso.nombreCurso}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Información del curso seleccionado */}
+              {cursoSeleccionadoData && (
+                <div className="p-4 bg-zinc-50 rounded-lg border border-zinc-200 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-medium text-zinc-900 text-sm">{cursoSeleccionadoData.nombreCurso}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Ciclo {cursoSeleccionadoData.ciclo}</p>
+                    </div>
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-white border border-zinc-200 text-zinc-600">
+                      {cursoSeleccionadoData.creditos} CR
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                    <Clock className="w-3.5 h-3.5" />
+                    {cursoSeleccionadoData.horasSemanal} horas semanales
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Columna Derecha: Selección de Estudiantes */}
+        <div className="lg:col-span-2">
+          {cursoSeleccionado && periodoSeleccionado ? (
+            <div className="bg-white rounded-xl border border-zinc-200 shadow-sm flex flex-col h-full">
+              <div className="p-6 border-b border-zinc-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold text-zinc-900 flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">2</span>
+                    Seleccionar Estudiantes
+                  </h2>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-full text-sm font-medium text-zinc-900">
+                    <UserCheck className="w-4 h-4" />
+                    <span>{estudiantesSeleccionados.length} seleccionados</span>
+                  </div>
+                </div>
+
+                {/* Filtros */}
+                <div className="flex gap-4">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Buscar por nombre o código..."
+                      value={filtroNombre}
+                      onChange={(e) => setFiltroNombre(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900"
+                    />
+                  </div>
+                  <div className="w-40 relative">
+                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <select
+                      value={filtroCiclo || ''}
+                      onChange={(e) => setFiltroCiclo(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full pl-9 pr-4 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 appearance-none bg-white"
+                    >
+                      <option value="">Todos</option>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
+                        <option key={ciclo} value={ciclo}>Ciclo {ciclo}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabla de estudiantes */}
+              <div className="overflow-x-auto flex-1">
+                <table className="min-w-full divide-y divide-zinc-100">
+                  <thead className="bg-zinc-50/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left w-12">
+                        <button
+                          onClick={handleToggleAll}
+                          className="flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors"
+                        >
+                          {estudiantesSeleccionados.length === estudiantesFiltrados.length && estudiantesFiltrados.length > 0 ? (
+                            <CheckSquare className="w-5 h-5 text-zinc-900" />
+                          ) : (
+                            <Square className="w-5 h-5" />
+                          )}
+                        </button>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Estudiante</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Ciclo</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-zinc-100">
+                    {estudiantesFiltrados.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center justify-center">
+                            <AlertCircle className="w-10 h-10 text-zinc-300 mb-3" />
+                            <p className="text-zinc-500 font-medium">No se encontraron estudiantes</p>
+                            <p className="text-zinc-400 text-sm">Ajusta los filtros de búsqueda</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      estudiantesFiltrados.map(estudiante => {
+                        const isSelected = estudiantesSeleccionados.includes(estudiante.id);
+                        return (
+                          <tr
+                            key={estudiante.id}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected ? 'bg-zinc-50' : 'hover:bg-zinc-50/50'
+                            }`}
+                            onClick={() => handleToggleEstudiante(estudiante.id)}
+                          >
+                            <td className="px-6 py-4">
+                              {isSelected ? (
+                                <CheckSquare className="w-5 h-5 text-zinc-900" />
+                              ) : (
+                                <Square className="w-5 h-5 text-zinc-300" />
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center">
+                                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium mr-3 ${
+                                  isSelected ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'
+                                }`}>
+                                  {estudiante.nombreCompleto.charAt(0)}
+                                </div>
+                                <div>
+                                  <div className={`text-sm font-medium ${isSelected ? 'text-zinc-900' : 'text-zinc-700'}`}>
+                                    {estudiante.nombreCompleto}
+                                  </div>
+                                  <div className="text-xs text-zinc-500 font-mono">{estudiante.codigo}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
+                                Ciclo {estudiante.cicloActual}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-zinc-600">
+                              {estudiante.creditosAcumulados}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer con botón de acción */}
+              <div className="p-6 border-t border-zinc-100 bg-zinc-50/50 rounded-b-xl">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-zinc-600">
+                    {estudiantesSeleccionados.length > 0 ? (
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        Listo para procesar <strong>{estudiantesSeleccionados.length}</strong> matrículas
+                      </span>
+                    ) : (
+                      <span className="text-zinc-400">Selecciona estudiantes para continuar</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={crearDirigidosMutation.isPending || estudiantesSeleccionados.length === 0}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-medium text-sm"
+                  >
+                    {crearDirigidosMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Crear Matrículas Dirigidas
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full min-h-[400px] bg-zinc-50 rounded-xl border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-center p-8">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
+                <UserCheck className="w-8 h-8 text-zinc-300" />
+              </div>
+              <h3 className="text-lg font-medium text-zinc-900 mb-2">Esperando configuración</h3>
+              <p className="text-zinc-500 max-w-sm">
+                Selecciona un período académico y un curso en el panel de la izquierda para comenzar a asignar estudiantes.
+              </p>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

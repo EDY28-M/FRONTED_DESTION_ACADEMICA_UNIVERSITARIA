@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { docenteCursosApi, docenteAsistenciaApi, CursoDocente, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
+import { docenteCursosApi, docenteAsistenciaApi, docenteHorariosApi, CursoDocente, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
+import { Horario } from '../../types/horario';
 import { toast } from 'react-hot-toast';
 
 import {
   BookOpenIcon,
   ChevronRightIcon,
   ClockIcon,
-  MapPinIcon,
   InboxIcon,
   CalendarIcon,
   XMarkIcon,
@@ -331,60 +331,115 @@ const ModalAsistenciaRapida = ({ curso, onClose, onSuccess }: ModalAsistenciaPro
 };
 
 // ============================================
-// WIDGET PRÓXIMA CLASE
+// WIDGET PRÓXIMAS CLASES (con horario real)
 // ============================================
 
+// Helper para obtener la próxima clase
+const getNextClass = (horarios: Horario[] = []) => {
+  if (!horarios.length) return null;
+  
+  const now = new Date();
+  const currentDay = now.getDay() || 7; // 1 (Mon) - 7 (Sun), Domingo = 7
+  const currentTime = now.getHours() * 60 + now.getMinutes();
+
+  // Ordenar horarios por día y hora
+  const sortedHorarios = [...horarios].sort((a, b) => {
+    if (a.diaSemana !== b.diaSemana) return a.diaSemana - b.diaSemana;
+    const timeA = parseInt(a.horaInicio.split(':')[0]) * 60 + parseInt(a.horaInicio.split(':')[1]);
+    const timeB = parseInt(b.horaInicio.split(':')[0]) * 60 + parseInt(b.horaInicio.split(':')[1]);
+    return timeA - timeB;
+  });
+
+  // Buscar próxima clase hoy
+  const nextToday = sortedHorarios.find(h => {
+    const start = parseInt(h.horaInicio.split(':')[0]) * 60 + parseInt(h.horaInicio.split(':')[1]);
+    return h.diaSemana === currentDay && start > currentTime;
+  });
+
+  if (nextToday) return { ...nextToday, label: 'Hoy' };
+
+  // Buscar primera clase en próximos días
+  const nextUpcoming = sortedHorarios.find(h => h.diaSemana > currentDay);
+  if (nextUpcoming) return { ...nextUpcoming, label: nextUpcoming.diaSemanaTexto };
+
+  // Si no hay clases esta semana, retornar primera de la próxima semana
+  return sortedHorarios[0] ? { ...sortedHorarios[0], label: sortedHorarios[0].diaSemanaTexto } : null;
+};
+
 interface NextClassWidgetProps {
-  curso: CursoDocente | null;
+  horarios: Horario[];
+  cursos: CursoDocente[];
   onTomarAsistencia: (curso: CursoDocente) => void;
+  isLoading?: boolean;
 }
 
-const NextClassWidget = ({ curso, onTomarAsistencia }: NextClassWidgetProps) => {
-  if (!curso) {
+const NextClassWidget = ({ horarios, cursos, onTomarAsistencia, isLoading }: NextClassWidgetProps) => {
+  const nextClass = useMemo(() => getNextClass(horarios), [horarios]);
+
+  if (isLoading) {
     return (
-      <div className="border border-zinc-200 rounded-lg bg-white p-5">
-        <p className="text-xs text-zinc-500 uppercase tracking-wide mb-3">Próxima clase</p>
-        <EmptyState 
-          icon={CalendarIcon} 
-          title="Sin clases programadas" 
-          description="No hay clases asignadas"
-        />
+      <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-zinc-700 rounded w-24" />
+          <div className="h-6 bg-zinc-700 rounded w-3/4" />
+          <div className="h-4 bg-zinc-700 rounded w-1/2" />
+          <div className="h-12 bg-zinc-800 rounded" />
+        </div>
       </div>
     );
   }
 
-  const horaActual = new Date();
-  const horaSimulada = `${String(horaActual.getHours() + 1).padStart(2, '0')}:00`;
+  // Buscar el curso completo para el botón de asistencia
+  const cursoCompleto = nextClass ? cursos.find(c => c.id === nextClass.idCurso) : null;
+  const esHoy = nextClass?.label === 'Hoy';
 
   return (
-    <div className="border border-zinc-200 rounded-lg bg-white p-5">
-      <p className="text-xs text-zinc-500 uppercase tracking-wide mb-4">Próxima clase</p>
+    <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden group">
+      {/* Icono decorativo de fondo */}
+      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <ClockIcon className="w-24 h-24" />
+      </div>
       
-      <div className="space-y-4">
-        <div>
-          <h4 className="text-base font-medium text-zinc-900 mb-1">{curso.nombreCurso}</h4>
-          <p className="text-sm text-zinc-500">Ciclo {curso.ciclo}</p>
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Próxima Clase</span>
+          {nextClass && (
+            <span className="px-2 py-1 bg-white/10 rounded text-xs font-medium text-white border border-white/10">
+              {nextClass.label}
+            </span>
+          )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-zinc-600">
-          <div className="flex items-center gap-1.5">
-            <ClockIcon className="h-4 w-4 text-zinc-400 stroke-[1.5]" />
-            <span className="font-mono text-xs">{horaSimulada}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <MapPinIcon className="h-4 w-4 text-zinc-400 stroke-[1.5]" />
-            <span className="text-xs">Aula 301</span>
-          </div>
-        </div>
+        {nextClass ? (
+          <>
+            <h3 className="text-xl font-semibold mb-1 line-clamp-2">{nextClass.nombreCurso}</h3>
+            <p className="text-zinc-400 text-sm mb-6">
+              {nextClass.aula || 'Aula por asignar'}
+            </p>
+            
+            <div className="flex items-center justify-between text-sm font-mono text-zinc-300 bg-white/5 p-3 rounded-lg border border-white/5">
+              <span>{nextClass.horaInicio}</span>
+              <div className="h-px w-8 bg-zinc-600" />
+              <span>{nextClass.horaFin}</span>
+            </div>
 
-        <button
-          onClick={() => onTomarAsistencia(curso)}
-          className="w-full mt-2 px-4 py-2 bg-zinc-900 text-white rounded-md text-sm font-medium 
-                     hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
-        >
-          Tomar Asistencia
-          <ChevronRightIcon className="h-4 w-4 stroke-[1.5]" />
-        </button>
+            {/* Botón de tomar asistencia solo si es hoy */}
+            {esHoy && cursoCompleto && (
+              <button
+                onClick={() => onTomarAsistencia(cursoCompleto)}
+                className="w-full mt-4 px-4 py-2.5 bg-white text-zinc-900 rounded-lg text-sm font-medium 
+                           hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2"
+              >
+                Tomar Asistencia
+                <ChevronRightIcon className="h-4 w-4 stroke-[2]" />
+              </button>
+            )}
+          </>
+        ) : (
+          <div className="py-8 text-center">
+            <p className="text-zinc-400 text-sm">No hay clases programadas próximamente</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -397,11 +452,14 @@ const NextClassWidget = ({ curso, onTomarAsistencia }: NextClassWidgetProps) => 
 export const DashboardDocentePage = () => {
   const navigate = useNavigate();
   const [cursos, setCursos] = useState<CursoDocente[]>([]);
+  const [horarios, setHorarios] = useState<Horario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingHorarios, setIsLoadingHorarios] = useState(true);
   const [modalAsistencia, setModalAsistencia] = useState<CursoDocente | null>(null);
 
   useEffect(() => {
     cargarCursos();
+    cargarHorarios();
   }, []);
 
   const cargarCursos = async () => {
@@ -414,6 +472,18 @@ export const DashboardDocentePage = () => {
       toast.error('Error al cargar los cursos');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const cargarHorarios = async () => {
+    try {
+      setIsLoadingHorarios(true);
+      const data = await docenteHorariosApi.getMiHorario();
+      setHorarios(data);
+    } catch (error) {
+      console.error('Error al cargar horarios:', error);
+    } finally {
+      setIsLoadingHorarios(false);
     }
   };
 
@@ -478,8 +548,10 @@ export const DashboardDocentePage = () => {
           {/* Próxima Clase Widget - 1 col */}
           <div className="col-span-1">
             <NextClassWidget 
-              curso={cursos[0] || null} 
+              horarios={horarios}
+              cursos={cursos}
               onTomarAsistencia={handleTomarAsistencia}
+              isLoading={isLoadingHorarios}
             />
           </div>
 

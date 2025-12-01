@@ -1,18 +1,17 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
-  EyeIcon, 
-  PencilIcon, 
-  TrashIcon,
-  BookOpenIcon,
-  ClockIcon,
-  TrophyIcon,
-  UserIcon
-} from '@heroicons/react/24/outline'
+  Plus, 
+  Search, 
+  Eye, 
+  Pencil, 
+  Trash2,
+  BookOpen,
+  Clock,
+  Award,
+  User
+} from 'lucide-react'
 import { cursosApi } from '../../services/cursosService'
 import { docentesApi } from '../../services/docentesService'
 import { Curso } from '../../types'
@@ -116,7 +115,7 @@ const CursosPage = () => {
           <div className="text-red-500 text-lg">Error al cargar los cursos</div>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-2 btn btn-primary"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
           >
             Reintentar
           </button>
@@ -128,45 +127,32 @@ const CursosPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="md:flex md:items-center md:justify-between"
-      >
-        <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
             Gestión de Cursos
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
             Administra los cursos académicos del sistema
           </p>
         </div>
-        <div className="mt-4 flex md:ml-4 md:mt-0">
-          <button
-            onClick={handleCreate}
-            className="btn btn-primary btn-md"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Nuevo Curso
-          </button>
-        </div>
-      </motion.div>
+        <button
+          onClick={handleCreate}
+          className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Nuevo Curso
+        </button>
+      </div>
 
       {/* Search and Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card p-6"
-      >
+      <div className="bg-white rounded-xl border border-zinc-200 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            </div>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <input
               type="text"
-              className="input pl-10"
+              className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               placeholder="Buscar cursos o docentes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -175,7 +161,7 @@ const CursosPage = () => {
           
           <div className="flex items-center gap-4">
             <select
-              className="input"
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               value={selectedCiclo}
               onChange={(e) => setSelectedCiclo(e.target.value)}
             >
@@ -187,29 +173,24 @@ const CursosPage = () => {
               ))}
             </select>
             
-            <div className="text-sm text-gray-500 whitespace-nowrap">
-              {filteredCursos.length} curso{filteredCursos.length !== 1 ? 's' : ''} encontrado{filteredCursos.length !== 1 ? 's' : ''}
-            </div>
+            <span className="text-sm text-zinc-500 whitespace-nowrap">
+              {filteredCursos.length} resultado{filteredCursos.length !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Cursos List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="card"
-      >
+      {/* Cursos Table */}
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
         {isLoading ? (
           <div className="p-6">
             <div className="animate-pulse space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <div className="rounded-lg bg-gray-300 h-16 w-16"></div>
+                <div key={i} className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-lg bg-zinc-200"></div>
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-4 bg-zinc-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-zinc-200 rounded w-1/2"></div>
                   </div>
                 </div>
               ))}
@@ -217,129 +198,119 @@ const CursosPage = () => {
           </div>
         ) : filteredCursos.length === 0 ? (
           <div className="text-center py-12">
-            <BookOpenIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron cursos</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm || selectedCiclo ? 'Intenta con otros filtros de búsqueda' : 'Comienza agregando un nuevo curso'}
+            <div className="flex h-12 w-12 mx-auto items-center justify-center rounded-lg bg-zinc-100">
+              <BookOpen className="h-6 w-6 text-zinc-400" />
+            </div>
+            <h3 className="mt-4 text-sm font-medium text-zinc-900">No se encontraron cursos</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              {searchTerm || selectedCiclo ? 'Intenta con otros filtros' : 'Comienza agregando un nuevo curso'}
             </p>
             {!searchTerm && !selectedCiclo && (
-              <div className="mt-6">
-                <button
-                  onClick={handleCreate}
-                  className="btn btn-primary btn-md"
-                >
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  Nuevo Curso
-                </button>
-              </div>
+              <button
+                onClick={handleCreate}
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              >
+                <Plus className="h-4 w-4" />
+                Nuevo Curso
+              </button>
             )}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table">
-              <thead className="table-header">
-                <tr>
-                  <th className="table-header-cell">Curso</th>
-                  <th className="table-header-cell">Docente</th>
-                  <th className="table-header-cell">Detalles</th>
-                  <th className="table-header-cell">Ciclo</th>
-                  <th className="table-header-cell">Acciones</th>
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50/50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Detalles</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Ciclo</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="table-body">
-                {filteredCursos.map((curso, index) => (
-                  <motion.tr
-                    key={curso.id}
-                    className="table-row"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <td className="table-cell">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                          <BookOpenIcon className="h-5 w-5 text-primary-600" />
+              <tbody className="divide-y divide-zinc-100">
+                {filteredCursos.map((curso) => (
+                  <tr key={curso.id} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100">
+                          <BookOpen className="h-4 w-4 text-zinc-600" />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {curso.nombreCurso}
-                          </div>
-                        </div>
+                        <span className="text-sm font-medium text-zinc-900">
+                          {curso.nombreCurso}
+                        </span>
                       </div>
                     </td>
-                    <td className="table-cell">
+                    <td className="px-4 py-3">
                       {curso.docente ? (
-                        <div className="flex items-center">
-                          <UserIcon className="h-4 w-4 text-gray-400 mr-2" />
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-zinc-400" />
                           <div>
-                            <div className="text-sm text-gray-900">
+                            <p className="text-sm text-zinc-900">
                               {curso.docente.nombres} {curso.docente.apellidos}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {curso.docente.profesion}
-                            </div>
+                            </p>
+                            <p className="text-xs text-zinc-500">{curso.docente.profesion}</p>
                           </div>
                         </div>
                       ) : (
-                        <span className="text-sm text-gray-500">Sin asignar</span>
+                        <span className="text-sm text-zinc-400">Sin asignar</span>
                       )}
                     </td>
-                    <td className="table-cell">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <TrophyIcon className="h-4 w-4 mr-1" />
-                          {curso.creditos} crédito{curso.creditos !== 1 ? 's' : ''}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <ClockIcon className="h-4 w-4 mr-1" />
-                          {curso.horasSemanal} hrs/sem
-                        </div>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-4 text-sm text-zinc-600">
+                        <span className="flex items-center gap-1">
+                          <Award className="h-4 w-4 text-zinc-400" />
+                          {curso.creditos} cr
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4 text-zinc-400" />
+                          {curso.horasSemanal}h/sem
+                        </span>
                       </div>
                     </td>
-                    <td className="table-cell">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700">
                         Ciclo {curso.ciclo}
                       </span>
                     </td>
-                    <td className="table-cell">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => handleView(curso)}
-                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                           title="Ver detalles"
                         >
-                          <EyeIcon className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleHorario(curso)}
-                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                           title="Gestionar Horario"
                         >
-                          <ClockIcon className="h-4 w-4" />
+                          <Clock className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(curso)}
-                          className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                           title="Editar"
                         >
-                          <PencilIcon className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(curso)}
-                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                          className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Eliminar"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Modals */}
       <CursoModal

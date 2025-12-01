@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, Transition } from '@headlessui/react';
 import { 
   adminCursosApi, 
   PeriodoAdmin, 
@@ -20,6 +21,8 @@ import {
   AlertTriangle,
   Users,
   Award,
+  CheckCircle2,
+  Unlock
 } from 'lucide-react';
 
 export default function GestionPeriodosPage() {
@@ -298,174 +301,153 @@ export default function GestionPeriodosPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando períodos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
+          <p className="mt-4 text-zinc-600">Cargando períodos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <Calendar className="w-8 h-8 text-primary-700" />
-            <h1 className="text-3xl font-bold text-gray-800">Gestión de Períodos</h1>
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <Calendar className="w-6 h-6 text-zinc-900" />
+            </div>
+            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Períodos</h1>
           </div>
-          <p className="text-gray-600">Administra los períodos académicos del sistema</p>
+          <p className="text-zinc-500">
+            Administra los ciclos académicos, aperturas y cierres de semestre.
+          </p>
         </div>
         <button
           onClick={abrirModalCrear}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors shadow-sm hover:shadow-md font-medium text-sm"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4" />
           Nuevo Período
         </button>
       </div>
 
-      {/* Info */}
-      <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-6">
-        <div className="flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-primary-900">
-            <p className="font-semibold mb-1">Información importante:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Solo puede haber un período activo a la vez</li>
-              <li>Los estudiantes solo pueden matricularse en el período activo</li>
-              <li>No se pueden eliminar períodos con matrículas registradas</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabla de períodos */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Tabla de Períodos */}
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-zinc-100">
+            <thead className="bg-zinc-50/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nombre
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Año
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ciclo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha Inicio
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fecha Fin
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Matrículas
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Período</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Fechas</th>
+                <th className="px-6 py-4 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-4 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Matrículas</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-zinc-100">
               {periodos.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p>No hay períodos registrados</p>
-                    <button
-                      onClick={abrirModalCrear}
-                      className="mt-3 text-primary-700 hover:text-primary-800 font-medium"
-                    >
-                      Crear el primer período
-                    </button>
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Calendar className="w-12 h-12 text-zinc-300 mb-3" />
+                      <p className="text-zinc-500 font-medium">No hay períodos registrados</p>
+                      <p className="text-zinc-400 text-sm">Crea un nuevo período para comenzar</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 periodos.map((periodo) => (
-                  <tr key={periodo.id} className="hover:bg-gray-50">
+                  <tr key={periodo.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${
+                          periodo.activo 
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
+                            : 'bg-zinc-100 border-zinc-200 text-zinc-500'
+                        }`}>
+                          <Calendar className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-zinc-900">{periodo.nombre}</p>
+                          <p className="text-xs text-zinc-500">Ciclo {periodo.ciclo} - {periodo.anio}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-zinc-600 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-zinc-400 w-12">Inicio:</span>
+                          <span>{new Date(periodo.fechaInicio).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium text-zinc-400 w-12">Fin:</span>
+                          <span>{new Date(periodo.fechaFin).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
                       {periodo.activo ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <CheckCircle className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           Activo
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          <Circle className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-600 border border-zinc-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                           Inactivo
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      {periodo.nombre}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{periodo.anio}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                        {periodo.ciclo}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {new Date(periodo.fechaInicio).toLocaleDateString('es-ES')}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {new Date(periodo.fechaFin).toLocaleDateString('es-ES')}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                    <td className="px-6 py-4 text-center">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
                         {periodo.totalMatriculas}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        {periodo.activo && periodo.totalMatriculas > 0 && (
-                          <button
-                            onClick={() => handleValidarCierre(periodo)}
-                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded transition-colors"
-                            title="Cerrar período académico"
-                            disabled={validarCierreMutation.isPending}
-                          >
-                            <Lock className="w-4 h-4" />
-                          </button>
-                        )}
-                        {!periodo.activo && (
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!periodo.activo ? (
                           <>
                             <button
-                              onClick={() => handleAbrirPeriodo(periodo)}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                              title="Abrir período y avanzar ciclos"
+                              onClick={() => handleActivar(periodo.id)}
+                              className="p-2 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title="Activar período"
                             >
                               <CheckCircle className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleActivar(periodo.id)}
-                              className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
-                              title="Activar período (sin avanzar ciclos)"
+                              onClick={() => handleAbrirPeriodo(periodo)}
+                              className="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Reabrir período cerrado"
                             >
-                              <Circle className="w-4 h-4" />
+                              <Unlock className="w-4 h-4" />
                             </button>
                           </>
+                        ) : (
+                          <button
+                            onClick={() => handleValidarCierre(periodo)}
+                            className="p-2 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                            title="Cerrar período"
+                          >
+                            <Lock className="w-4 h-4" />
+                          </button>
                         )}
+                        
                         <button
                           onClick={() => abrirModalEditar(periodo)}
-                          className="p-1.5 text-primary-700 hover:bg-primary-50 rounded transition-colors"
-                          title="Editar período"
+                          className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+                          title="Editar"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
+                        
                         {periodo.totalMatriculas === 0 && (
                           <button
                             onClick={() => handleEliminar(periodo)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="Eliminar período"
+                            className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -480,556 +462,485 @@ export default function GestionPeriodosPage() {
         </div>
       </div>
 
-      {/* Modal */}
-      {modalAbierto && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {modoEdicion ? 'Editar Período' : 'Crear Nuevo Período'}
-                </h2>
-                <button
-                  onClick={cerrarModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+      {/* Modal Crear/Editar */}
+      <Transition appear show={modalAbierto} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Año */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Año *
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.anio}
-                      onChange={(e) => setFormData({ ...formData, anio: parseInt(e.target.value) })}
-                      min={2020}
-                      max={2100}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
-                      required
-                    />
-                  </div>
-
-                  {/* Ciclo */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ciclo *
-                    </label>
-                    <select
-                      value={formData.ciclo}
-                      onChange={(e) => setFormData({ ...formData, ciclo: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
-                      required
-                    >
-                      <option value="I">I (Semestre Impar)</option>
-                      <option value="II">II (Semestre Par)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Nombre */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre del Período *
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={formData.nombre}
-                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                      placeholder="Ej: 2025-I"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={handleGenerarNombre}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                    >
-                      Auto-generar
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center justify-between mb-6">
+                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900 flex items-center gap-2">
+                      <div className="p-2 bg-zinc-100 rounded-lg">
+                        {modoEdicion ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      </div>
+                      {modoEdicion ? 'Editar Período' : 'Nuevo Período'}
+                    </Dialog.Title>
+                    <button onClick={cerrarModal} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
-                </div>
 
-                {/* Fechas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fecha de Inicio *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.fechaInicio}
-                      onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
-                      required
-                    />
-                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">Año</label>
+                        <input
+                          type="number"
+                          value={formData.anio}
+                          onChange={(e) => setFormData({ ...formData, anio: parseInt(e.target.value) })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">Ciclo</label>
+                        <select
+                          value={formData.ciclo}
+                          onChange={(e) => setFormData({ ...formData, ciclo: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all bg-white"
+                        >
+                          <option value="I">I</option>
+                          <option value="II">II</option>
+                          <option value="0">Verano (0)</option>
+                        </select>
+                      </div>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fecha de Fin *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.fechaFin}
-                      onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-600"
-                      required
-                    />
-                  </div>
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">Nombre del Período</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={formData.nombre}
+                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                          className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                          placeholder="Ej. 2024-I"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleGenerarNombre}
+                          className="px-3 py-2 bg-zinc-100 text-zinc-600 rounded-lg hover:bg-zinc-200 transition-colors text-sm font-medium"
+                        >
+                          Generar
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Activo (solo en creación) */}
-                {!modoEdicion && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="activo"
-                      checked={formData.activo}
-                      onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                      className="w-4 h-4 text-primary-700 border-gray-300 rounded focus:ring-primary-600"
-                    />
-                    <label htmlFor="activo" className="text-sm text-gray-700">
-                      Marcar como período activo (desactivará otros períodos)
-                    </label>
-                  </div>
-                )}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">Fecha Inicio</label>
+                        <input
+                          type="date"
+                          value={formData.fechaInicio}
+                          onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">Fecha Fin</label>
+                        <input
+                          type="date"
+                          value={formData.fechaFin}
+                          onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                        />
+                      </div>
+                    </div>
 
-                {/* Botones */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    disabled={crearMutation.isPending || editarMutation.isPending}
-                    className="flex-1 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {crearMutation.isPending || editarMutation.isPending
-                      ? 'Guardando...'
-                      : modoEdicion
-                      ? 'Actualizar Período'
-                      : 'Crear Período'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cerrarModal}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={cerrarModal}
+                        className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={crearMutation.isPending || editarMutation.isPending}
+                        className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {(crearMutation.isPending || editarMutation.isPending) && (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        )}
+                        {modoEdicion ? 'Guardar Cambios' : 'Crear Período'}
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
 
-      {/* Modal de Validación de Cierre */}
-      {modalValidacionAbierto && validacionData && periodoACerrar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  Validación de Cierre - {periodoACerrar.nombre}
-                </h2>
-                <button
-                  onClick={cerrarModalValidacion}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+      {/* Modal Validación Cierre */}
+      <Transition appear show={modalValidacionAbierto} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModalValidacion}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
 
-              {/* Resumen */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-primary-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-5 h-5 text-primary-700" />
-                    <span className="text-sm font-medium text-primary-900">Total Matrículas</span>
-                  </div>
-                  <p className="text-2xl font-bold text-primary-700">{validacionData.totalMatriculas}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-900">Completas</span>
-                  </div>
-                  <p className="text-2xl font-bold text-green-600">{validacionData.matriculasCompletas}</p>
-                </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-5 h-5 text-orange-600" />
-                    <span className="text-sm font-medium text-orange-900">Incompletas</span>
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600">{validacionData.matriculasIncompletas}</p>
-                </div>
-              </div>
-
-              {/* Estado de validación */}
-              {validacionData.puedeSerCerrado ? (
-                <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex-shrink-0 h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center">
+                      <AlertTriangle className="h-6 w-6 text-amber-600" />
+                    </div>
                     <div>
-                      <p className="font-semibold text-green-900">El período puede ser cerrado</p>
-                      <p className="text-sm text-green-800 mt-1">
-                        Todos los estudiantes tienen sus notas completas. Al confirmar se calcularán los promedios finales
-                        y se actualizarán los estados de las matrículas (Aprobado/Desaprobado).
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900">
+                        Validación de Cierre de Período
+                      </Dialog.Title>
+                      <p className="text-sm text-zinc-500">
+                        Verificando requisitos para cerrar el período {periodoACerrar?.nombre}
                       </p>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-red-900">El período NO puede ser cerrado aún</p>
-                      <p className="text-sm text-red-800 mt-1">
-                        Hay estudiantes con notas incompletas. Complete todas las evaluaciones antes de cerrar el período.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Advertencias */}
-              {validacionData.advertencias && validacionData.advertencias.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Advertencias</h3>
-                  <div className="space-y-2">
-                    {validacionData.advertencias.map((advertencia, index) => (
-                      <div key={index} className="bg-yellow-50 border-l-4 border-yellow-400 p-3">
-                        <p className="text-sm text-yellow-800">{advertencia}</p>
+                  {validacionData && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-100 text-center">
+                          <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Total Estudiantes</p>
+                          <p className="text-2xl font-bold text-zinc-900 mt-1">{validacionData.totalEstudiantes}</p>
+                        </div>
+                        <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 text-center">
+                          <p className="text-xs text-emerald-600 uppercase tracking-wider font-medium">Aprobados</p>
+                          <p className="text-2xl font-bold text-emerald-700 mt-1">{validacionData.estudiantesAprobados}</p>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg border border-red-100 text-center">
+                          <p className="text-xs text-red-600 uppercase tracking-wider font-medium">Desaprobados</p>
+                          <p className="text-2xl font-bold text-red-700 mt-1">{validacionData.estudiantesDesaprobados}</p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              {/* Estudiantes con notas incompletas */}
-              {validacionData.estudiantesSinNotasCompletas && validacionData.estudiantesSinNotasCompletas.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Estudiantes con Notas Incompletas ({validacionData.estudiantesSinNotasCompletas.length})
-                  </h3>
-                  <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
-                    <div className="space-y-4">
-                      {validacionData.estudiantesSinNotasCompletas.map((estudiante) => (
-                        <div key={estudiante.idEstudiante} className="bg-white p-4 rounded-lg shadow-sm">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <p className="font-semibold text-gray-900">{estudiante.nombreEstudiante}</p>
-                              <p className="text-sm text-gray-600">Código: {estudiante.codigo}</p>
-                            </div>
-                            <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
-                              {estudiante.cursosPendientes.length} curso(s) pendiente(s)
-                            </span>
-                          </div>
-                          <div className="space-y-2 mt-3">
-                            {estudiante.cursosPendientes.map((curso) => (
-                              <div key={curso.idCurso} className="bg-red-50 p-3 rounded border border-red-200">
-                                <p className="text-sm font-medium text-gray-900">{curso.nombreCurso}</p>
-                                <p className="text-xs text-red-700 mt-1">{curso.razon}</p>
-                              </div>
+                      {validacionData.advertencias.length > 0 && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                          <h4 className="text-sm font-medium text-amber-900 mb-2 flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" />
+                            Advertencias ({validacionData.advertencias.length})
+                          </h4>
+                          <ul className="list-disc list-inside text-sm text-amber-800 space-y-1 max-h-40 overflow-y-auto">
+                            {validacionData.advertencias.map((adv, i) => (
+                              <li key={i}>{adv}</li>
                             ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
+                        <button
+                          type="button"
+                          onClick={cerrarModalValidacion}
+                          className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleConfirmarCierre}
+                          disabled={!validacionData.puedeSerCerrado}
+                          className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          <Lock className="w-4 h-4" />
+                          Confirmar Cierre
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal Confirmación Cierre */}
+      <Transition appear show={modalCierreAbierto} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModalCierre}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex-shrink-0 h-12 w-12 rounded-full bg-red-50 flex items-center justify-center">
+                      <Lock className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900">
+                        Cerrar Período Definitivamente
+                      </Dialog.Title>
+                      <p className="text-sm text-zinc-500">
+                        Esta acción calculará promedios finales y orden de mérito.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-red-800 font-medium">
+                      ¡Atención! Esta acción es irreversible.
+                    </p>
+                    <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                      <li>Se cerrarán todas las actas de notas</li>
+                      <li>Se calcularán los promedios ponderados</li>
+                      <li>Se generará el orden de mérito</li>
+                      <li>Se determinará la promoción de ciclo</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={cerrarModalCierre}
+                      className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCerrarPeriodo}
+                      disabled={cerrarPeriodoMutation.isPending}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {cerrarPeriodoMutation.isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-4 h-4" />
+                          Sí, Cerrar Período
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal Resultado Cierre */}
+      <Transition appear show={!!resultadoCierre} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModalResultado}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="text-center mb-6">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
+                      <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+                    </div>
+                    <Dialog.Title as="h3" className="text-xl font-bold text-zinc-900">
+                      Período Cerrado Exitosamente
+                    </Dialog.Title>
+                    <p className="text-sm text-zinc-500 mt-2">
+                      El proceso de cierre ha finalizado correctamente.
+                    </p>
+                  </div>
+
+                  {resultadoCierre && (
+                    <div className="space-y-4 mb-6">
+                      <div className="bg-zinc-50 rounded-lg p-4 border border-zinc-200">
+                        <h4 className="font-medium text-zinc-900 mb-3 flex items-center gap-2">
+                          <Award className="w-4 h-4" />
+                          Resumen de Resultados
+                        </h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">Promovidos:</span>
+                            <span className="font-medium text-emerald-600">{resultadoCierre.estudiantesPromovidos}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">Retenidos:</span>
+                            <span className="font-medium text-red-600">{resultadoCierre.estudiantesRetenidos}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-zinc-500">Total Procesados:</span>
+                            <span className="font-medium text-zinc-900">{resultadoCierre.totalEstudiantesProcesados}</span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Botones */}
-              <div className="flex gap-3 pt-4">
-                {validacionData.puedeSerCerrado && (
-                  <button
-                    onClick={handleConfirmarCierre}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Lock className="w-5 h-5" />
-                    Proceder con el Cierre
-                  </button>
-                )}
-                <button
-                  onClick={cerrarModalValidacion}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  {validacionData.puedeSerCerrado ? 'Cancelar' : 'Cerrar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Confirmación Final de Cierre */}
-      {modalCierreAbierto && periodoACerrar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Confirmar Cierre</h2>
-                <button
-                  onClick={cerrarModalCierre}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="mb-6">
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-red-900">¡Acción Irreversible!</p>
-                      <p className="text-sm text-red-800 mt-1">
-                        Esta acción no se puede deshacer. Se calcularán los promedios finales y se actualizarán
-                        los estados de las matrículas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-700 mb-2">
-                    <strong>Período a cerrar:</strong> {periodoACerrar.nombre}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <strong>Total de matrículas:</strong> {periodoACerrar.totalMatriculas}
-                  </p>
-                </div>
-
-                <p className="text-sm text-gray-600 mt-4">
-                  ¿Está seguro de que desea cerrar este período académico?
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleCerrarPeriodo}
-                  disabled={cerrarPeriodoMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                >
-                  <Lock className="w-5 h-5" />
-                  {cerrarPeriodoMutation.isPending ? 'Cerrando...' : 'Confirmar Cierre'}
-                </button>
-                <button
-                  onClick={cerrarModalCierre}
-                  disabled={cerrarPeriodoMutation.isPending}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Resultado de Cierre */}
-      {resultadoCierre && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Período Cerrado Exitosamente</h2>
-                <button
-                  onClick={cerrarModalResultado}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-green-900">{resultadoCierre.mensaje}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-primary-50 p-4 rounded-lg text-center">
-                  <Users className="w-8 h-8 text-primary-700 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-primary-900 mb-1">Total Procesadas</p>
-                  <p className="text-2xl font-bold text-primary-700">
-                    {resultadoCierre.estadisticas.totalMatriculas}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg text-center">
-                  <Award className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-green-900 mb-1">Aprobados</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {resultadoCierre.estadisticas.aprobados}
-                  </p>
-                </div>
-                <div className="bg-red-50 p-4 rounded-lg text-center">
-                  <AlertTriangle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-red-900 mb-1">Desaprobados</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {resultadoCierre.estadisticas.desaprobados}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-gray-700">
-                  <strong>Fecha de cierre:</strong>{' '}
-                  {new Date(resultadoCierre.estadisticas.fechaCierre).toLocaleString('es-ES')}
-                </p>
-              </div>
-
-              <button
-                onClick={cerrarModalResultado}
-                className="w-full px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
-              >
-                Entendido
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Confirmación de Apertura */}
-      {modalAperturaAbierto && periodoAAbrir && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Abrir Nuevo Período</h2>
-                <button
-                  onClick={cerrarModalApertura}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="mb-6">
-                <div className="bg-primary-50 border-l-4 border-primary-600 p-4 mb-4">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-primary-700 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-primary-900">Avance Automático de Ciclos</p>
-                      <p className="text-sm text-primary-800 mt-1">
-                        Los estudiantes que tengan al menos un curso con nota en el período anterior 
-                        avanzarán automáticamente al siguiente ciclo.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                  <p className="text-sm text-gray-700 mb-2">
-                    <strong>Período a abrir:</strong> {periodoAAbrir.nombre}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    <strong>Año:</strong> {periodoAAbrir.anio} - <strong>Ciclo:</strong> {periodoAAbrir.ciclo}
-                  </p>
-                </div>
-
-                <p className="text-sm text-gray-600">
-                  ¿Está seguro de que desea abrir este período y avanzar los ciclos académicos?
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={handleConfirmarApertura}
-                  disabled={abrirPeriodoMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  {abrirPeriodoMutation.isPending ? 'Abriendo...' : 'Confirmar Apertura'}
-                </button>
-                <button
-                  onClick={cerrarModalApertura}
-                  disabled={abrirPeriodoMutation.isPending}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Resultado de Apertura */}
-      {resultadoApertura && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Período Abierto Exitosamente</h2>
-                <button
-                  onClick={cerrarModalResultadoApertura}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-green-900">{resultadoApertura.mensaje}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3">Período Activo:</h3>
-                <div className="space-y-2 text-sm text-gray-700">
-                  <p><strong>Nombre:</strong> {resultadoApertura.periodoActivo.nombre}</p>
-                  <p><strong>Año:</strong> {resultadoApertura.periodoActivo.anio}</p>
-                  <p><strong>Ciclo:</strong> {resultadoApertura.periodoActivo.ciclo}</p>
-                </div>
-              </div>
-
-              {resultadoApertura.resumenCiclos && resultadoApertura.resumenCiclos.length > 0 && (
-                <div className="bg-primary-50 p-4 rounded-lg mb-6">
-                  <h3 className="font-semibold text-primary-900 mb-3">Distribución por Ciclos:</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {resultadoApertura.resumenCiclos.map((resumen: any, idx: number) => (
-                      <div key={idx} className="bg-white p-3 rounded text-center">
-                        <p className="text-xs text-gray-600 mb-1">Ciclo {resumen.ciclo}</p>
-                        <p className="text-xl font-bold text-primary-700">{resumen.cantidadEstudiantes}</p>
-                        <p className="text-xs text-gray-500">estudiantes</p>
                       </div>
-                    ))}
+                    </div>
+                  )}
+
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={cerrarModalResultado}
+                      className="px-6 py-2.5 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors"
+                    >
+                      Entendido
+                    </button>
                   </div>
-                </div>
-              )}
-
-              <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                <p className="text-sm text-gray-700">
-                  <strong>Fecha de apertura:</strong>{' '}
-                  {new Date(resultadoApertura.fechaApertura).toLocaleString('es-ES')}
-                </p>
-              </div>
-
-              <button
-                onClick={cerrarModalResultadoApertura}
-                className="w-full px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
-              >
-                Entendido
-              </button>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
+
+      {/* Modal Apertura */}
+      <Transition appear show={modalAperturaAbierto} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModalApertura}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex-shrink-0 h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center">
+                      <Unlock className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900">
+                        Reabrir Período
+                      </Dialog.Title>
+                      <p className="text-sm text-zinc-500">
+                        ¿Estás seguro de reabrir el período {periodoAAbrir?.nombre}?
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-blue-800">
+                      Al reabrir el período, se permitirá nuevamente la modificación de notas y matrículas.
+                      El orden de mérito actual será invalidado hasta el próximo cierre.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={cerrarModalApertura}
+                      className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleConfirmarApertura}
+                      disabled={abrirPeriodoMutation.isPending}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {abrirPeriodoMutation.isPending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          Procesando...
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="w-4 h-4" />
+                          Sí, Reabrir
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }

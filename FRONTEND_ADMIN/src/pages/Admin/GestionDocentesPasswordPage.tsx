@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, Transition } from '@headlessui/react';
 import { adminDocentesApi, DocenteAdmin, CrearDocenteConPasswordRequest, AsignarPasswordRequest, ActualizarDocenteRequest } from '../../services/adminDocentesApi';
-import { GraduationCap, Plus, Key, Edit, X, Check, AlertCircle, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { GraduationCap, Plus, Key, Edit, X, Check, AlertCircle, Eye, EyeOff, Trash2, Search, User, Mail, Calendar, Briefcase, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type ModalType = 'crear' | 'asignarPassword' | 'editar' | 'eliminar' | null;
@@ -188,10 +189,10 @@ export default function GestionDocentesPasswordPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando docentes...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
+          <p className="mt-4 text-zinc-600">Cargando docentes...</p>
         </div>
       </div>
     );
@@ -199,68 +200,77 @@ export default function GestionDocentesPasswordPage() {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center bg-red-50 p-8 rounded-lg border border-red-200">
-          <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-red-800 mb-2">Error al cargar docentes</h2>
-          <p className="text-red-600">
+      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+        <div className="text-center bg-white p-8 rounded-xl border border-zinc-200 shadow-sm max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-zinc-900 mb-2">Error al cargar docentes</h2>
+          <p className="text-zinc-600 mb-6 text-sm">
             {error instanceof Error ? error.message : 'No se pudo conectar con el servidor'}
           </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors text-sm font-medium"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <GraduationCap className="w-8 h-8 text-primary-700" />
-              <h1 className="text-3xl font-bold text-gray-800">Gestión de Docentes</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <GraduationCap className="w-6 h-6 text-zinc-900" />
             </div>
-            <p className="text-gray-600">
-              Administra docentes y sus credenciales de acceso
-            </p>
+            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Docentes</h1>
           </div>
-          <button
-            onClick={abrirModalCrear}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            Nuevo Docente
-          </button>
+          <p className="text-zinc-500">
+            Administra docentes y sus credenciales de acceso al sistema.
+          </p>
         </div>
+        <button
+          onClick={abrirModalCrear}
+          className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors shadow-sm hover:shadow-md font-medium text-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Docente
+        </button>
       </div>
 
       {/* Buscador y estadísticas */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex-1">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nombre, correo o profesión..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
+              className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
             />
           </div>
-          <div className="flex gap-4 text-sm">
+          <div className="flex items-center gap-6 px-4 py-2 bg-zinc-50 rounded-lg border border-zinc-100">
             <div className="text-center">
-              <p className="text-gray-500">Total</p>
-              <p className="font-bold text-gray-900">{docentes.length}</p>
+              <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Total</p>
+              <p className="text-lg font-bold text-zinc-900">{docentes.length}</p>
             </div>
+            <div className="w-px h-8 bg-zinc-200"></div>
             <div className="text-center">
-              <p className="text-gray-500">Con Contraseña</p>
-              <p className="font-bold text-green-600">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Con Acceso</p>
+              <p className="text-lg font-bold text-emerald-600">
                 {docentes.filter((d) => d.tienePassword).length}
               </p>
             </div>
+            <div className="w-px h-8 bg-zinc-200"></div>
             <div className="text-center">
-              <p className="text-gray-500">Sin Contraseña</p>
-              <p className="font-bold text-red-600">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Sin Acceso</p>
+              <p className="text-lg font-bold text-amber-600">
                 {docentes.filter((d) => !d.tienePassword).length}
               </p>
             </div>
@@ -269,53 +279,42 @@ export default function GestionDocentesPasswordPage() {
       </div>
 
       {/* Tabla de docentes */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-zinc-100">
+            <thead className="bg-zinc-50/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Docente
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Profesión
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Correo
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cursos
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado Contraseña
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Profesión</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Correo</th>
+                <th className="px-6 py-4 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Cursos</th>
+                <th className="px-6 py-4 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
+                <th className="px-6 py-4 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-zinc-100">
               {docentesFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    <GraduationCap className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p>No se encontraron docentes</p>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <GraduationCap className="w-12 h-12 text-zinc-300 mb-3" />
+                      <p className="text-zinc-500 font-medium">No se encontraron docentes</p>
+                      <p className="text-zinc-400 text-sm">Intenta con otros términos de búsqueda</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 docentesFiltrados.map((docente) => (
-                  <tr key={docente.id} className="hover:bg-gray-50">
+                  <tr key={docente.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                          <GraduationCap className="w-5 h-5 text-primary-700" />
+                        <div className="flex-shrink-0 w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-zinc-500 font-medium text-sm border border-zinc-200">
+                          {docente.nombreCompleto.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{docente.nombreCompleto}</p>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                          <p className="text-sm font-medium text-zinc-900">{docente.nombreCompleto}</p>
+                          <div className="flex items-center gap-1 text-xs text-zinc-500">
+                            <Calendar className="w-3 h-3" />
                             {docente.fechaNacimiento 
                               ? new Date(docente.fechaNacimiento).toLocaleDateString('es-ES', {
                                   day: '2-digit',
@@ -328,45 +327,45 @@ export default function GestionDocentesPasswordPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {docente.profesion || '-'}
+                    <td className="px-6 py-4 text-sm text-zinc-600">
+                      {docente.profesion || <span className="text-zinc-400 italic">No especificado</span>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {docente.correo || '-'}
+                    <td className="px-6 py-4 text-sm text-zinc-600">
+                      {docente.correo || <span className="text-zinc-400 italic">No registrado</span>}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
                         {docente.totalCursos}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       {docente.tienePassword ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <Check className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           Configurada
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <AlertCircle className="w-3 h-3" />
-                          Sin contraseña
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Pendiente
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => abrirModalEditar(docente)}
-                          className="p-1.5 text-primary-700 hover:bg-primary-50 rounded transition-colors"
+                          className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
                           title="Editar información"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => abrirModalAsignarPassword(docente)}
-                          className={`p-1.5 rounded transition-colors ${
+                          className={`p-2 rounded-lg transition-colors ${
                             docente.tienePassword
-                              ? 'text-orange-600 hover:bg-orange-50'
-                              : 'text-green-600 hover:bg-green-50'
+                              ? 'text-zinc-400 hover:text-amber-600 hover:bg-amber-50'
+                              : 'text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50'
                           }`}
                           title={docente.tienePassword ? 'Cambiar contraseña' : 'Asignar contraseña'}
                         >
@@ -374,7 +373,7 @@ export default function GestionDocentesPasswordPage() {
                         </button>
                         <button
                           onClick={() => abrirModalEliminar(docente)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Eliminar docente"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -389,360 +388,385 @@ export default function GestionDocentesPasswordPage() {
         </div>
       </div>
 
-      {/* Modal Crear Docente */}
-      {modalAbierto === 'crear' && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-primary-700 px-6 py-4 text-white flex items-center justify-between">
-              <h2 className="text-xl font-bold">Crear Nuevo Docente</h2>
-              <button onClick={cerrarModal} className="text-white hover:bg-primary-800 p-1 rounded">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      {/* Modal Crear/Editar Docente */}
+      <Transition appear show={modalAbierto === 'crear' || modalAbierto === 'editar'} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
 
-            <form onSubmit={handleCrear} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Apellidos <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.apellidos}
-                    onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombres <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.nombres}
-                    onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profesión</label>
-                  <input
-                    type="text"
-                    value={formData.profesion}
-                    onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha de Nacimiento
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.fechaNacimiento}
-                    onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.correo}
-                    onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contraseña <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={mostrarPassword ? 'text' : 'password'}
-                      required
-                      minLength={6}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 pr-10"
-                      placeholder="Mínimo 6 caracteres"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setMostrarPassword(!mostrarPassword)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    >
-                      {mostrarPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center justify-between mb-6">
+                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900 flex items-center gap-2">
+                      <div className="p-2 bg-zinc-100 rounded-lg">
+                        {modalAbierto === 'crear' ? <Plus className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
+                      </div>
+                      {modalAbierto === 'crear' ? 'Nuevo Docente' : 'Editar Docente'}
+                    </Dialog.Title>
+                    <button onClick={cerrarModal} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formData.password.length}/6 caracteres mínimos
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={cerrarModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={crearMutation.isPending}
-                  className="px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors disabled:opacity-50"
-                >
-                  {crearMutation.isPending ? 'Creando...' : 'Crear Docente'}
-                </button>
-              </div>
-            </form>
+                  <form onSubmit={modalAbierto === 'crear' ? handleCrear : handleActualizar} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Apellidos <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <input
+                            type="text"
+                            required
+                            value={formData.apellidos}
+                            onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                            placeholder="Ej. Pérez López"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Nombres <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <input
+                            type="text"
+                            required
+                            value={formData.nombres}
+                            onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                            placeholder="Ej. Juan Carlos"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">Profesión</label>
+                        <div className="relative">
+                          <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <input
+                            type="text"
+                            value={formData.profesion}
+                            onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                            placeholder="Ej. Ingeniero de Sistemas"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Fecha de Nacimiento
+                        </label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <input
+                            type="date"
+                            value={formData.fechaNacimiento}
+                            onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Correo Electrónico
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <input
+                            type="email"
+                            value={formData.correo}
+                            onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                            placeholder="ejemplo@universidad.edu.pe"
+                          />
+                        </div>
+                      </div>
+
+                      {modalAbierto === 'crear' && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                            Contraseña <span className="text-red-500">*</span>
+                          </label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                            <input
+                              type={mostrarPassword ? 'text' : 'password'}
+                              required
+                              minLength={6}
+                              value={formData.password}
+                              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                              className="w-full pl-10 pr-12 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                              placeholder="Mínimo 6 caracteres"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setMostrarPassword(!mostrarPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                            >
+                              {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          <p className="text-xs text-zinc-500 mt-1.5 flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            La contraseña debe tener al menos 6 caracteres
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {modalAbierto === 'editar' && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                        <p className="text-sm text-amber-800">
+                          Para cambiar la contraseña, utiliza el botón de llave <Key className="inline w-3 h-3" /> en la lista de docentes.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={cerrarModal}
+                        className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={crearMutation.isPending || actualizarMutation.isPending}
+                        className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {(crearMutation.isPending || actualizarMutation.isPending) && (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        )}
+                        {modalAbierto === 'crear' ? 'Crear Docente' : 'Guardar Cambios'}
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
 
       {/* Modal Asignar/Cambiar Contraseña */}
-      {modalAbierto === 'asignarPassword' && docenteSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full">
-            <div className="bg-orange-600 px-6 py-4 text-white flex items-center justify-between">
-              <h2 className="text-xl font-bold">
-                {docenteSeleccionado.tienePassword ? 'Cambiar' : 'Asignar'} Contraseña
-              </h2>
-              <button onClick={cerrarModal} className="text-white hover:bg-orange-700 p-1 rounded">
-                <X className="w-6 h-6" />
-              </button>
+      <Transition appear show={modalAbierto === 'asignarPassword'} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center justify-between mb-6">
+                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900 flex items-center gap-2">
+                      <div className="p-2 bg-zinc-100 rounded-lg">
+                        <Key className="w-5 h-5" />
+                      </div>
+                      {docenteSeleccionado?.tienePassword ? 'Cambiar Contraseña' : 'Asignar Contraseña'}
+                    </Dialog.Title>
+                    <button onClick={cerrarModal} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAsignarPassword} className="space-y-6">
+                    <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-100">
+                      <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Docente</p>
+                      <p className="font-medium text-zinc-900">{docenteSeleccionado?.nombreCompleto}</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                        Nueva Contraseña <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                        <input
+                          type={mostrarPassword ? 'text' : 'password'}
+                          required
+                          minLength={6}
+                          value={passwordData.password}
+                          onChange={(e) => setPasswordData({ password: e.target.value })}
+                          className="w-full pl-10 pr-12 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                          placeholder="Mínimo 6 caracteres"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setMostrarPassword(!mostrarPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                        >
+                          {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1.5">
+                        Mínimo 6 caracteres
+                      </p>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={cerrarModal}
+                        className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={asignarPasswordMutation.isPending}
+                        className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {asignarPasswordMutation.isPending && (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        )}
+                        Guardar Contraseña
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
-
-            <form onSubmit={handleAsignarPassword} className="p-6 space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                <p className="text-sm text-gray-600">Docente:</p>
-                <p className="font-semibold text-gray-900">{docenteSeleccionado.nombreCompleto}</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nueva Contraseña <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type={mostrarPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={passwordData.password}
-                    onChange={(e) => setPasswordData({ password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
-                    placeholder="Mínimo 6 caracteres"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setMostrarPassword(!mostrarPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {mostrarPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {passwordData.password.length}/6 caracteres mínimos
-                </p>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={cerrarModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={asignarPasswordMutation.isPending}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
-                >
-                  {asignarPasswordMutation.isPending ? 'Guardando...' : 'Guardar Contraseña'}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
-
-      {/* Modal Editar Docente */}
-      {modalAbierto === 'editar' && docenteSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-green-600 px-6 py-4 text-white flex items-center justify-between">
-              <h2 className="text-xl font-bold">Editar Información del Docente</h2>
-              <button onClick={cerrarModal} className="text-white hover:bg-green-700 p-1 rounded">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleActualizar} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Apellidos <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.apellidos}
-                    onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombres <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.nombres}
-                    onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Profesión</label>
-                  <input
-                    type="text"
-                    value={formData.profesion}
-                    onChange={(e) => setFormData({ ...formData, profesion: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fecha de Nacimiento
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.fechaNacimiento}
-                    onChange={(e) => setFormData({ ...formData, fechaNacimiento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.correo}
-                    onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
-                <p className="text-sm text-primary-800">
-                  <strong>Nota:</strong> Para cambiar la contraseña, usa el botón de contraseña{' '}
-                  <Key className="inline w-4 h-4" /> en la tabla.
-                </p>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={cerrarModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={actualizarMutation.isPending}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                >
-                  {actualizarMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
 
       {/* Modal Eliminar */}
-      {modalAbierto === 'eliminar' && docenteSeleccionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-red-100 rounded-full">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900">Eliminar Docente</h2>
-              </div>
-              <button
-                onClick={cerrarModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+      <Transition appear show={modalAbierto === 'eliminar'} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={cerrarModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-xl bg-white p-6 text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="flex-shrink-0 h-12 w-12 rounded-full bg-red-50 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-zinc-900">
+                        Eliminar Docente
+                      </Dialog.Title>
+                      <p className="text-sm text-zinc-500">
+                        Esta acción no se puede deshacer.
+                      </p>
+                    </div>
+                  </div>
 
-            <div className="p-6">
-              <p className="text-gray-700 mb-4">
-                ¿Estás seguro que deseas eliminar al docente{' '}
-                <strong className="text-gray-900">{docenteSeleccionado.nombreCompleto}</strong>?
-              </p>
-              
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-red-800">
-                  <strong>¡Atención!</strong> Esta acción no se puede deshacer. El docente será eliminado 
-                  permanentemente del sistema.
-                </p>
-              </div>
+                  <div className="mb-6 space-y-4">
+                    <div className="bg-zinc-50 rounded-lg p-4 border border-zinc-200">
+                      <p className="font-medium text-zinc-900">{docenteSeleccionado?.nombreCompleto}</p>
+                      <p className="text-sm text-zinc-500 mt-1">{docenteSeleccionado?.profesion}</p>
+                    </div>
 
-              {docenteSeleccionado.totalCursos > 0 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-yellow-800">
-                    <strong>Nota:</strong> Este docente tiene{' '}
-                    <strong>{docenteSeleccionado.totalCursos}</strong> curso(s) asignado(s). 
-                    Los cursos quedarán sin docente asignado (se desasignarán automáticamente).
-                  </p>
-                </div>
-              )}
+                    {(docenteSeleccionado?.totalCursos || 0) > 0 && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                        <p className="text-sm text-amber-800">
+                          Este docente tiene <strong>{docenteSeleccionado?.totalCursos}</strong> curso(s) asignado(s). 
+                          Los cursos quedarán sin docente asignado.
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={cerrarModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleEliminar}
-                  disabled={eliminarMutation.isPending}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {eliminarMutation.isPending ? 'Eliminando...' : 'Sí, Eliminar'}
-                </button>
-              </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:ring-offset-2"
+                      onClick={cerrarModal}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-lg border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed gap-2 items-center"
+                      onClick={handleEliminar}
+                      disabled={eliminarMutation.isPending}
+                    >
+                      {eliminarMutation.isPending ? (
+                        <>
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                          Eliminando...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4" />
+                          Eliminar
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </div>
-      )}
+        </Dialog>
+      </Transition>
     </div>
   );
 }

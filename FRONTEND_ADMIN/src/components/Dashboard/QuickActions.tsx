@@ -1,63 +1,50 @@
-import { motion } from 'framer-motion'
-import { PlusIcon, UserGroupIcon, AcademicCapIcon, DocumentChartBarIcon } from '@heroicons/react/24/outline'
+import { Users, BookOpen, BarChart3, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const actions = [
   {
     name: 'Nuevo Docente',
-    description: 'Agregar un nuevo profesor al sistema',
-    icon: UserGroupIcon,
+    description: 'Agregar un nuevo profesor',
+    icon: Users,
     href: '/docentes?action=new',
-    color: 'bg-primary-600 hover:bg-primary-700',
   },
   {
     name: 'Nuevo Curso',
-    description: 'Crear un nuevo curso académico',
-    icon: AcademicCapIcon,
+    description: 'Crear curso académico',
+    icon: BookOpen,
     href: '/cursos?action=new',
-    color: 'bg-green-500 hover:bg-green-600',
   },
   {
     name: 'Ver Estadísticas',
-    description: 'Analizar reportes y métricas',
-    icon: DocumentChartBarIcon,
+    description: 'Reportes y métricas',
+    icon: BarChart3,
     href: '/estadisticas',
-    color: 'bg-purple-500 hover:bg-purple-600',
   },
 ]
 
 const QuickActions = () => {
   return (
-    <motion.div
-      className="card p-4 sm:p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Acciones Rápidas</h3>
-      <div className="space-y-2 sm:space-y-3">
-        {actions.map((action, index) => (
-          <motion.div
+    <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <h3 className="text-sm font-semibold text-zinc-900 mb-4">Acciones Rápidas</h3>
+      <div className="space-y-2">
+        {actions.map((action) => (
+          <Link
             key={action.name}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
+            to={action.href}
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-50 transition-colors group"
           >
-            <Link
-              to={action.href}
-              className={`flex items-center p-3 sm:p-4 rounded-lg text-white transition-colors ${action.color} group`}
-            >
-              <action.icon className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm sm:text-base truncate">{action.name}</div>
-                <div className="text-xs sm:text-sm opacity-90 hidden sm:block">{action.description}</div>
-              </div>
-              <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" />
-            </Link>
-          </motion.div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
+              <action.icon className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-zinc-900">{action.name}</p>
+              <p className="text-xs text-zinc-500">{action.description}</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+          </Link>
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

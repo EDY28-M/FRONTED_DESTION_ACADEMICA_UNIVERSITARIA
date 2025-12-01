@@ -2,47 +2,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import { 
-  User, Mail, Calendar, Award, TrendingUp, BookOpen, GraduationCap, 
-  Lock, Eye, EyeOff, X, KeyRound, Edit2, Save, Phone, MapPin, Shield
+  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Stat Card Component
-const StatCard = ({ icon: Icon, label, value, color = 'zinc' }: { 
-  icon: React.ElementType; 
-  label: string; 
-  value: string | number;
-  color?: string;
-}) => (
-  <div className="bg-white rounded-xl border border-zinc-200 p-4 hover:border-zinc-300 transition-colors">
-    <div className={`w-9 h-9 rounded-lg bg-${color}-100 flex items-center justify-center mb-3`}>
-      <Icon className={`w-4 h-4 text-${color}-600`} />
-    </div>
-    <p className="text-[11px] text-zinc-500 uppercase tracking-wider mb-0.5">{label}</p>
-    <p className={`text-2xl font-bold tabular-nums text-${color}-700`}>{value}</p>
-  </div>
-);
-
-// Info Field Component
-const InfoField = ({ icon: Icon, label, value }: { 
-  icon: React.ElementType; 
-  label: string; 
-  value?: string;
-}) => (
-  <div className="flex items-center gap-3 p-3 rounded-lg border border-zinc-100 hover:bg-zinc-50/50 transition-colors">
-    <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center flex-shrink-0">
-      <Icon className="w-4 h-4 text-zinc-500" />
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-[11px] text-zinc-500 uppercase tracking-wider">{label}</p>
-      <p className="text-[13px] font-medium text-zinc-900 truncate">{value || '—'}</p>
-    </div>
-  </div>
-);
-
 const PerfilEstudiantePage: React.FC = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [seccionActiva, setSeccionActiva] = useState<'info' | 'contacto' | 'academico'>('info');
+  const [editandoContacto, setEditandoContacto] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: perfil, isLoading } = useQuery({
@@ -50,171 +16,150 @@ const PerfilEstudiantePage: React.FC = () => {
     queryFn: estudiantesApi.getPerfil,
   });
 
-  const { data: misCursos } = useQuery({
-    queryKey: ['mis-cursos-total'],
-    queryFn: () => estudiantesApi.getMisCursos(),
+  const { data: periodoActivo } = useQuery({
+    queryKey: ['periodo-activo'],
+    queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const cursosAprobados = misCursos?.filter(c => c.estado === 'Aprobado').length || 0;
-  const cursosActivos = misCursos?.filter(c => c.estado === 'Matriculado').length || 0;
+  // Cursos del período actual
+  const { data: misCursosCicloActual } = useQuery({
+    queryKey: ['mis-cursos-ciclo', periodoActivo?.id],
+    queryFn: () => estudiantesApi.getMisCursos(periodoActivo?.id),
+    enabled: !!periodoActivo?.id,
+  });
+
+  // Calcular créditos matriculados este ciclo
+  const creditosMatriculadosCiclo = misCursosCicloActual
+    ?.filter(c => c.estado === 'Matriculado')
+    ?.reduce((sum, c) => sum + (c.creditos || 0), 0) || 0;
+
+  // Calcular cursos aprobados este ciclo (promedioFinal >= 11)
+  const cursosAprobadosCiclo = misCursosCicloActual
+    ?.filter(c => c.promedioFinal !== undefined && c.promedioFinal !== null && c.promedioFinal >= 11)
+    ?.length || 0;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="animate-spin w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  const getInitials = (nombre?: string) => {
-    return nombre?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'ES';
-  };
-
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <h1 className="text-sm font-medium text-zinc-900">Mi Perfil</h1>
-              <p className="text-[11px] text-zinc-500">{perfil?.carrera}</p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setModalAbierto(true)}
-            className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-zinc-700 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors"
-          >
-            <Shield className="w-4 h-4" />
-            Cambiar Contraseña
-          </button>
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Header simple */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Mi Perfil</h1>
+          <p className="text-zinc-500 text-sm mt-1">Información personal y académica</p>
         </div>
-      </header>
+        <button
+          onClick={() => setModalAbierto(true)}
+          className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+        >
+          Cambiar contraseña
+        </button>
+      </div>
 
-      <div className="p-6 max-w-5xl mx-auto space-y-6">
-        {/* Profile Header Card */}
-        <div className="bg-zinc-900 rounded-2xl p-6 text-white">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-xl font-bold">
-              {getInitials(perfil?.nombreCompleto)}
+      {/* Grid principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Columna izquierda - Card principal */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Tarjeta de identidad */}
+          <div className="bg-white border border-zinc-200 rounded-xl p-6">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 mx-auto bg-zinc-900 rounded-full flex items-center justify-center text-white text-2xl font-semibold mb-4">
+                {perfil?.nombreCompleto?.split(' ').slice(0, 2).map((n: string) => n[0]).join('') || 'ES'}
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900">{perfil?.nombreCompleto}</h2>
+              <p className="text-sm text-zinc-500 mt-1">{perfil?.carrera}</p>
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-medium">{perfil?.nombreCompleto}</h2>
-              <div className="flex items-center gap-3 mt-1.5">
-                <span className="px-2 py-0.5 bg-white/10 rounded text-[11px] font-medium">{perfil?.codigo}</span>
-                <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded text-[11px] font-medium">Ciclo {perfil?.cicloActual}</span>
-                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[11px] font-medium">{perfil?.estado}</span>
+
+            <div className="space-y-3 pt-4 border-t border-zinc-100">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Código</span>
+                <span className="text-sm font-mono text-zinc-900">{perfil?.codigo}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Ciclo</span>
+                <span className="text-sm font-medium text-zinc-900">{perfil?.cicloActual}°</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Estado</span>
+                <span className="px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                  {perfil?.estado}
+                </span>
               </div>
             </div>
           </div>
+
+          {/* Stats compactos */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{perfil?.creditosAcumulados || 0}</p>
+              <p className="text-xs text-zinc-500 mt-1">Créditos totales</p>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{creditosMatriculadosCiclo}</p>
+              <p className="text-xs text-zinc-500 mt-1">Créditos este ciclo</p>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{cursosAprobadosCiclo}</p>
+              <p className="text-xs text-zinc-500 mt-1">Aprobados este ciclo</p>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{misCursosCicloActual?.filter(c => c.estado === 'Matriculado')?.length || 0}</p>
+              <p className="text-xs text-zinc-500 mt-1">Cursos matriculados</p>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-4">
-          <StatCard icon={Award} label="Créditos Acumulados" value={perfil?.creditosAcumulados || 0} color="emerald" />
-          <StatCard icon={BookOpen} label="Cursos Activos" value={cursosActivos} color="blue" />
-          <StatCard icon={Award} label="Cursos Aprobados" value={cursosAprobados} color="amber" />
-          <StatCard icon={TrendingUp} label="Total Cursos" value={misCursos?.length || 0} color="violet" />
-        </div>
-
-        {/* Tabs Content */}
-        <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-          {/* Tab Navigation */}
-          <div className="flex border-b border-zinc-100">
-            {[
-              { id: 'info', label: 'Información Personal', icon: User },
-              { id: 'contacto', label: 'Contacto', icon: Mail },
-              { id: 'academico', label: 'Estado Académico', icon: GraduationCap },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSeccionActiva(tab.id as any)}
-                className={`relative flex items-center gap-2 px-5 py-3 text-[13px] font-medium transition-colors ${
-                  seccionActiva === tab.id 
-                    ? 'text-zinc-900' 
-                    : 'text-zinc-500 hover:text-zinc-700'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-                {seccionActiva === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-900" />
-                )}
-              </button>
-            ))}
+        {/* Columna derecha - Detalles */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Información personal */}
+          <div className="bg-white border border-zinc-200 rounded-xl">
+            <div className="px-6 py-4 border-b border-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900">Información Personal</h3>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Campo icon={CreditCard} label="DNI" value={perfil?.dni} />
+                <Campo icon={Calendar} label="Fecha de Nacimiento" value={perfil?.fechaNacimiento?.split('T')[0]} />
+                <Campo icon={Mail} label="Correo Institucional" value={perfil?.email} className="sm:col-span-2" />
+              </div>
+            </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="p-5">
-            {seccionActiva === 'info' && (
-              <div className="grid grid-cols-2 gap-3">
-                <InfoField icon={User} label="Nombre Completo" value={perfil?.nombreCompleto} />
-                <InfoField icon={User} label="DNI" value={perfil?.dni} />
-                <InfoField icon={Calendar} label="Fecha de Nacimiento" value={perfil?.fechaNacimiento?.split('T')[0]} />
-                <InfoField icon={Mail} label="Correo Institucional" value={perfil?.email} />
-              </div>
-            )}
-
-            {seccionActiva === 'contacto' && (
-              <SeccionContacto perfil={perfil} onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })} />
-            )}
-
-            {seccionActiva === 'academico' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <Award className="w-5 h-5 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="text-[13px] font-medium text-zinc-900">Estado del Estudiante</p>
-                      <p className="text-[11px] text-zinc-500">Tu estado académico actual</p>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-lg text-sm font-bold">
-                    {perfil?.estado}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-[11px] text-zinc-500 uppercase tracking-wider">Ciclo Actual</p>
-                      <p className="text-xl font-bold text-blue-700">{perfil?.cicloActual}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200">
-                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                      <Award className="w-5 h-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-[11px] text-zinc-500 uppercase tracking-wider">Créditos Acumulados</p>
-                      <p className="text-xl font-bold text-amber-700">{perfil?.creditosAcumulados}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Información de contacto editable */}
+          <SeccionContacto 
+            perfil={perfil} 
+            editando={editandoContacto}
+            setEditando={setEditandoContacto}
+            onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })} 
+          />
         </div>
       </div>
 
-      {/* Modal Cambiar Contraseña */}
       {modalAbierto && <ModalCambiarContrasena onClose={() => setModalAbierto(false)} />}
     </div>
   );
 };
 
+// Campo de solo lectura
+const Campo: React.FC<{ icon: any; label: string; value?: string; className?: string }> = ({ icon: Icon, label, value, className }) => (
+  <div className={className}>
+    <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-1">{label}</label>
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-zinc-400" />
+      <span className="text-sm text-zinc-900">{value || '—'}</span>
+    </div>
+  </div>
+);
+
 // Sección Contacto Editable
-const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perfil, onUpdate }) => {
-  const [modoEdicion, setModoEdicion] = useState(false);
+const SeccionContacto: React.FC<{ perfil: any; editando: boolean; setEditando: (v: boolean) => void; onUpdate: () => void }> = ({ perfil, editando, setEditando, onUpdate }) => {
   const [formData, setFormData] = useState({
     apellidos: perfil?.apellidos || '',
     nombres: perfil?.nombres || '',
@@ -229,7 +174,7 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
     mutationFn: estudiantesApi.actualizarPerfil,
     onSuccess: () => {
       toast.success('Información actualizada');
-      setModoEdicion(false);
+      setEditando(false);
       onUpdate();
     },
     onError: (error: any) => {
@@ -237,7 +182,6 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
     },
   });
 
-  const handleSubmit = () => actualizarMutation.mutate(formData);
   const handleCancel = () => {
     setFormData({
       apellidos: perfil?.apellidos || '',
@@ -248,98 +192,68 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
       telefono: perfil?.telefono || '',
       direccion: perfil?.direccion || '',
     });
-    setModoEdicion(false);
+    setEditando(false);
   };
 
-  const campos = [
-    { icon: User, label: 'Apellidos', field: 'apellidos', type: 'text' },
-    { icon: User, label: 'Nombres', field: 'nombres', type: 'text' },
-    { icon: Mail, label: 'Correo Personal', field: 'correo', type: 'email' },
-    { icon: Phone, label: 'Teléfono', field: 'telefono', type: 'tel' },
-  ];
-
   return (
-    <div>
-      <div className="flex justify-end mb-4">
-        {!modoEdicion ? (
-          <button
-            onClick={() => setModoEdicion(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 text-white text-[13px] font-medium rounded-lg hover:bg-zinc-800 transition-colors"
-          >
-            <Edit2 className="w-4 h-4" />
-            Editar
+    <div className="bg-white border border-zinc-200 rounded-xl">
+      <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-900">Información de Contacto</h3>
+        {!editando ? (
+          <button onClick={() => setEditando(true)} className="text-sm text-zinc-500 hover:text-zinc-900 flex items-center gap-1.5 transition-colors">
+            <Edit2 className="w-3.5 h-3.5" /> Editar
           </button>
         ) : (
           <div className="flex gap-2">
-            <button
-              onClick={handleSubmit}
-              disabled={actualizarMutation.isPending}
-              className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 text-white text-[13px] font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              {actualizarMutation.isPending ? 'Guardando...' : 'Guardar'}
+            <button onClick={() => actualizarMutation.mutate(formData)} disabled={actualizarMutation.isPending} className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 disabled:opacity-50">
+              <Save className="w-3.5 h-3.5" /> {actualizarMutation.isPending ? 'Guardando...' : 'Guardar'}
             </button>
-            <button
-              onClick={handleCancel}
-              className="px-3 py-1.5 bg-zinc-100 text-zinc-700 text-[13px] font-medium rounded-lg hover:bg-zinc-200 transition-colors"
-            >
-              Cancelar
-            </button>
+            <button onClick={handleCancel} className="text-sm text-zinc-500 hover:text-zinc-700">Cancelar</button>
           </div>
         )}
       </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {campos.map((campo) => (
-          <div key={campo.field} className="flex items-center gap-3 p-3 rounded-lg border border-zinc-100 hover:bg-zinc-50/50 transition-colors">
-            <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <campo.icon className="w-4 h-4 text-zinc-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] text-zinc-500 uppercase tracking-wider mb-1">{campo.label}</p>
-              {modoEdicion ? (
-                <input
-                  type={campo.type}
-                  value={formData[campo.field as keyof typeof formData]}
-                  onChange={(e) => setFormData(prev => ({ ...prev, [campo.field]: e.target.value }))}
-                  className="w-full text-[13px] font-medium text-zinc-900 border-b border-zinc-300 focus:border-zinc-900 focus:outline-none py-0.5 bg-transparent"
-                  placeholder={`Ingresa tu ${campo.label.toLowerCase()}`}
-                />
-              ) : (
-                <p className={`text-[13px] font-medium truncate ${formData[campo.field as keyof typeof formData] ? 'text-zinc-900' : 'text-zinc-400 italic'}`}>
-                  {formData[campo.field as keyof typeof formData] || 'No registrado'}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
-        
-        {/* Dirección - Full width */}
-        <div className="col-span-2 flex items-center gap-3 p-3 rounded-lg border border-zinc-100 hover:bg-zinc-50/50 transition-colors">
-          <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-4 h-4 text-zinc-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-zinc-500 uppercase tracking-wider mb-1">Dirección</p>
-            {modoEdicion ? (
-              <input
-                type="text"
-                value={formData.direccion}
-                onChange={(e) => setFormData(prev => ({ ...prev, direccion: e.target.value }))}
-                className="w-full text-[13px] font-medium text-zinc-900 border-b border-zinc-300 focus:border-zinc-900 focus:outline-none py-0.5 bg-transparent"
-                placeholder="Ingresa tu dirección"
-              />
-            ) : (
-              <p className={`text-[13px] font-medium truncate ${formData.direccion ? 'text-zinc-900' : 'text-zinc-400 italic'}`}>
-                {formData.direccion || 'No registrado'}
-              </p>
-            )}
-          </div>
+      <div className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <CampoEditable icon={Mail} label="Correo Personal" field="correo" type="email" formData={formData} setFormData={setFormData} editando={editando} />
+          <CampoEditable icon={Phone} label="Teléfono" field="telefono" type="tel" formData={formData} setFormData={setFormData} editando={editando} />
+          <CampoEditable icon={MapPin} label="Dirección" field="direccion" type="text" formData={formData} setFormData={setFormData} editando={editando} className="sm:col-span-2" />
         </div>
       </div>
     </div>
   );
 };
+
+// Campo editable
+const CampoEditable: React.FC<{
+  icon: any;
+  label: string;
+  field: string;
+  type: string;
+  formData: any;
+  setFormData: (v: any) => void;
+  editando: boolean;
+  className?: string;
+}> = ({ icon: Icon, label, field, type, formData, setFormData, editando, className }) => (
+  <div className={className}>
+    <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-1">{label}</label>
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+      {editando ? (
+        <input
+          type={type}
+          value={formData[field] || ''}
+          onChange={(e) => setFormData((prev: any) => ({ ...prev, [field]: e.target.value }))}
+          className="flex-1 text-sm text-zinc-900 border-b border-zinc-300 focus:border-zinc-900 outline-none py-1 bg-transparent"
+          placeholder={`Ingresa tu ${label.toLowerCase()}`}
+        />
+      ) : (
+        <span className={`text-sm ${formData[field] ? 'text-zinc-900' : 'text-zinc-400'}`}>
+          {formData[field] || 'No registrado'}
+        </span>
+      )}
+    </div>
+  </div>
+);
 
 // Modal Cambiar Contraseña
 const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -368,7 +282,7 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
       return;
     }
     if (contrasenaNueva.length < 6) {
-      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     if (contrasenaNueva !== confirmarContrasena) {
@@ -378,93 +292,143 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
     cambiarContrasenaMutation.mutate({ contrasenaActual, contrasenaNueva });
   };
 
-  const InputField = ({ 
-    label, value, onChange, show, onToggle 
-  }: { 
-    label: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void;
-  }) => (
-    <div>
-      <label className="block text-[13px] font-medium text-zinc-700 mb-1.5">{label}</label>
-      <div className="relative">
-        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-        <input
-          type={show ? 'text' : 'password'}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full pl-10 pr-10 py-2 text-[13px] rounded-lg border border-zinc-200 focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none"
-          placeholder={`Ingresa ${label.toLowerCase()}`}
-        />
-        <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
-          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
-      </div>
-    </div>
-  );
+  const validaciones = [
+    { ok: contrasenaNueva.length >= 6, texto: 'Mínimo 6 caracteres' },
+    { ok: contrasenaNueva === confirmarContrasena && confirmarContrasena.length > 0, texto: 'Las contraseñas coinciden' },
+  ];
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-zinc-100 rounded-lg flex items-center justify-center">
-              <KeyRound className="w-4 h-4 text-zinc-600" />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        {/* Header con gradiente sutil */}
+        <div className="px-6 py-5 bg-gradient-to-b from-zinc-50 to-white border-b border-zinc-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-900">Cambiar contraseña</h2>
+              <p className="text-sm text-zinc-500 mt-0.5">Actualiza tu contraseña de acceso</p>
             </div>
-            <h2 className="text-sm font-medium text-zinc-900">Cambiar Contraseña</h2>
+            <button 
+              onClick={onClose} 
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors">
-            <X className="w-4 h-4" />
-          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <InputField 
-            label="Contraseña Actual" 
-            value={contrasenaActual} 
-            onChange={setContrasenaActual}
-            show={mostrarActual}
-            onToggle={() => setMostrarActual(!mostrarActual)}
-          />
-          <InputField 
-            label="Nueva Contraseña" 
-            value={contrasenaNueva} 
-            onChange={setContrasenaNueva}
-            show={mostrarNueva}
-            onToggle={() => setMostrarNueva(!mostrarNueva)}
-          />
-          <InputField 
-            label="Confirmar Contraseña" 
-            value={confirmarContrasena} 
-            onChange={setConfirmarContrasena}
-            show={mostrarConfirmar}
-            onToggle={() => setMostrarConfirmar(!mostrarConfirmar)}
-          />
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Contraseña actual */}
+          <div>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Contraseña actual</label>
+            <div className="relative">
+              <input
+                type={mostrarActual ? 'text' : 'password'}
+                value={contrasenaActual}
+                onChange={(e) => setContrasenaActual(e.target.value)}
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
+                placeholder="Ingresa tu contraseña actual"
+              />
+              <button 
+                type="button" 
+                onClick={() => setMostrarActual(!mostrarActual)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarActual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
 
-          {contrasenaNueva && (
-            <p className={`text-[11px] flex items-center gap-1 ${contrasenaNueva.length >= 6 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {contrasenaNueva.length >= 6 ? '✓' : '✗'} Mínimo 6 caracteres
-            </p>
+          {/* Separador */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-3 bg-white text-xs text-zinc-400">Nueva contraseña</span>
+            </div>
+          </div>
+
+          {/* Nueva contraseña */}
+          <div>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Nueva contraseña</label>
+            <div className="relative">
+              <input
+                type={mostrarNueva ? 'text' : 'password'}
+                value={contrasenaNueva}
+                onChange={(e) => setContrasenaNueva(e.target.value)}
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
+                placeholder="Mínimo 6 caracteres"
+              />
+              <button 
+                type="button" 
+                onClick={() => setMostrarNueva(!mostrarNueva)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarNueva ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirmar contraseña */}
+          <div>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Confirmar contraseña</label>
+            <div className="relative">
+              <input
+                type={mostrarConfirmar ? 'text' : 'password'}
+                value={confirmarContrasena}
+                onChange={(e) => setConfirmarContrasena(e.target.value)}
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
+                placeholder="Repite la nueva contraseña"
+              />
+              <button 
+                type="button" 
+                onClick={() => setMostrarConfirmar(!mostrarConfirmar)} 
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarConfirmar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Validaciones visuales */}
+          {(contrasenaNueva || confirmarContrasena) && (
+            <div className="flex flex-wrap gap-2">
+              {validaciones.map((v, i) => (
+                <span 
+                  key={i}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    v.ok 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                      : 'bg-zinc-100 text-zinc-500 border border-zinc-200'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${v.ok ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
+                  {v.texto}
+                </span>
+              ))}
+            </div>
           )}
 
-          {/* Buttons */}
+          {/* Botones */}
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={cambiarContrasenaMutation.isPending}
-              className="flex-1 py-2.5 bg-zinc-900 text-white text-[13px] font-medium rounded-lg hover:bg-zinc-800 disabled:opacity-50 transition-colors"
-            >
-              {cambiarContrasenaMutation.isPending ? 'Cambiando...' : 'Cambiar Contraseña'}
-            </button>
             <button 
               type="button" 
               onClick={onClose} 
-              className="px-4 py-2.5 bg-zinc-100 text-zinc-700 text-[13px] font-medium rounded-lg hover:bg-zinc-200 transition-colors"
+              className="flex-1 h-11 text-sm font-medium text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
             >
               Cancelar
+            </button>
+            <button 
+              type="submit" 
+              disabled={cambiarContrasenaMutation.isPending || !contrasenaActual || contrasenaNueva.length < 6 || contrasenaNueva !== confirmarContrasena}
+              className="flex-1 h-11 text-sm font-medium text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {cambiarContrasenaMutation.isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Cambiando...
+                </span>
+              ) : 'Actualizar contraseña'}
             </button>
           </div>
         </form>
