@@ -1,9 +1,82 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { BookOpen, AlertCircle } from 'lucide-react';
+import { BookOpen, AlertCircle, Check, GraduationCap, Clock, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationContext';
+
+// Stat Card Component
+const StatCard = ({ label, value, accent = false }: { label: string; value: string | number; accent?: boolean }) => (
+  <div className={`px-3 py-1.5 rounded-lg ${accent ? 'bg-zinc-900 text-white' : 'bg-zinc-100'}`}>
+    <span className={`text-[11px] ${accent ? 'text-zinc-400' : 'text-zinc-500'}`}>{label}</span>
+    <span className={`ml-1.5 text-sm font-semibold tabular-nums ${accent ? 'text-white' : 'text-zinc-900'}`}>{value}</span>
+  </div>
+);
+
+// Course Row Component
+const CursoRow = ({
+  curso,
+  isSelected,
+  isMatriculado,
+  onToggle,
+  disabled
+}: {
+  curso: any;
+  isSelected: boolean;
+  isMatriculado: boolean;
+  onToggle: () => void;
+  disabled: boolean;
+}) => (
+  <tr className={`border-b border-zinc-100 last:border-0 transition-colors ${isMatriculado ? 'bg-amber-50/40' : 'hover:bg-zinc-50/50'}`}>
+    <td className="py-3 pl-4 pr-2">
+      <button
+        onClick={onToggle}
+        disabled={disabled || isMatriculado}
+        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+          isSelected || isMatriculado
+            ? 'bg-zinc-900 border-zinc-900'
+            : 'border-zinc-300 hover:border-zinc-400'
+        } ${disabled || isMatriculado ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        {(isSelected || isMatriculado) && <Check className="w-3 h-3 text-white" />}
+      </button>
+    </td>
+    <td className="py-3 px-3">
+      <span className={`px-2 py-0.5 text-[11px] font-mono font-medium rounded ${
+        isMatriculado ? 'bg-amber-100 text-amber-700' : 'bg-zinc-100 text-zinc-600'
+      }`}>
+        {curso.codigo}
+      </span>
+    </td>
+    <td className="py-3 px-3">
+      <p className="text-[13px] font-medium text-zinc-900">{curso.nombreCurso}</p>
+      <p className="text-[11px] text-zinc-400">Obligatorio</p>
+    </td>
+    <td className="py-3 px-3 text-center">
+      <span className="text-[13px] font-mono font-medium text-zinc-700">{curso.creditos}</span>
+    </td>
+    <td className="py-3 px-3">
+      <div className="flex items-center gap-1.5">
+        <User className="w-3.5 h-3.5 text-zinc-400" />
+        <span className="text-[13px] text-zinc-600">{curso.nombreDocente || '—'}</span>
+      </div>
+    </td>
+    <td className="py-3 px-3 text-center">
+      <span className="text-[13px] font-mono text-zinc-600">
+        {curso.estudiantesMatriculados || 0}/{curso.capacidadMaxima || 30}
+      </span>
+    </td>
+    <td className="py-3 px-3 text-center">
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ring-1 ${
+        isMatriculado 
+          ? 'bg-amber-50 text-amber-700 ring-amber-200' 
+          : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+      }`}>
+        {isMatriculado ? 'Matriculado' : 'Disponible'}
+      </span>
+    </td>
+  </tr>
+);
 
 const MatriculaPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -43,13 +116,9 @@ const MatriculaPage: React.FC = () => {
   });
 
   const handleToggleCurso = (idCurso: number) => {
-    setCursosSeleccionados(prev => {
-      if (prev.includes(idCurso)) {
-        return prev.filter(id => id !== idCurso);
-      } else {
-        return [...prev, idCurso];
-      }
-    });
+    setCursosSeleccionados(prev =>
+      prev.includes(idCurso) ? prev.filter(id => id !== idCurso) : [...prev, idCurso]
+    );
   };
 
   const handleMatricularSeleccionados = async () => {
@@ -66,19 +135,14 @@ const MatriculaPage: React.FC = () => {
 
     let exitosos = 0;
     let fallidos = 0;
-    const cursosMatriculados: string[] = [];
 
     for (const idCurso of cursosSeleccionados) {
       try {
         await matricularMutation.mutateAsync({ idCurso, idPeriodo });
         exitosos++;
         
-        // Buscar el nombre del curso
         const curso = cursosDisponibles?.find(c => c.id === idCurso);
         if (curso) {
-          cursosMatriculados.push(curso.nombreCurso);
-          
-          // Crear notificación local
           addNotification({
             type: 'academico',
             action: 'matricula',
@@ -90,7 +154,7 @@ const MatriculaPage: React.FC = () => {
             }
           });
         }
-      } catch (error) {
+      } catch {
         fallidos++;
       }
     }
@@ -104,42 +168,37 @@ const MatriculaPage: React.FC = () => {
     }
   };
 
-  // Separar cursos por disponibilidad
   const cursosDisponiblesList = cursosDisponibles?.filter(c => c.disponible && !c.yaMatriculado) || [];
   const cursosMatriculadosList = cursosDisponibles?.filter(c => c.yaMatriculado) || [];
   const cursosNoDisponiblesList = cursosDisponibles?.filter(c => !c.disponible && !c.yaMatriculado) || [];
 
   return (
-    <div className="space-y-6">
-      {/* Información del estudiante */}
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Matrícula de Cursos</h2>
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <span className="flex items-center">
-                <span className="font-medium text-gray-700">Ciclo:</span>
-                <span className="ml-1 px-2 py-0.5 bg-primary-100 text-primary-800 rounded font-semibold">{perfil?.cicloActual}</span>
-              </span>
-              <span className="text-gray-400">|</span>
-              <span className="flex items-center">
-                <span className="font-medium text-gray-700">Créditos:</span>
-                <span className="ml-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded font-semibold">{perfil?.creditosAcumulados}</span>
-              </span>
+    <div className="min-h-screen bg-zinc-50">
+      {/* Header */}
+      <header className="bg-white border-b border-zinc-200">
+        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
+              <GraduationCap className="w-4 h-4 text-white" />
             </div>
-            {periodoActivo && (
-              <p className="text-gray-600 text-sm mt-2">
-                Período: {periodoActivo.nombre} ({new Date(periodoActivo.fechaInicio).toLocaleDateString('es-PE')} - {new Date(periodoActivo.fechaFin).toLocaleDateString('es-PE')})
+            <div>
+              <h1 className="text-sm font-medium text-zinc-900">Matrícula de Cursos</h1>
+              <p className="text-[11px] text-zinc-500">
+                {periodoActivo?.nombre || 'Sin período activo'}
               </p>
-            )}
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <label htmlFor="periodo" className="text-sm text-gray-700 font-medium">Período:</label>
+
+          <div className="flex items-center gap-3">
+            <StatCard label="Ciclo" value={perfil?.cicloActual || '—'} />
+            <StatCard label="Créditos" value={perfil?.creditosAcumulados || 0} accent />
+            
+            <div className="h-6 w-px bg-zinc-200" />
+            
             <select
-              id="periodo"
               value={periodoSeleccionado || ''}
               onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-600 text-gray-900"
+              className="text-[13px] px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900"
             >
               <option value="">Período Activo</option>
               {periodos?.map((periodo) => (
@@ -150,226 +209,125 @@ const MatriculaPage: React.FC = () => {
             </select>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Cursos Disponibles */}
-      <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-            <BookOpen className="h-5 w-5 mr-2 text-primary-700" />
-            Cursos Disponibles para Matrícula
-          </h3>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-primary-600 rounded-full"></div>
-              <span className="text-xs text-gray-600">Disponible</span>
+      {/* Main Content */}
+      <div className="p-6 max-w-7xl mx-auto space-y-4">
+        {/* Cursos Disponibles */}
+        <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-zinc-400" />
+              <h2 className="text-sm font-medium text-zinc-900">Cursos Disponibles</h2>
             </div>
-            <div className="flex items-center space-x-1">
-              <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-              <span className="text-xs text-gray-600">Matriculado</span>
+            <div className="flex items-center gap-4 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-zinc-500">Disponible</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <span className="text-zinc-500">Matriculado</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="overflow-x-auto">
+
           {isLoading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
-              <p className="text-gray-500 mt-4">Cargando cursos...</p>
+            <div className="py-16 text-center">
+              <div className="inline-block w-6 h-6 border-2 border-zinc-200 border-t-zinc-600 rounded-full animate-spin" />
+              <p className="mt-3 text-sm text-zinc-500">Cargando cursos...</p>
             </div>
           ) : cursosDisponiblesList.length > 0 || cursosMatriculadosList.length > 0 ? (
             <>
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="w-12 px-6 py-4 text-center">
-                      <input type="checkbox" className="rounded border-gray-300" disabled />
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Código
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Curso
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Créditos
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Docente
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Vacantes
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Día
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      Horario
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {cursosDisponiblesList.map((curso) => (
-                    <tr key={curso.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 text-center">
-                        <input 
-                          type="checkbox" 
-                          className="rounded border-gray-300 text-primary-700 focus:ring-primary-600"
-                          checked={cursosSeleccionados.includes(curso.id)}
-                          onChange={() => handleToggleCurso(curso.id)}
-                          disabled={matricularMutation.isPending}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded font-mono text-xs font-semibold">
-                          {curso.codigo}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{curso.nombreCurso}</p>
-                          <p className="text-xs text-gray-500">Obligatorio</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-900 font-medium">
-                        {curso.creditos}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {curso.nombreDocente}
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm">
-                        <span className="font-medium text-gray-900">{curso.estudiantesMatriculados || 0}</span>
-                        <span className="text-gray-400">/</span>
-                        <span className="text-gray-600">{curso.capacidadMaxima || 30}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                          Disponible
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center text-xs text-gray-600">
-                        <div>Lu</div>
-                        <div>Mi</div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-xs text-gray-600">
-                        <div>11-01 pm</div>
-                        <div>07-10 pm</div>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                      <th className="py-2.5 pl-4 pr-2 w-10" />
+                      <th className="py-2.5 px-3 text-left text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Código</th>
+                      <th className="py-2.5 px-3 text-left text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
+                      <th className="py-2.5 px-3 text-center text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
+                      <th className="py-2.5 px-3 text-left text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                      <th className="py-2.5 px-3 text-center text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Vacantes</th>
+                      <th className="py-2.5 px-3 text-center text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
                     </tr>
-                  ))}
-                  {cursosMatriculadosList.map((curso) => (
-                    <tr key={curso.id} className="bg-amber-50/30 hover:bg-amber-50/50 transition-colors">
-                      <td className="px-6 py-4 text-center">
-                        <input 
-                          type="checkbox" 
-                          checked
-                          disabled
-                          className="rounded border-gray-300"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded font-mono text-xs font-semibold">
-                          {curso.codigo}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{curso.nombreCurso}</p>
-                          <p className="text-xs text-gray-500">Obligatorio</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-900 font-medium">
-                        {curso.creditos}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {curso.nombreDocente}
-                      </td>
-                      <td className="px-6 py-4 text-center text-sm">
-                        <span className="font-medium text-gray-900">{curso.estudiantesMatriculados || 0}</span>
-                        <span className="text-gray-400">/</span>
-                        <span className="text-gray-600">{curso.capacidadMaxima || 30}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          Matriculado
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center text-xs text-gray-600">
-                        <div>Ma</div>
-                        <div>Ju</div>
-                      </td>
-                      <td className="px-6 py-4 text-center text-xs text-gray-600">
-                        <div>09-12 am</div>
-                        <div>02-05 pm</div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Disponibles:</span>
-                    <span className="px-2.5 py-1 bg-primary-100 text-primary-800 rounded-md text-sm font-semibold">
-                      {cursosDisponiblesList.length}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Matriculados:</span>
-                    <span className="px-2.5 py-1 bg-amber-100 text-amber-700 rounded-md text-sm font-semibold">
-                      {cursosMatriculadosList.length}
-                    </span>
-                  </div>
+                  </thead>
+                  <tbody>
+                    {cursosDisponiblesList.map((curso) => (
+                      <CursoRow
+                        key={curso.id}
+                        curso={curso}
+                        isSelected={cursosSeleccionados.includes(curso.id)}
+                        isMatriculado={false}
+                        onToggle={() => handleToggleCurso(curso.id)}
+                        disabled={matricularMutation.isPending}
+                      />
+                    ))}
+                    {cursosMatriculadosList.map((curso) => (
+                      <CursoRow
+                        key={curso.id}
+                        curso={curso}
+                        isSelected={false}
+                        isMatriculado={true}
+                        onToggle={() => {}}
+                        disabled={true}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer */}
+              <div className="px-5 py-3 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between">
+                <div className="flex items-center gap-4 text-[13px]">
+                  <span className="text-zinc-500">
+                    Disponibles: <span className="font-medium text-zinc-700">{cursosDisponiblesList.length}</span>
+                  </span>
+                  <span className="text-zinc-500">
+                    Matriculados: <span className="font-medium text-amber-600">{cursosMatriculadosList.length}</span>
+                  </span>
                   {cursosSeleccionados.length > 0 && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">Seleccionados:</span>
-                      <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-md text-sm font-semibold">
-                        {cursosSeleccionados.length}
-                      </span>
-                    </div>
+                    <span className="text-zinc-500">
+                      Seleccionados: <span className="font-semibold text-zinc-900">{cursosSeleccionados.length}</span>
+                    </span>
                   )}
                 </div>
+                
                 <button
-                  className="flex items-center px-5 py-2.5 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                   onClick={handleMatricularSeleccionados}
                   disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-[13px] font-medium rounded-lg hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <BookOpen className="w-4 h-4" />
                   Matricular ({cursosSeleccionados.length})
                 </button>
               </div>
             </>
           ) : (
-            <div className="text-center py-12">
-              <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No hay cursos disponibles para matricular en este período</p>
-              <p className="text-gray-400 text-sm mt-2">Selecciona otro período o espera a que se abra el período de matrícula</p>
+            <div className="py-16 text-center">
+              <Clock className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
+              <p className="text-sm text-zinc-500">No hay cursos disponibles para matricular</p>
+              <p className="text-[11px] text-zinc-400 mt-1">Selecciona otro período o espera la apertura de matrícula</p>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Cursos No Disponibles - Opcional, comentado por ahora */}
-      {cursosNoDisponiblesList.length > 0 && (
-        <div className="bg-white rounded-lg shadow border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 bg-orange-50">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-orange-600" />
-              Cursos No Disponibles
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-3">
+        {/* Cursos No Disponibles */}
+        {cursosNoDisponiblesList.length > 0 && (
+          <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-zinc-100 bg-orange-50/50 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-orange-500" />
+              <h2 className="text-sm font-medium text-zinc-900">Cursos No Disponibles</h2>
+            </div>
+            <div className="p-4 space-y-2">
               {cursosNoDisponiblesList.map((curso) => (
-                <div key={curso.id} className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{curso.nombreCurso}</p>
-                    <p className="text-sm text-gray-600">{curso.nombreDocente} • {curso.creditos} créditos</p>
+                <div key={curso.id} className="flex items-center justify-between p-3 bg-orange-50/30 border border-orange-100 rounded-lg">
+                  <div>
+                    <p className="text-[13px] font-medium text-zinc-900">{curso.nombreCurso}</p>
+                    <p className="text-[11px] text-zinc-500">{curso.nombreDocente} · {curso.creditos} créditos</p>
                   </div>
                   {curso.motivoNoDisponible && (
-                    <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
+                    <span className="px-2.5 py-1 bg-orange-100 text-orange-700 rounded text-[11px] font-medium">
                       {curso.motivoNoDisponible}
                     </span>
                   )}
@@ -377,8 +335,8 @@ const MatriculaPage: React.FC = () => {
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
