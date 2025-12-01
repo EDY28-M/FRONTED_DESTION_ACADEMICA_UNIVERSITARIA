@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Horario } from '../types/horario';
 
 const API_URL = 'http://localhost:5251/api';
 
@@ -271,9 +272,18 @@ export const docenteTiposEvaluacionApi = {
   },
 };
 
+// API de horarios del docente
+export const docenteHorariosApi = {
+  getMiHorario: async (): Promise<Horario[]> => {
+    const response = await apiClient.get('/horarios/mi-horario');
+    return response.data;
+  },
+};
+
 export default {
   auth: docenteAuthApi,
   cursos: docenteCursosApi,
   asistencia: docenteAsistenciaApi,
   tiposEvaluacion: docenteTiposEvaluacionApi,
+  horarios: docenteHorariosApi,
 };

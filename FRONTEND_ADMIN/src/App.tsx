@@ -19,7 +19,8 @@ import {
   PerfilDocentePage,
   MisCursosDocentePage,
   EstudiantesDocentePage,
-  AsistenciasDocentePage
+  AsistenciasDocentePage,
+  HorarioDocentePage
 } from './pages/Docente'
 import Dashboard from './pages/Dashboard'
 import DocentesPage from './pages/Docentes/DocentesPage'
@@ -39,6 +40,7 @@ import AsistenciasPage from './pages/Student/AsistenciasPage'
 import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
 import RegistroNotasPage from './pages/Student/RegistroNotasPage'
 import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
+import { HorarioEstudiantePage } from './pages/Student/HorarioEstudiantePage'
 
 function App() {
   const { isAuthenticated, isLoading, user } = useAuth()
@@ -116,6 +118,7 @@ function App() {
           <Route path="mis-cursos" element={<MisCursosDocentePage />} />
           <Route path="estudiantes" element={<EstudiantesDocentePage />} />
           <Route path="asistencias" element={<AsistenciasDocentePage />} />
+          <Route path="horario" element={<HorarioDocentePage />} />
           <Route path="curso/:id" element={<GestionCursoDocentePage />} />
           <Route path="perfil" element={<PerfilDocentePage />} />
         </Route>
@@ -142,6 +145,7 @@ function App() {
         <Route path="notas" element={<NotasPage />} />
         <Route path="registro-notas" element={<RegistroNotasPage />} />
         <Route path="asistencias" element={<AsistenciasPage />} />
+        <Route path="horario" element={<HorarioEstudiantePage />} />
         <Route path="orden-merito" element={<OrdenMeritoPage />} />
         <Route path="perfil" element={<PerfilEstudiantePage />} />
       </Route>

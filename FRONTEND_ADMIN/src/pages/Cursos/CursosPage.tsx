@@ -17,6 +17,7 @@ import { cursosApi } from '../../services/cursosService'
 import { docentesApi } from '../../services/docentesService'
 import { Curso } from '../../types'
 import CursoModal from '../../components/Cursos/CursoModal'
+import GestionHorarioModal from '../../components/Cursos/GestionHorarioModal'
 import ConfirmModal from '../../components/Common/ConfirmModal'
 import { useNotifications } from '../../contexts/NotificationContext'
 
@@ -24,6 +25,7 @@ const CursosPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isHorarioModalOpen, setIsHorarioModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [cursoToDelete, setCursoToDelete] = useState<Curso | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
@@ -89,6 +91,11 @@ const CursosPage = () => {
     setModalMode('view')
     setSelectedCurso(curso)
     setIsModalOpen(true)
+  }
+
+  const handleHorario = (curso: Curso) => {
+    setSelectedCurso(curso)
+    setIsHorarioModalOpen(true)
   }
 
   const handleDelete = (curso: Curso) => {
@@ -304,6 +311,13 @@ const CursosPage = () => {
                           <EyeIcon className="h-4 w-4" />
                         </button>
                         <button
+                          onClick={() => handleHorario(curso)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Gestionar Horario"
+                        >
+                          <ClockIcon className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleEdit(curso)}
                           className="p-1 text-gray-400 hover:text-green-600 transition-colors"
                           title="Editar"
@@ -334,6 +348,12 @@ const CursosPage = () => {
         curso={selectedCurso}
         mode={modalMode}
         docentes={docentes || []}
+      />
+
+      <GestionHorarioModal
+        isOpen={isHorarioModalOpen}
+        onClose={() => setIsHorarioModalOpen(false)}
+        curso={selectedCurso}
       />
 
       <ConfirmModal

@@ -9,6 +9,7 @@ import {
   RegistroNotas,
   SemestreRegistro
 } from '../types/estudiante';
+import { Horario } from '../types/horario';
 
 export const estudiantesApi = {
   // Obtener perfil del estudiante autenticado
@@ -28,6 +29,12 @@ export const estudiantesApi = {
   getMisCursos: async (idPeriodo?: number): Promise<Matricula[]> => {
     const params = idPeriodo ? { idPeriodo } : {};
     const response = await axios.get('/estudiantes/mis-cursos', { params });
+    return response.data;
+  },
+
+  // Obtener horario del estudiante
+  getMiHorario: async (): Promise<Horario[]> => {
+    const response = await axios.get('/horarios/mi-horario');
     return response.data;
   },
 

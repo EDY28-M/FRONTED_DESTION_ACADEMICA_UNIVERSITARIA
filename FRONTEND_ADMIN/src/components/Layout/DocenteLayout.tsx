@@ -8,6 +8,7 @@ import {
   BookOpenIcon,
   UsersIcon,
   CalendarIcon,
+  CalendarDaysIcon,
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
   Bars3Icon,
@@ -170,6 +171,11 @@ export const DocenteLayout = () => {
             to="/docente/asistencias"
             icon={CalendarIcon} 
             label="Asistencias"
+          />
+          <SidebarItem 
+            to="/docente/horario"
+            icon={CalendarDaysIcon} 
+            label="Mi Horario"
           />
         </nav>
 

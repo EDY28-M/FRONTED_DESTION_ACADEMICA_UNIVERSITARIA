@@ -5,5 +5,6 @@ export { PerfilDocentePage } from './PerfilDocentePage';
 export { MisCursosDocentePage } from './MisCursosDocentePage';
 export { EstudiantesDocentePage } from './EstudiantesDocentePage';
 export { AsistenciasDocentePage } from './AsistenciasDocentePage';
+export { HorarioDocentePage } from './HorarioDocentePage';
 export { ForgotPasswordDocentePage } from './ForgotPasswordDocentePage';
 export { ResetPasswordDocentePage } from './ResetPasswordDocentePage';

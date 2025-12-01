@@ -17,7 +17,8 @@ import {
   ChevronDown,
   Shield,
   Calendar,
-  MapPin
+  MapPin,
+  Clock
 } from 'lucide-react';
 
 const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -67,6 +68,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
     { name: 'Notas', href: '/estudiante/notas', icon: FileText },
     { name: 'Asistencias', href: '/estudiante/asistencias', icon: Calendar },
+    { name: 'Mi Horario', href: '/estudiante/horario', icon: Clock },
     { name: 'Registro de Notas', href: '/estudiante/registro-notas', icon: Award },
     { name: 'Orden de Mérito', href: '/estudiante/orden-merito', icon: GraduationCap },
     { name: 'Perfil', href: '/estudiante/perfil', icon: User },
