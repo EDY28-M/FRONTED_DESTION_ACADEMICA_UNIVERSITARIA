@@ -23,7 +23,7 @@ import {
   HorarioDocentePage
 } from './pages/Docente'
 import Dashboard from './pages/Dashboard'
-import DocentesPage from './pages/Docentes/DocentesPage'
+import DocentesPage from './pages/Docente/DocentesPage'
 import CursosPage from './pages/Cursos/CursosPage'
 import EstadisticasPage from './pages/Estadisticas/EstadisticasPage'
 import PerfilPage from './pages/Perfil/PerfilPage'
@@ -43,18 +43,10 @@ import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
 import { HorarioEstudiantePage } from './pages/Student/HorarioEstudiantePage'
 
 function App() {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando aplicación...</p>
-        </div>
-      </div>
-    )
-  }
+  // Eliminar el loading bloqueante - la autenticación ahora es instantánea
+  // El AuthContext ya inicializa con datos del localStorage
 
   return (
     <DocenteAuthProvider>

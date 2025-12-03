@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-toastify'
-import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, BookOpenIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
@@ -98,16 +98,16 @@ const LoginPage: React.FC = () => {
         className="absolute inset-0"
         style={{
           backdropFilter: 'blur(3px)',
-          backgroundColor: 'rgba(0, 51, 102, 0.3)',
+          backgroundColor: 'rgba(8, 8, 8, 0.3)',
         }}
       />
 
       {/* Contenedor Principal - Tarjeta flotante */}
       <div 
-        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl"
+        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
-          borderRadius: '8px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+          borderRadius: '12px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
         {/* Banner de Éxito - Reset de Contraseña */}
@@ -123,7 +123,6 @@ const LoginPage: React.FC = () => {
               <CheckCircleIcon className="w-6 h-6 text-white flex-shrink-0" />
               <p
                 className="text-white text-sm font-medium flex-1"
-                style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
               >
                 Sesión exitosa. Usa tu nueva contraseña para ingresar.
               </p>
@@ -139,45 +138,18 @@ const LoginPage: React.FC = () => {
 
         {/* Logo y Marca */}
         <div className="text-center mb-8">
-          {/* Escudo minimalista con libro */}
-          <div className="mx-auto w-20 h-20 relative mb-4">
-            <div 
-              className="w-full h-full rounded-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #003366 0%, #004080 100%)',
-                boxShadow: '0 4px 14px rgba(0, 51, 102, 0.4)',
-              }}
-            >
-              <div className="relative">
-                <BookOpenIcon 
-                  className="w-10 h-10"
-                  style={{ color: '#C7A740' }}
-                />
-                {/* Detalles dorados del escudo */}
-                <div 
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                  style={{ backgroundColor: '#C7A740' }}
-                />
-              </div>
-            </div>
-            {/* Borde decorativo dorado */}
-            <div 
-              className="absolute inset-0 rounded-full"
-              style={{
-                border: '3px solid #C7A740',
-                opacity: 0.6,
-              }}
+          {/* Logo Escudo Universitario */}
+          <div className="mx-auto w-20 h-24 relative mb-4">
+            <img 
+              src="/src/image/fondouni.svg" 
+              alt="Escudo Universitario" 
+              className="w-full h-full object-contain"
             />
           </div>
           
           {/* Etiqueta de Marca */}
           <h1 
-            className="text-xl font-bold tracking-wider"
-            style={{ 
-              color: '#003366',
-              fontFamily: "'Montserrat', 'Roboto', sans-serif",
-              letterSpacing: '0.15em',
-            }}
+            className="text-xl font-bold tracking-wider text-zinc-800"
           >
             UNIVERSIDAD ACADEMICA
           </h1>
@@ -185,11 +157,7 @@ const LoginPage: React.FC = () => {
 
         {/* Título de la Pantalla */}
         <h2 
-          className="text-center text-2xl sm:text-3xl font-bold mb-8"
-          style={{ 
-            color: '#003366',
-            fontFamily: "'Montserrat', 'Roboto', sans-serif",
-          }}
+          className="text-center text-2xl sm:text-3xl font-bold mb-8 text-zinc-800"
         >
           Acceso al Portal Académico
         </h2>
@@ -199,11 +167,7 @@ const LoginPage: React.FC = () => {
           <div>
             <label 
               htmlFor="email" 
-              className="block text-sm font-medium mb-2"
-              style={{ 
-                color: '#003366',
-                fontFamily: "'Montserrat', 'Roboto', sans-serif",
-              }}
+              className="block text-sm font-medium mb-2 text-zinc-700"
             >
               Correo institucional
             </label>
@@ -221,12 +185,8 @@ const LoginPage: React.FC = () => {
                   setEmail(e.target.value)
                   setErrors({ ...errors, email: undefined })
                 }}
-                className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-400' : 'border-gray-300'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
-                style={{
-                  fontFamily: "'Montserrat', 'Roboto', sans-serif",
-                  fontSize: '0.95rem',
-                }}
+                className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-400' : 'border-zinc-200'
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                 placeholder="Correo Electrónico Universitario"
               />
             </div>
@@ -239,11 +199,7 @@ const LoginPage: React.FC = () => {
           <div>
             <label 
               htmlFor="password" 
-              className="block text-sm font-medium mb-2"
-              style={{ 
-                color: '#003366',
-                fontFamily: "'Montserrat', 'Roboto', sans-serif",
-              }}
+              className="block text-sm font-medium mb-2 text-zinc-700"
             >
               Contraseña
             </label>
@@ -261,12 +217,8 @@ const LoginPage: React.FC = () => {
                   setPassword(e.target.value)
                   setErrors({ ...errors, password: undefined })
                 }}
-                className={`block w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-400' : 'border-gray-300'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200`}
-                style={{
-                  fontFamily: "'Montserrat', 'Roboto', sans-serif",
-                  fontSize: '0.95rem',
-                }}
+                className={`block w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-400' : 'border-zinc-200'
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                 placeholder="••••••••"
               />
               <button
@@ -290,30 +242,19 @@ const LoginPage: React.FC = () => {
           <div className="text-right">
             <Link 
               to="/forgot-password" 
-              className="text-sm font-medium hover:underline transition-all"
-              style={{ 
-                color: '#C7A740',
-                fontFamily: "'Montserrat', 'Roboto', sans-serif",
-              }}
+              className="text-sm font-medium hover:underline transition-all text-zinc-600 hover:text-zinc-900"
             >
               ¿Olvidaste tu contraseña?
             </Link>
           </div>
 
-         
-
           {/* Botón de Iniciar Sesión */}
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-bold rounded-lg transition-all duration-300 ${
-              isLoading ? 'cursor-not-allowed opacity-80' : 'hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5'
+            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-lg transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
             }`}
-            style={{
-              backgroundColor: '#003366',
-              fontFamily: "'Montserrat', 'Roboto', sans-serif",
-              letterSpacing: '0.05em',
-            }}
           >
             {isLoading ? (
               <>
@@ -348,11 +289,7 @@ const LoginPage: React.FC = () => {
         {/* Pie de Página */}
         <div className="mt-8 text-center">
           <p 
-            className="text-sm italic"
-            style={{ 
-              color: '#808080',
-              fontFamily: "'Montserrat', 'Roboto', sans-serif",
-            }}
+            className="text-sm italic text-zinc-500"
           >
             Tu futuro comienza aquí.
           </p>

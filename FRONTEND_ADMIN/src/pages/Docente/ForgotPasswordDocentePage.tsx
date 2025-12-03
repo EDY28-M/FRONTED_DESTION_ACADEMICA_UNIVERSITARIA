@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { EnvelopeIcon, AcademicCapIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
 const API_URL = 'http://localhost:5251/api';
@@ -74,40 +74,35 @@ export const ForgotPasswordDocentePage: React.FC = () => {
         className="absolute inset-0"
         style={{
           backdropFilter: 'blur(3px)',
-          backgroundColor: 'rgba(0, 51, 102, 0.4)',
+          backgroundColor: 'rgba(8, 8, 8, 0.3)',
         }}
       />
 
       {/* Contenedor Principal */}
       <div 
-        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl"
+        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
-          borderRadius: '8px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+          borderRadius: '12px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
         {/* Logo y Marca */}
         <div className="text-center mb-8">
-          <div 
-            className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
-            style={{ backgroundColor: '#003366' }}
-          >
-            <AcademicCapIcon className="w-12 h-12 text-white" />
+          <div className="mx-auto w-20 h-24 relative mb-4">
+            <img 
+              src="/src/image/fondouni.svg" 
+              alt="Escudo Universitario" 
+              className="w-full h-full object-contain"
+            />
           </div>
           
-          <h1 
-            className="text-2xl font-bold mb-2"
-            style={{ 
-              color: '#003366',
-              fontFamily: "'Montserrat', 'Roboto', sans-serif",
-            }}
-          >
-            Recuperar Contraseña
+          <h1 className="text-xl font-bold tracking-wider text-zinc-800 mb-2">
+            UNIVERSIDAD ACADEMICA
           </h1>
           
-          <p className="text-gray-500 text-sm">
-            Portal Docente - SIAGE
-          </p>
+          <h2 className="text-2xl font-bold text-zinc-800">
+            Recuperar Contraseña 
+          </h2>
         </div>
 
         {emailSent ? (
@@ -127,10 +122,7 @@ export const ForgotPasswordDocentePage: React.FC = () => {
             </p>
             <Link
               to="/docente/login"
-              className="inline-flex items-center justify-center w-full py-3 px-4 rounded-lg text-white font-semibold transition-all duration-200"
-              style={{ backgroundColor: '#003366' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#002244'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#003366'}
+              className="inline-flex items-center justify-center w-full py-3.5 px-4 rounded-lg text-white font-medium transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 hover:shadow-lg"
             >
               <ArrowLeftIcon className="w-5 h-5 mr-2" />
               Volver al inicio de sesión
@@ -139,7 +131,7 @@ export const ForgotPasswordDocentePage: React.FC = () => {
         ) : (
           /* Formulario */
           <>
-            <p className="text-gray-600 text-sm text-center mb-6">
+            <p className="text-zinc-500 text-sm text-center mb-6">
               Ingresa tu correo institucional y te enviaremos las instrucciones para restablecer tu contraseña.
             </p>
 
@@ -148,8 +140,7 @@ export const ForgotPasswordDocentePage: React.FC = () => {
               <div>
                 <label 
                   htmlFor="correo" 
-                  className="block text-sm font-semibold mb-2"
-                  style={{ color: '#003366' }}
+                  className="block text-sm font-medium mb-2 text-zinc-700"
                 >
                   Correo Institucional
                 </label>
@@ -165,14 +156,8 @@ export const ForgotPasswordDocentePage: React.FC = () => {
                       setCorreo(e.target.value);
                       setError('');
                     }}
-                    className={`
-                      block w-full pl-10 pr-3 py-3 border rounded-lg
-                      focus:outline-none focus:ring-2 transition-all duration-200
-                      ${error 
-                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                        : 'border-gray-300 focus:ring-primary-600 focus:border-primary-600'
-                      }
-                    `}
+                    className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-400' : 'border-zinc-200'
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                     placeholder="docente@unas.edu.pe"
                   />
                 </div>
@@ -185,16 +170,9 @@ export const ForgotPasswordDocentePage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 rounded-lg text-white font-semibold transition-all duration-200 flex items-center justify-center gap-2"
-                style={{ 
-                  backgroundColor: isLoading ? '#6B7280' : '#003366',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isLoading) e.currentTarget.style.backgroundColor = '#002244';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isLoading) e.currentTarget.style.backgroundColor = '#003366';
-                }}
+                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-lg transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
+                }`}
               >
                 {isLoading ? (
                   <>
@@ -214,8 +192,7 @@ export const ForgotPasswordDocentePage: React.FC = () => {
             <div className="mt-6 text-center">
               <Link 
                 to="/docente/login"
-                className="inline-flex items-center text-sm font-medium hover:underline"
-                style={{ color: '#003366' }}
+                className="inline-flex items-center text-sm font-medium hover:underline text-zinc-600 hover:text-zinc-900 transition-all"
               >
                 <ArrowLeftIcon className="w-4 h-4 mr-1" />
                 Volver al inicio de sesión
@@ -225,9 +202,9 @@ export const ForgotPasswordDocentePage: React.FC = () => {
         )}
 
         {/* Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-          <p className="text-xs text-gray-500">
-            © 2025 Sistema de Gestión Académica
+        <div className="mt-8 pt-6 border-t border-zinc-200 text-center">
+          <p className="text-xs text-zinc-500">
+            Tu futuro comienza aquí.
           </p>
         </div>
       </div>

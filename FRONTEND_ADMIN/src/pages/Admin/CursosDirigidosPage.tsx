@@ -156,10 +156,7 @@ export default function CursosDirigidosPage() {
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-zinc-100 rounded-lg">
-            <BookOpen className="w-6 h-6 text-zinc-900" />
-          </div>
+        <div className="mb-2">
           <h1 className="text-2xl font-bold text-zinc-900">Cursos Dirigidos</h1>
         </div>
         <p className="text-zinc-500">

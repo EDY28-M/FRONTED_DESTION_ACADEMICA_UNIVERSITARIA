@@ -223,12 +223,9 @@ export default function GestionDocentesPasswordPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-zinc-100 rounded-lg">
-              <GraduationCap className="w-6 h-6 text-zinc-900" />
+            <div className="mb-2">
+              <h1 className="text-2xl font-bold text-zinc-900">Gestión de Docentes</h1>
             </div>
-            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Docentes</h1>
-          </div>
           <p className="text-zinc-500">
             Administra docentes y sus credenciales de acceso al sistema.
           </p>

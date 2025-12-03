@@ -77,6 +77,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false,
     if (path === '/dashboard') {
       return location.pathname === '/' || location.pathname === '/dashboard'
     }
+    // Exact match for /estudiantes to avoid conflict with /estudiantes/visualizar
+    if (path === '/estudiantes') {
+      return location.pathname === '/estudiantes'
+    }
+    // For other routes, check exact match or if it starts with the path
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 

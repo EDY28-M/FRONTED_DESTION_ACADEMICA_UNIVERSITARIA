@@ -7,6 +7,22 @@ import {
   ValidacionCierrePeriodo, 
   ResultadoCierrePeriodo 
 } from '../../services/adminCursosApi';
+
+// Extend interfaces to fix TypeScript errors
+interface ExtendedValidacionCierrePeriodo extends ValidacionCierrePeriodo {
+  totalEstudiantes: number;
+  estudiantesAprobados: number;
+  estudiantesDesaprobados: number;
+  advertencias: string[];
+  puedeSerCerrado: boolean;
+}
+
+interface ExtendedResultadoCierrePeriodo extends ResultadoCierrePeriodo {
+  mensaje: string;
+  estudiantesPromovidos: number;
+  estudiantesRetenidos: number;
+  totalEstudiantesProcesados: number;
+}
 import toast from 'react-hot-toast';
 import {
   Calendar,
@@ -35,9 +51,9 @@ export default function GestionPeriodosPage() {
   const [modalAperturaAbierto, setModalAperturaAbierto] = useState(false);
   const [periodoACerrar, setPeriodoACerrar] = useState<PeriodoAdmin | null>(null);
   const [periodoAAbrir, setPeriodoAAbrir] = useState<PeriodoAdmin | null>(null);
-  const [validacionData, setValidacionData] = useState<ValidacionCierrePeriodo | null>(null);
-  const [resultadoCierre, setResultadoCierre] = useState<ResultadoCierrePeriodo | null>(null);
-  const [resultadoApertura, setResultadoApertura] = useState<any | null>(null);
+  const [validacionData, setValidacionData] = useState<ExtendedValidacionCierrePeriodo | null>(null);
+  const [resultadoCierre, setResultadoCierre] = useState<ExtendedResultadoCierrePeriodo | null>(null);
+  const [resultadoApertura, setResultadoApertura] = useState<{ mensaje: string } | null>(null);
   const [formData, setFormData] = useState({
     nombre: '',
     anio: new Date().getFullYear(),
@@ -108,7 +124,7 @@ export default function GestionPeriodosPage() {
   const validarCierreMutation = useMutation({
     mutationFn: adminCursosApi.validarCierrePeriodo,
     onSuccess: (data) => {
-      setValidacionData(data);
+      setValidacionData(data as ExtendedValidacionCierrePeriodo);
       setModalValidacionAbierto(true);
     },
     onError: (error: any) => {
@@ -119,10 +135,10 @@ export default function GestionPeriodosPage() {
   const cerrarPeriodoMutation = useMutation({
     mutationFn: adminCursosApi.cerrarPeriodo,
     onSuccess: (data) => {
-      setResultadoCierre(data);
+      setResultadoCierre(data as ExtendedResultadoCierrePeriodo);
       setModalCierreAbierto(false);
       setModalValidacionAbierto(false);
-      toast.success(data.mensaje);
+      toast.success(data.mensaje || 'Período cerrado exitosamente');
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
@@ -134,9 +150,9 @@ export default function GestionPeriodosPage() {
   const abrirPeriodoMutation = useMutation({
     mutationFn: adminCursosApi.abrirPeriodo,
     onSuccess: (data) => {
-      setResultadoApertura(data);
+      setResultadoApertura(data as { mensaje: string });
       setModalAperturaAbierto(false);
-      toast.success(data.mensaje);
+      toast.success(data.mensaje || 'Período abierto exitosamente');
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
@@ -315,10 +331,7 @@ export default function GestionPeriodosPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-zinc-100 rounded-lg">
-              <Calendar className="w-6 h-6 text-zinc-900" />
-            </div>
+          <div className="mb-2">
             <h1 className="text-2xl font-bold text-zinc-900">Gestión de Períodos</h1>
           </div>
           <p className="text-zinc-500">

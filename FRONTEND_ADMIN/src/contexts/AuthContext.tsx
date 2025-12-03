@@ -21,8 +21,14 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Inicializar con datos del localStorage para carga instantánea
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = authService.getUser()
+    const token = authService.getToken()
+    // Si hay token y usuario almacenado, confiar en ellos inicialmente
+    return token && storedUser ? storedUser : null
+  })
+  const [isLoading, setIsLoading] = useState(false) // Cambiar a false para carga instantánea
 
   // Obtener addNotification solo si ya está montado el NotificationProvider
   const getNotifications = () => {
@@ -33,34 +39,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  // Verificar autenticación al cargar la aplicación
+  // Validar token en segundo plano (sin bloquear la UI)
   useEffect(() => {
-    const initAuth = async () => {
+    const validateAuthInBackground = async () => {
       const token = authService.getToken()
       
-      if (token) {
-        const storedUser = authService.getUser()
-        
-        // Intentar validar el token
-        const isValid = await authService.validateToken()
-        
-        if (isValid && storedUser) {
-          setUser(storedUser)
+      if (!token) {
+        setUser(null)
+        return
+      }
+
+      // Verificar si el token ya expiró localmente (sin llamada al servidor)
+      if (authService.isTokenExpired()) {
+        // Intentar refrescar silenciosamente
+        const refreshed = await authService.refreshToken()
+        if (refreshed) {
+          setUser(refreshed.usuario)
         } else {
-          // Si el token no es válido, intentar refrescar
-          const refreshed = await authService.refreshToken()
-          if (refreshed) {
-            setUser(refreshed.usuario)
-          } else {
-            authService.clearAuthData()
-          }
+          setUser(null)
+          authService.clearAuthData()
         }
       }
-      
-      setIsLoading(false)
+      // Si el token no ha expirado, confiar en los datos locales
     }
 
-    initAuth()
+    validateAuthInBackground()
   }, [])
 
   // Auto-refresh del token cuando está próximo a expirar
