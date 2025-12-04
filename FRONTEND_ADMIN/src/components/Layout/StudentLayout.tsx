@@ -18,12 +18,16 @@ import {
   Shield,
   Calendar,
   MapPin,
-  Clock
+  Clock,
+  Plus,
+  Minus,
+  Building2
 } from 'lucide-react';
 
 const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [registroAcademicoOpen, setRegistroAcademicoOpen] = useState(true);
   const [clientIp, setClientIp] = useState<string>('Obteniendo...');
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -65,7 +69,6 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigation = [
     { name: 'Inicio', href: '/estudiante/inicio', icon: Home },
     { name: 'Mis Cursos', href: '/estudiante/mis-cursos', icon: BookOpen },
-    { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
     { name: 'Notas', href: '/estudiante/notas', icon: FileText },
     { name: 'Asistencias', href: '/estudiante/asistencias', icon: Calendar },
     { name: 'Mi Horario', href: '/estudiante/horario', icon: Clock },
@@ -73,6 +76,18 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { name: 'Orden de Mérito', href: '/estudiante/orden-merito', icon: GraduationCap },
     { name: 'Perfil', href: '/estudiante/perfil', icon: User },
   ];
+
+  // Submenú de Registro Académico
+  const registroAcademicoSubMenu = [
+    { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
+    { name: 'Aumento de Cursos', href: '/estudiante/aumento-cursos', icon: Plus },
+    { name: 'Retiro de Cursos', href: '/estudiante/retiro-cursos', icon: Minus },
+  ];
+
+  // Verificar si alguna ruta del submenú está activa
+  const isRegistroAcademicoActive = location.pathname.includes('/estudiante/matricula') || 
+    location.pathname.includes('/estudiante/aumento-cursos') || 
+    location.pathname.includes('/estudiante/retiro-cursos');
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -101,7 +116,67 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </button>
           </div>
           <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-            {navigation.map((item) => {
+            {navigation.slice(0, 2).map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-zinc-100 text-zinc-900'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+
+            {/* Submenú Registro Académico */}
+            <div className="py-1">
+              <button
+                onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isRegistroAcademicoActive
+                    ? 'bg-teal-50 text-teal-700'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
+                  <span>Registro Académico</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {registroAcademicoOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
+                  {registroAcademicoSubMenu.map((subItem) => {
+                    const isSubActive = location.pathname === subItem.href;
+                    return (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                          isSubActive
+                            ? 'bg-teal-100 text-teal-800'
+                            : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
+                        {subItem.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {navigation.slice(2).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
@@ -142,7 +217,65 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <span className="ml-2 text-sm font-semibold text-zinc-900">Portal Estudiante</span>
           </div>
           <nav className="flex-1 px-3 py-4 space-y-0.5">
-            {navigation.map((item) => {
+            {navigation.slice(0, 2).map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isActive
+                      ? 'bg-zinc-100 text-zinc-900'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+
+            {/* Submenú Registro Académico - Desktop */}
+            <div className="py-1">
+              <button
+                onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isRegistroAcademicoActive
+                    ? 'bg-teal-50 text-teal-700'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
+                  <span>Registro Académico</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {registroAcademicoOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
+                  {registroAcademicoSubMenu.map((subItem) => {
+                    const isSubActive = location.pathname === subItem.href;
+                    return (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                          isSubActive
+                            ? 'bg-teal-100 text-teal-800'
+                            : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
+                        {subItem.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {navigation.slice(2).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link

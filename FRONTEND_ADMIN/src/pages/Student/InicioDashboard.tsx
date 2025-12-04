@@ -11,7 +11,8 @@ import {
   FileText,
   ClipboardList,
   Layers,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Plus
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Horario } from '../../types/horario';
@@ -67,12 +68,6 @@ const InicioDashboard: React.FC = () => {
     queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const { data: misCursos } = useQuery({
-    queryKey: ['mis-cursos-dashboard', periodo?.id],
-    queryFn: () => estudiantesApi.getMisCursos(periodo?.id),
-    enabled: !!periodo,
-  });
-
   const { data: estadisticas } = useQuery({
     queryKey: ['estadisticas', periodo?.id],
     queryFn: () => estudiantesApi.getNotas(periodo?.id),
@@ -84,7 +79,18 @@ const InicioDashboard: React.FC = () => {
     queryFn: estudiantesApi.getMiHorario,
   });
 
-  const cursosActivos = useMemo(() => misCursos?.filter(c => c.estado === 'Matriculado') || [], [misCursos]);
+  // Cursos disponibles para matrícula
+  const { data: cursosDisponibles } = useQuery({
+    queryKey: ['cursos-disponibles-dashboard', periodo?.id],
+    queryFn: () => estudiantesApi.getCursosDisponibles(periodo?.id),
+    enabled: !!periodo,
+  });
+
+  // Filtrar solo cursos disponibles (no matriculados)
+  const cursosParaMatricular = useMemo(() => 
+    cursosDisponibles?.filter(c => c.disponible && !c.yaMatriculado) || [], 
+    [cursosDisponibles]
+  );
   const promedioGeneral = estadisticas?.promedioGeneral || perfil?.promedioAcumulado || 0;
   const nextClass = useMemo(() => getNextClass(horarios), [horarios]);
 
@@ -173,17 +179,17 @@ const InicioDashboard: React.FC = () => {
               <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Créditos</span>
             </div>
 
-            {/* Cursos */}
+            {/* Cursos Disponibles */}
             <div className="p-4 text-center">
               <div className="flex justify-center mb-2">
-                <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
-                  <BookOpen className="w-4 h-4 text-zinc-600" />
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-emerald-600" />
                 </div>
               </div>
               <span className="text-2xl font-semibold text-zinc-900 tabular-nums block">
-                {cursosActivos.length}
+                {cursosParaMatricular.length}
               </span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Cursos</span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Disponibles</span>
             </div>
           </div>
         </div>
@@ -242,30 +248,38 @@ const InicioDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* MÓVIL: Cursos como lista compacta */}
+      {/* MÓVIL: Cursos disponibles como lista compacta */}
       <div className="md:hidden">
         <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">Cursos Matriculados</h3>
-            <Link to="/estudiante/mis-cursos" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1">
-              Ver todos <ArrowRight className="w-3 h-3" />
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">Cursos Disponibles</h3>
+              {cursosParaMatricular.length > 0 && (
+                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
+                  {cursosParaMatricular.length}
+                </span>
+              )}
+            </div>
+            <Link to="/estudiante/matricula" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+              Matricular <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="divide-y divide-zinc-50">
-            {cursosActivos.slice(0, 4).map((curso) => (
+            {cursosParaMatricular.slice(0, 4).map((curso) => (
               <div key={curso.id} className="px-4 py-3 flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-zinc-900 truncate">{curso.nombreCurso}</p>
-                  <p className="text-xs text-zinc-500">{curso.nombreDocente || 'Sin docente'}</p>
+                  <p className="text-xs text-zinc-500">Ciclo {curso.ciclo} • {(curso.capacidadMaxima || 30) - curso.estudiantesMatriculados} vacantes</p>
                 </div>
-                <span className="ml-3 text-xs font-mono text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded">
+                <span className="ml-3 text-xs font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
                   {curso.creditos} cr
                 </span>
               </div>
             ))}
-            {cursosActivos.length === 0 && (
+            {cursosParaMatricular.length === 0 && (
               <div className="px-4 py-8 text-center">
-                <p className="text-sm text-zinc-400">Sin cursos matriculados</p>
+                <BookOpen className="w-6 h-6 text-zinc-300 mx-auto mb-2" />
+                <p className="text-sm text-zinc-400">No hay cursos disponibles</p>
               </div>
             )}
           </div>
@@ -305,28 +319,29 @@ const InicioDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Cursos */}
+            {/* Cursos Disponibles */}
             <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm flex flex-col justify-between h-32">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Cursos</span>
-                <BookOpen className="w-4 h-4 text-zinc-400" />
+                <Plus className="w-4 h-4 text-emerald-500" />
               </div>
               <div>
                 <span className="text-3xl font-semibold text-zinc-900 tracking-tight tabular-nums">
-                  {cursosActivos.length}
+                  {cursosParaMatricular.length}
                 </span>
-                <span className="text-sm text-zinc-400 ml-1">activos</span>
+                <span className="text-sm text-zinc-400 ml-1">disponibles</span>
               </div>
             </div>
           </div>
 
-          {/* Tabla de Cursos */}
+          {/* Tabla de Cursos Disponibles */}
           <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900">Cursos Matriculados</h3>
-              <Link to="/estudiante/mis-cursos" className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors">
-                Ver todos <ArrowRight className="w-3 h-3" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-zinc-900">Cursos Disponibles </h3>
+              
+              </div>
+        
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -334,32 +349,49 @@ const InicioDashboard: React.FC = () => {
                   <tr className="border-b border-zinc-100 bg-zinc-50/50">
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Tipo</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Ciclo</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Vacantes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
-                  {cursosActivos.slice(0, 5).map((curso) => (
-                    <tr key={curso.id} className="group hover:bg-zinc-50/50 transition-colors">
-                      <td className="px-6 py-3">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</span>
-                          <span className="text-xs text-zinc-500 font-mono">{curso.codigoCurso}</span>
+                  {cursosParaMatricular.length > 0 ? (
+                    cursosParaMatricular.slice(0, 5).map((curso) => {
+                      const vacantes = (curso.capacidadMaxima || 30) - curso.estudiantesMatriculados;
+                      return (
+                        <tr key={curso.id} className="group hover:bg-zinc-50/50 transition-colors">
+                          <td className="px-6 py-3">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</span>
+                              <span className="text-xs text-zinc-500 font-mono">{curso.codigo}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3 text-center">
+                            <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
+                          </td>
+                          <td className="px-6 py-3 text-center">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-zinc-100 text-zinc-700 border-zinc-200">
+                              Ciclo {curso.ciclo}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3 text-center">
+                            <span className={`text-sm font-mono ${vacantes > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                              {vacantes}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center">
+                        <div className="flex flex-col items-center">
+                          <BookOpen className="w-8 h-8 text-zinc-300 mb-2" />
+                          <p className="text-sm text-zinc-500">No hay cursos disponibles para matrícula</p>
+                          <p className="text-xs text-zinc-400 mt-1">Ya estás matriculado en todos los cursos disponibles</p>
                         </div>
                       </td>
-                      <td className="px-6 py-3 text-center">
-                        <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-zinc-100 text-zinc-700 border-zinc-200">
-                          Obligatorio
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <span className="text-sm text-zinc-500">{curso.nombreDocente || 'Por asignar'}</span>
-                      </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

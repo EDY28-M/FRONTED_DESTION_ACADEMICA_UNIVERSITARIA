@@ -35,6 +35,8 @@ import GestionDocentesPasswordPage from './pages/Admin/GestionDocentesPasswordPa
 import InicioDashboard from './pages/Student/InicioDashboard'
 import MisCursosPage from './pages/Student/MisCursosPage'
 import MatriculaPage from './pages/Student/MatriculaPage'
+import AumentoCursosPage from './pages/Student/AumentoCursosPage'
+import RetiroCursosPage from './pages/Student/RetiroCursosPage'
 import NotasPage from './pages/Student/NotasPage'
 import AsistenciasPage from './pages/Student/AsistenciasPage'
 import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
@@ -134,6 +136,8 @@ function App() {
         <Route path="inicio" element={<InicioDashboard />} />
         <Route path="mis-cursos" element={<MisCursosPage />} />
         <Route path="matricula" element={<MatriculaPage />} />
+        <Route path="aumento-cursos" element={<AumentoCursosPage />} />
+        <Route path="retiro-cursos" element={<RetiroCursosPage />} />
         <Route path="notas" element={<NotasPage />} />
         <Route path="registro-notas" element={<RegistroNotasPage />} />
         <Route path="asistencias" element={<AsistenciasPage />} />
