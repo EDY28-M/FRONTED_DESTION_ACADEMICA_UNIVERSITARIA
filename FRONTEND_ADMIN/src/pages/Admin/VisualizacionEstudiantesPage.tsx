@@ -646,7 +646,7 @@ export default function VisualizacionEstudiantesPage() {
                                         <div>
                                           <h3 className="font-semibold text-zinc-900">{periodo.nombrePeriodo}</h3>
                                           <p className="text-sm text-zinc-500">
-                                            Año {periodo.anio} - Ciclo {periodo.ciclo}
+                                            Año {periodo.anio} - Ciclo {periodo.cicloAcademico}
                                           </p>
                                         </div>
                                         {periodo.esActivo && (

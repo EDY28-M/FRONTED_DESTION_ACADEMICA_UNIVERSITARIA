@@ -94,7 +94,7 @@ export default function RegistroNotasPage() {
 
       {/* Lista de Semestres */}
       <div className="space-y-4">
-        {registroNotas.semestres.map((semestre: SemestreRegistro, index: number) => (
+        {registroNotas.semestres.map((semestre: SemestreRegistro) => (
           <div 
             key={semestre.idPeriodo} 
             className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden"
@@ -106,7 +106,7 @@ export default function RegistroNotasPage() {
             >
               <div className="flex items-center gap-4">
                 <div className="bg-zinc-900 text-white w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm">
-                  {index + 1}
+                  {semestre.cicloAcademico}
                 </div>
                 <div className="text-left">
                   <h2 className="text-base font-semibold text-zinc-900">
@@ -115,7 +115,7 @@ export default function RegistroNotasPage() {
                   <div className="flex items-center gap-3 mt-1 text-sm">
                     <span className="flex items-center gap-1.5 text-zinc-500">
                       <Calendar className="w-3.5 h-3.5" />
-                      {semestre.anio} - Ciclo {semestre.ciclo}
+                      {semestre.anio} - Ciclo {semestre.cicloAcademico}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
                       semestre.estado === 'Cerrado' 

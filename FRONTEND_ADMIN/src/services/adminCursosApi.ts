@@ -85,6 +85,7 @@ export interface EstudianteDetalle {
     nombrePeriodo: string;
     anio: number;
     ciclo: string;
+    cicloAcademico: number;  // Ciclo académico secuencial (1, 2, 3, 4...)
     esActivo: boolean;
     totalCursos: number;
     cursosMatriculados: number;
