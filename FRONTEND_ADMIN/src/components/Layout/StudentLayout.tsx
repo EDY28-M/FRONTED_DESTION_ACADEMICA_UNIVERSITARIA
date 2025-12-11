@@ -85,8 +85,8 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   ];
 
   // Verificar si alguna ruta del submenú está activa
-  const isRegistroAcademicoActive = location.pathname.includes('/estudiante/matricula') || 
-    location.pathname.includes('/estudiante/aumento-cursos') || 
+  const isRegistroAcademicoActive = location.pathname.includes('/estudiante/matricula') ||
+    location.pathname.includes('/estudiante/aumento-cursos') ||
     location.pathname.includes('/estudiante/retiro-cursos');
 
   return (
@@ -94,20 +94,22 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {/* Sidebar móvil */}
       <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? '' : 'pointer-events-none'}`}>
         <div
-          className={`fixed inset-0 bg-zinc-900/60 backdrop-blur-sm transition-opacity ${
-            sidebarOpen ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-0 bg-zinc-900/60 backdrop-blur-sm transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className={`fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-zinc-200 transform transition-transform ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-zinc-200 transform transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
           <div className="flex items-center justify-between h-14 px-4 border-b border-zinc-200">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 bg-zinc-900 rounded-md flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+                <img
+                  src="/src/image/fondouni.svg"
+                  alt="Logo Universidad"
+                  className="h-8 w-8 object-contain"
+                />
               </div>
               <span className="text-sm font-semibold text-zinc-900">Portal Estudiante</span>
             </div>
@@ -123,11 +125,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
@@ -139,11 +140,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <div className="py-1">
               <button
                 onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
-                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isRegistroAcademicoActive
-                    ? 'bg-teal-50 text-teal-700'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                }`}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${isRegistroAcademicoActive
+                  ? 'bg-teal-50 text-teal-700'
+                  : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
@@ -151,7 +151,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </div>
                 <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {registroAcademicoOpen && (
                 <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
                   {registroAcademicoSubMenu.map((subItem) => {
@@ -161,11 +161,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         key={subItem.name}
                         to={subItem.href}
                         onClick={() => setSidebarOpen(false)}
-                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          isSubActive
-                            ? 'bg-teal-100 text-teal-800'
-                            : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                        }`}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${isSubActive
+                          ? 'bg-teal-100 text-teal-800'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                          }`}
                       >
                         <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
                         {subItem.name}
@@ -183,11 +182,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
@@ -210,11 +208,15 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {/* Sidebar desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-60 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-zinc-200 overflow-y-auto">
-          <div className="flex items-center h-14 px-4 border-b border-zinc-200">
-            <div className="h-7 w-7 bg-zinc-900 rounded-md flex items-center justify-center">
-              <GraduationCap className="h-4 w-4 text-white" />
+          <div className="flex items-center h-16 px-4 border-b border-zinc-200">
+            <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+              <img
+                src="/src/image/fondouni.svg"
+                alt="Logo Universidad"
+                className="h-8 w-8 object-contain"
+              />
             </div>
-            <span className="ml-2 text-sm font-semibold text-zinc-900">Portal Estudiante</span>
+            <span className="ml-3 text-sm font-semibold text-zinc-900">Portal Estudiante</span>
           </div>
           <nav className="flex-1 px-3 py-4 space-y-0.5">
             {navigation.slice(0, 2).map((item) => {
@@ -223,11 +225,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
@@ -239,11 +240,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <div className="py-1">
               <button
                 onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
-                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isRegistroAcademicoActive
-                    ? 'bg-teal-50 text-teal-700'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                }`}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${isRegistroAcademicoActive
+                  ? 'bg-teal-50 text-teal-700'
+                  : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
@@ -251,7 +251,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 </div>
                 <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {registroAcademicoOpen && (
                 <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
                   {registroAcademicoSubMenu.map((subItem) => {
@@ -260,11 +260,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                       <Link
                         key={subItem.name}
                         to={subItem.href}
-                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          isSubActive
-                            ? 'bg-teal-100 text-teal-800'
-                            : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                        }`}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${isSubActive
+                          ? 'bg-teal-100 text-teal-800'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                          }`}
                       >
                         <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
                         {subItem.name}
@@ -281,11 +280,10 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
                   <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
@@ -327,7 +325,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 onClear={clearNotifications}
                 onMarkAsRead={markAsRead}
               />
-              
+
               {/* Menú del Perfil con Dropdown */}
               <div className="relative" ref={profileMenuRef}>
                 {/* Botón Desktop */}
@@ -380,7 +378,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         <div className="flex items-center text-xs text-zinc-600">
                           <Calendar className="h-3 w-3 mr-1.5 text-zinc-400 flex-shrink-0" />
                           <span className="font-mono tabular-nums">
-                            {user?.ultimoAcceso 
+                            {user?.ultimoAcceso
                               ? new Date(user.ultimoAcceso).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new Date(user.ultimoAcceso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
                               : new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
                             }

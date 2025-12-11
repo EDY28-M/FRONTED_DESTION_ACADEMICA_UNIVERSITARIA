@@ -39,11 +39,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  // Estado para controlar la inactividad
+  const [lastActivity, setLastActivity] = useState(Date.now())
+  const INACTIVITY_LIMIT = 30 * 60 * 1000 // 30 minutos
+
+  // Actualizar tiempo de última actividad
+  useEffect(() => {
+    const updateActivity = () => setLastActivity(Date.now())
+
+    window.addEventListener('mousemove', updateActivity)
+    window.addEventListener('keydown', updateActivity)
+    window.addEventListener('click', updateActivity)
+    window.addEventListener('scroll', updateActivity)
+
+    return () => {
+      window.removeEventListener('mousemove', updateActivity)
+      window.removeEventListener('keydown', updateActivity)
+      window.removeEventListener('click', updateActivity)
+      window.removeEventListener('scroll', updateActivity)
+    }
+  }, [])
+
   // Validar token en segundo plano (sin bloquear la UI)
   useEffect(() => {
     const validateAuthInBackground = async () => {
       const token = authService.getToken()
-      
+
       if (!token) {
         setUser(null)
         return
@@ -66,11 +87,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     validateAuthInBackground()
   }, [])
 
-  // Auto-refresh del token cuando está próximo a expirar
+  // Auto-refresh del token y chequeo de inactividad
   useEffect(() => {
     if (!user) return
 
     const interval = setInterval(async () => {
+      const timeSinceLastActivity = Date.now() - lastActivity
+
+      // Si ha pasado el tiempo límite de inactividad
+      if (timeSinceLastActivity > INACTIVITY_LIMIT) {
+        console.log('Sesión expirada por inactividad')
+        await logout()
+        return
+      }
+
+      // Si el usuario está activo y el token va a expirar, refrescar
       if (authService.isTokenExpiringSoon()) {
         console.log('Token próximo a expirar, refrescando...')
         const refreshed = await authService.refreshToken()
@@ -84,13 +115,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, 60000) // Verificar cada minuto
 
     return () => clearInterval(interval)
-  }, [user])
+  }, [user, lastActivity])
 
   const login = async (credentials: LoginRequest): Promise<User> => {
     try {
       const response = await authService.login(credentials)
       setUser(response.usuario)
-      
+
       // Conectar a SignalR
       const token = localStorage.getItem('token')
       if (token) {
@@ -107,14 +138,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const notificationContext = getNotifications()
         if (notificationContext) {
           await notificationContext.loadNotifications()
-          
+
           // Detectar dispositivo y ubicación
           const deviceInfo = getDeviceInfo()
           const location = await getLocationInfo()
-          
+
           const isNewDev = isNewDevice(deviceInfo.fingerprint)
           const isNewLoc = isNewLocation(location)
-          
+
           // Si es un nuevo dispositivo o ubicación, crear notificación en el servidor
           if (isNewDev || isNewLoc) {
             let message = ''
@@ -125,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             } else {
               message = 'Nueva ubicación detectada'
             }
-            
+
             await notificationContext.createNotification({
               type: 'login',
               action: 'iniciar',
@@ -136,13 +167,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               }
             })
           }
-          
+
           // Registrar dispositivo y ubicación
           registerDevice(deviceInfo.fingerprint)
           registerLocation(location)
         }
       }, 1000)
-      
+
       return response.usuario
     } catch (error) {
       console.error('Error en login:', error)

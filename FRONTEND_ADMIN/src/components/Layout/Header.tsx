@@ -129,10 +129,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
           {/* Profile Dropdown */}
           <Menu as="div" className="relative">
             <Menu.Button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-100 transition-colors">
-              <div className="h-8 w-8 rounded-full bg-zinc-900 flex items-center justify-center">
-                <span className="text-xs font-semibold text-white">
-                  {user ? getInitials(user.nombres, user.apellidos) : 'U'}
-                </span>
+              <div className="h-8 w-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                <User className="h-4 w-4 text-zinc-600" />
               </div>
               <div className="hidden md:block text-left">
                 <div className="text-sm font-medium text-zinc-900">

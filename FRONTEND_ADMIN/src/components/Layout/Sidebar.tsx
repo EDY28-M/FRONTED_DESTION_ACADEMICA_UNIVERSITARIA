@@ -88,10 +88,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false,
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <div className="flex flex-col h-full bg-white border-r border-zinc-200">
       {/* Logo */}
-      <div className="flex items-center h-16 px-6 border-b border-zinc-200">
+      <div className="flex items-center h-16 px-4 border-b border-zinc-200">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900">
-            <Users className="h-5 w-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+            <img
+              src="/src/image/fondouni.svg"
+              alt="Logo Universidad"
+              className="h-8 w-8 object-contain"
+            />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
@@ -110,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false,
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const active = isActive(item.href)
-          
+
           return (
             <Link
               key={item.name}
@@ -118,17 +122,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false,
               onClick={onClose}
               className={`
                 group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${collapsed ? 'justify-center' : ''}
-                ${active 
-                  ? 'bg-zinc-100 text-zinc-900' 
+                ${active
+                  ? 'bg-zinc-100 text-zinc-900'
                   : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                 }
               `}
               title={collapsed ? item.name : undefined}
             >
-              <item.icon 
+              <item.icon
                 className={`h-[18px] w-[18px] shrink-0 transition-colors
                   ${active ? 'text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-600'}
-                `} 
+                `}
               />
               {!collapsed && item.name}
             </Link>

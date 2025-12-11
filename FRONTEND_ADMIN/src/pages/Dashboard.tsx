@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { 
-  Users, 
-  BookOpen, 
+import {
+  Users,
+  BookOpen,
   Clock,
   Award,
   Download,
@@ -10,7 +10,7 @@ import {
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
 import StatsCard from '../components/Dashboard/StatsCard'
-import RecentActivity from '../components/Dashboard/RecentActivity'
+
 import QuickActions from '../components/Dashboard/QuickActions'
 import ChartsSection from '../components/Dashboard/ChartsSection'
 
@@ -87,13 +87,13 @@ const Dashboard = () => {
       </head>
       <body>
         <h1>Reporte Académico - Sistema de Gestión</h1>
-        <p><strong>Fecha de generación:</strong> ${new Date().toLocaleDateString('es-ES', { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}</p>
+        <p><strong>Fecha de generación:</strong> ${new Date().toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}</p>
         
         <h2>Resumen General</h2>
         <div class="stats">
@@ -128,8 +128,8 @@ const Dashboard = () => {
           </thead>
           <tbody>
             ${cursos
-              .sort((a, b) => a.ciclo - b.ciclo)
-              .map(curso => `
+        .sort((a, b) => a.ciclo - b.ciclo)
+        .map(curso => `
                 <tr>
                   <td>Ciclo ${curso.ciclo}</td>
                   <td>${curso.nombreCurso}</td>
@@ -217,7 +217,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
             Dashboard
@@ -226,11 +226,11 @@ const Dashboard = () => {
             Resumen general del sistema de gestión académica
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
           <button
             type="button"
             onClick={handleExportarDatos}
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />
             Exportar
@@ -238,7 +238,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleGenerarReporte}
-            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
             Generar Reporte
@@ -247,7 +247,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <StatsCard key={stat.name} {...stat} isLoading={isLoading} />
         ))}
@@ -263,7 +263,7 @@ const Dashboard = () => {
         {/* Sidebar Content */}
         <div className="space-y-6">
           <QuickActions />
-          <RecentActivity />
+
         </div>
       </div>
     </div>

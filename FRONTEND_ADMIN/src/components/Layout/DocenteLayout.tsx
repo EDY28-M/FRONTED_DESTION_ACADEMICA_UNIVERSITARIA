@@ -18,14 +18,14 @@ import {
 // ============================================
 // SIDEBAR ITEM COMPONENT
 // ============================================
-const SidebarItem = ({ 
-  to, 
-  icon: Icon, 
+const SidebarItem = ({
+  to,
+  icon: Icon,
   label,
   end = false
-}: { 
+}: {
   to: string;
-  icon: React.ElementType; 
+  icon: React.ElementType;
   label: string;
   end?: boolean;
 }) => (
@@ -35,8 +35,8 @@ const SidebarItem = ({
     className={({ isActive }) => `
       w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium
       transition-opacity duration-150
-      ${isActive 
-        ? 'text-zinc-900 bg-zinc-100' 
+      ${isActive
+        ? 'text-zinc-900 bg-zinc-100'
         : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
       }
     `}
@@ -49,14 +49,14 @@ const SidebarItem = ({
 // ============================================
 // SIDEBAR BUTTON COMPONENT (para acciones)
 // ============================================
-const SidebarButton = ({ 
-  icon: Icon, 
-  label, 
+const SidebarButton = ({
+  icon: Icon,
+  label,
   onClick,
   danger = false
-}: { 
-  icon: React.ElementType; 
-  label: string; 
+}: {
+  icon: React.ElementType;
+  label: string;
   onClick?: () => void;
   danger?: boolean;
 }) => (
@@ -65,8 +65,8 @@ const SidebarButton = ({
     className={`
       w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium
       transition-opacity duration-150
-      ${danger 
-        ? 'text-red-600 hover:text-red-700 hover:bg-red-50' 
+      ${danger
+        ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
         : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
       }
     `}
@@ -126,7 +126,7 @@ export const DocenteLayout = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* ========== MOBILE OVERLAY ========== */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -139,9 +139,18 @@ export const DocenteLayout = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo/Brand */}
-        <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-100">
-          <span className="text-sm font-semibold text-zinc-900">Portal Docente</span>
-          <button 
+        <div className="h-16 px-4 flex items-center border-b border-zinc-100">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+              <img
+                src="/src/image/fondouni.svg"
+                alt="Logo Universidad"
+                className="h-8 w-8 object-contain"
+              />
+            </div>
+            <span className="text-sm font-semibold text-zinc-900">Portal Docente</span>
+          </div>
+          <button
             onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden p-1 text-zinc-500 hover:bg-zinc-100 rounded-md"
           >
@@ -151,43 +160,43 @@ export const DocenteLayout = () => {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <SidebarItem 
+          <SidebarItem
             to="/docente/dashboard"
-            icon={HomeIcon} 
+            icon={HomeIcon}
             label="Dashboard"
             end
           />
-          <SidebarItem 
+          <SidebarItem
             to="/docente/mis-cursos"
-            icon={BookOpenIcon} 
+            icon={BookOpenIcon}
             label="Mis Cursos"
           />
-          <SidebarItem 
+          <SidebarItem
             to="/docente/estudiantes"
-            icon={UsersIcon} 
+            icon={UsersIcon}
             label="Estudiantes"
           />
-          <SidebarItem 
+          <SidebarItem
             to="/docente/asistencias"
-            icon={CalendarIcon} 
+            icon={CalendarIcon}
             label="Asistencias"
           />
-          <SidebarItem 
+          <SidebarItem
             to="/docente/horario"
-            icon={CalendarDaysIcon} 
+            icon={CalendarDaysIcon}
             label="Mi Horario"
           />
         </nav>
 
         {/* Bottom section */}
         <div className="px-3 py-4 border-t border-zinc-100 space-y-1">
-          <SidebarItem 
+          <SidebarItem
             to="/docente/perfil"
-            icon={Cog6ToothIcon} 
+            icon={Cog6ToothIcon}
             label="Configuración"
           />
-          <SidebarButton 
-            icon={ArrowRightStartOnRectangleIcon} 
+          <SidebarButton
+            icon={ArrowRightStartOnRectangleIcon}
             label="Cerrar sesión"
             onClick={handleLogout}
           />
@@ -214,7 +223,7 @@ export const DocenteLayout = () => {
       `}>
         {/* Top Header */}
         <header className="bg-white border-b border-zinc-200 h-14 flex items-center px-4 sticky top-0 z-30">
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 -ml-2 text-zinc-500 hover:bg-zinc-100 rounded-md focus:outline-none focus:ring-2 focus:ring-zinc-200"
           >
