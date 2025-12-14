@@ -58,13 +58,21 @@ api.interceptors.response.use(
     
     // Si es error 401 y no es la ruta de login/refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url?.includes('/auth/login') || 
-          originalRequest.url?.includes('/auth/refresh')) {
-        // Si falla login o refresh, limpiar datos y redirigir
+      if (originalRequest.url?.includes('/auth/login')) {
+        // Si falla login, solo limpiar datos y rechazar el error (no redirigir)
+        // El componente manejará el error y mostrará el mensaje correspondiente
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
-        window.location.href = '/login'
+        return Promise.reject(error)
+      }
+      
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        // Si falla refresh, limpiar datos y redirigir al login
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user_data')
+        window.location.href = '/admin/login'
         return Promise.reject(error)
       }
 

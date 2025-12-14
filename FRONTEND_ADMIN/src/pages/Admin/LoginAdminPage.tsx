@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
-const LoginPage: React.FC = () => {
+const LoginAdminPage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { login } = useAuth()
@@ -20,9 +20,7 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (searchParams.get('passwordReset') === 'success') {
       setShowSuccessBanner(true)
-      // Limpiar el parámetro de la URL
       setSearchParams({})
-      // Ocultar el banner después de 8 segundos
       const timer = setTimeout(() => {
         setShowSuccessBanner(false)
       }, 8000)
@@ -59,25 +57,34 @@ const LoginPage: React.FC = () => {
     setIsLoading(true)
 
     try {
-      const loggedUser = await login({ email, password })
-      toast.success('¡Bienvenido! Inicio de sesión exitoso')
+      // Enviar tipo de usuario esperado al backend para validación
+      const loggedUser = await login({ email, password, tipoUsuario: 'Administrador' })
       
-      // Redirigir según el rol del usuario
-      if (loggedUser.rol?.toLowerCase() === 'estudiante') {
-        navigate('/estudiante/inicio')
-      } else {
-        navigate('/dashboard')
+      // Validación adicional en frontend: asegurar que el rol sea Administrador
+      if (loggedUser.rol?.toLowerCase() !== 'administrador') {
+        // Limpiar datos de autenticación si el rol no coincide
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+        toast.error('Acceso denegado. Estas credenciales no corresponden a un administrador.')
+        setPassword('')
+        return
       }
+      
+      toast.success('¡Bienvenido! Inicio de sesión exitoso')
+      navigate('/admin/dashboard')
     } catch (error: any) {
       console.error('Error en login:', error)
       
       if (error.response?.status === 401) {
-        toast.error('Email o contraseña incorrectos')
+        toast.error('Correo o contraseña incorrectos')
       } else if (error.response?.status === 400) {
         toast.error('Datos de entrada inválidos')
       } else {
         toast.error('Error al iniciar sesión. Por favor, intente nuevamente')
       }
+      
+      setPassword('')
     } finally {
       setIsLoading(false)
     }
@@ -93,7 +100,7 @@ const LoginPage: React.FC = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Overlay con efecto bokeh/desenfocado */}
+      {/* Overlay */}
       <div 
         className="absolute inset-0"
         style={{
@@ -102,7 +109,7 @@ const LoginPage: React.FC = () => {
         }}
       />
 
-      {/* Contenedor Principal - Tarjeta flotante */}
+      {/* Contenedor Principal */}
       <div 
         className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
@@ -110,7 +117,6 @@ const LoginPage: React.FC = () => {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
-        {/* Banner de Éxito - Reset de Contraseña */}
         {showSuccessBanner && (
           <div
             className="absolute -top-16 left-0 right-0 mx-auto max-w-md animate-fade-in-down"
@@ -121,9 +127,7 @@ const LoginPage: React.FC = () => {
               style={{ backgroundColor: '#10B981' }}
             >
               <CheckCircleIcon className="w-6 h-6 text-white flex-shrink-0" />
-              <p
-                className="text-white text-sm font-medium flex-1"
-              >
+              <p className="text-white text-sm font-medium flex-1">
                 Sesión exitosa. Usa tu nueva contraseña para ingresar.
               </p>
               <button
@@ -138,7 +142,6 @@ const LoginPage: React.FC = () => {
 
         {/* Logo y Marca */}
         <div className="text-center mb-8">
-          {/* Logo Escudo Universitario */}
           <div className="mx-auto w-20 h-24 relative mb-4">
             <img 
               src="/src/image/fondouni.svg" 
@@ -147,33 +150,28 @@ const LoginPage: React.FC = () => {
             />
           </div>
           
-          {/* Etiqueta de Marca */}
-          <h1 
-            className="text-xl font-bold tracking-wider text-zinc-800"
-          >
+          <h1 className="text-xl font-bold tracking-wider text-zinc-800 mb-2">
             UNIVERSIDAD ACADEMICA
           </h1>
+          
+          <h2 className="text-2xl font-bold text-zinc-800">
+            Acceso Administrativo
+          </h2>
         </div>
 
-        {/* Título de la Pantalla */}
-        <h2 
-          className="text-center text-2xl sm:text-3xl font-bold mb-8 text-zinc-800"
-        >
-          Acceso al Portal Académico
-        </h2>
-
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {/* Campo de Email */}
+        {/* Formulario */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Campo Email */}
           <div>
             <label 
               htmlFor="email" 
               className="block text-sm font-medium mb-2 text-zinc-700"
             >
-              Correo institucional
+              Correo Institucional
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <EnvelopeIcon className="h-5 w-5" style={{ color: '#6B7280' }} />
+                <EnvelopeIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 id="email"
@@ -183,19 +181,19 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
-                  setErrors({ ...errors, email: undefined })
+                  if (errors.email) setErrors({ ...errors, email: undefined })
                 }}
                 className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-400' : 'border-zinc-200'
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
-                placeholder="Correo Electrónico Universitario"
+                placeholder="admin@unas.edu.pe"
               />
             </div>
             {errors.email && (
-              <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>
+              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
             )}
           </div>
 
-          {/* Campo de Contraseña */}
+          {/* Campo Contraseña */}
           <div>
             <label 
               htmlFor="password" 
@@ -205,7 +203,7 @@ const LoginPage: React.FC = () => {
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockClosedIcon className="h-5 w-5" style={{ color: '#6B7280' }} />
+                <LockClosedIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 id="password"
@@ -215,7 +213,7 @@ const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value)
-                  setErrors({ ...errors, password: undefined })
+                  if (errors.password) setErrors({ ...errors, password: undefined })
                 }}
                 className={`block w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-400' : 'border-zinc-200'
                   } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
@@ -224,31 +222,21 @@ const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center hover:opacity-70 transition-opacity"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" style={{ color: '#6B7280' }} />
+                  <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                 ) : (
-                  <EyeIcon className="h-5 w-5" style={{ color: '#6B7280' }} />
+                  <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                 )}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1.5 text-sm text-red-500">{errors.password}</p>
+              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}
           </div>
 
-          {/* Enlace Olvidé Contraseña */}
-          <div className="text-right">
-            <Link 
-              to="/admin/forgot-password" 
-              className="text-sm font-medium hover:underline transition-all text-zinc-600 hover:text-zinc-900"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-
-          {/* Botón de Iniciar Sesión */}
+          {/* Botón de Login */}
           <button
             type="submit"
             disabled={isLoading}
@@ -258,39 +246,31 @@ const LoginPage: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Iniciando sesión...
               </>
             ) : (
-              'INICIAR SESIÓN'
+              'Ingresar al Portal'
             )}
           </button>
         </form>
 
-        {/* Pie de Página */}
-        <div className="mt-8 text-center">
-          <p 
-            className="text-sm italic text-zinc-500"
+        {/* Link para recuperar contraseña */}
+        <div className="mt-6 text-center">
+          <Link 
+            to="/admin/forgot-password"
+            className="text-sm font-medium hover:underline text-zinc-600 hover:text-zinc-900 transition-all"
           >
+            ¿Olvidó su contraseña?
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 pt-6 border-t border-zinc-200 text-center">
+          <p className="text-xs text-zinc-500">
             Tu futuro comienza aquí.
           </p>
         </div>
@@ -299,4 +279,4 @@ const LoginPage: React.FC = () => {
   )
 }
 
-export default LoginPage
+export default LoginAdminPage

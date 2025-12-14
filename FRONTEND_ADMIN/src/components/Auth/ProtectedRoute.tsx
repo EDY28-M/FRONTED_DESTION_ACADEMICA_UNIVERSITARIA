@@ -14,7 +14,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles
 
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Redirigir según el rol requerido, o por defecto a admin
+    if (requiredRoles && requiredRoles.length > 0) {
+      if (requiredRoles.includes('Estudiante')) {
+        return <Navigate to="/estudiante/login" replace />
+      } else if (requiredRoles.includes('Administrador')) {
+        return <Navigate to="/admin/login" replace />
+      }
+    }
+    return <Navigate to="/admin/login" replace />
   }
 
   // Si se especifican roles requeridos, verificar que el usuario tenga uno de ellos

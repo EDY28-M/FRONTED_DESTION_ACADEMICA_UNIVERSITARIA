@@ -127,6 +127,7 @@ export interface User {
 export interface LoginRequest {
   email: string
   password: string
+  tipoUsuario?: string // "Administrador" o "Estudiante" - para validación en backend
 }
 
 export interface AuthResponse {

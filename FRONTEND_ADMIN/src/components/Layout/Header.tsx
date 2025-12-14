@@ -57,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
     try {
       await logout()
       toast.success('Sesión cerrada exitosamente')
-      navigate('/login')
+      navigate('/admin/login')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)
       toast.error('Error al cerrar sesión')
@@ -177,7 +177,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                     {({ active }) => (
                       <button
                         className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
-                        onClick={() => navigate('/perfil')}
+                        onClick={() => navigate('/admin/perfil')}
                       >
                         <User className="h-4 w-4 text-zinc-400" />
                         Información Personal
@@ -188,7 +188,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                     {({ active }) => (
                       <button
                         className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
-                        onClick={() => navigate('/perfil', { state: { openChangePassword: true } })}
+                        onClick={() => navigate('/admin/perfil', { state: { openChangePassword: true } })}
                       >
                         <KeyRound className="h-4 w-4 text-zinc-400" />
                         Cambiar Contraseña

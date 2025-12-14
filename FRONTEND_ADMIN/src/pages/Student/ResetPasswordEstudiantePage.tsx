@@ -40,7 +40,7 @@ const passwordRequirements: PasswordRequirement[] = [
   },
 ];
 
-const ResetPasswordPage = () => {
+const ResetPasswordEstudiantePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState('');
@@ -52,7 +52,7 @@ const ResetPasswordPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const [isValidatingToken, setIsValidatingToken] = useState(true);
-  const [countdown, setCountdown] = useState(15); // Contador para redirección automática
+  const [countdown, setCountdown] = useState(15);
 
   const token = searchParams.get('token');
 
@@ -96,7 +96,7 @@ const ResetPasswordPage = () => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate('/admin/login?passwordReset=success');
+            navigate('/estudiante/login?passwordReset=success');
             return 0;
           }
           return prev - 1;
@@ -153,7 +153,6 @@ const ResetPasswordPage = () => {
 
       if (response.data.success) {
         setIsSuccess(true);
-        // La redirección ahora se maneja en el useEffect con countdown
       } else {
         setError(response.data.message || 'Error al restablecer la contraseña');
       }
@@ -219,8 +218,8 @@ const ResetPasswordPage = () => {
           <p className="text-gray-600 mb-6">
             {error || 'El enlace de recuperación no es válido o ha expirado. Por favor, solicita uno nuevo.'}
           </p>
-              <Link
-                to="/admin/forgot-password"
+          <Link
+            to="/estudiante/forgot-password"
             className="inline-block px-6 py-3 text-white font-bold rounded-lg transition-all hover:opacity-90"
             style={{ backgroundColor: '#003366' }}
           >
@@ -286,9 +285,8 @@ const ResetPasswordPage = () => {
         </div>
 
         {isSuccess ? (
-          /* Vista de Confirmación - Diseño minimalista */
+          /* Vista de Confirmación */
           <div className="text-center py-8">
-            {/* Icono de éxito */}
             <div
               className="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-8"
               style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}
@@ -296,7 +294,6 @@ const ResetPasswordPage = () => {
               <CheckCircleIcon className="w-14 h-14 text-green-500" />
             </div>
 
-            {/* Título de confirmación */}
             <h2
               className="text-2xl font-bold mb-4"
               style={{ color: '#003366', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -304,7 +301,6 @@ const ResetPasswordPage = () => {
               ¡Contraseña Actualizada Exitosamente!
             </h2>
 
-            {/* Mensaje de confirmación */}
             <p
               className="text-base mb-8 leading-relaxed"
               style={{ color: '#4D4D4D', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -313,9 +309,8 @@ const ResetPasswordPage = () => {
               Ya puedes acceder a tu cuenta con tu nueva contraseña.
             </p>
 
-            {/* Botón principal con enfoque automático */}
             <button
-              onClick={() => navigate('/admin/login?passwordReset=success')}
+              onClick={() => navigate('/estudiante/login?passwordReset=success')}
               autoFocus
               className="w-full py-4 px-6 text-white font-bold rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-300"
               style={{
@@ -327,7 +322,6 @@ const ResetPasswordPage = () => {
               Ir al Portal de Acceso
             </button>
 
-            {/* Indicador de redirección automática */}
             <p
               className="mt-6 text-sm"
               style={{ color: '#808080', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -339,7 +333,6 @@ const ResetPasswordPage = () => {
               segundos
             </p>
 
-            {/* Barra de progreso de redirección */}
             <div className="mt-3 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-1000 ease-linear"
@@ -350,7 +343,6 @@ const ResetPasswordPage = () => {
               />
             </div>
 
-            {/* Pie de página de la vista de éxito */}
             <p
               className="mt-8 text-sm italic"
               style={{ color: '#808080', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -361,7 +353,6 @@ const ResetPasswordPage = () => {
         ) : (
           /* Formulario de Reseteo */
           <>
-            {/* Título */}
             <h2
               className="text-center text-xl sm:text-2xl font-bold mb-3"
               style={{ color: '#003366', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -369,7 +360,6 @@ const ResetPasswordPage = () => {
               Establece tu Nueva Contraseña
             </h2>
 
-            {/* Instrucción */}
             <p
               className="text-center text-sm mb-6 leading-relaxed"
               style={{ color: '#4D4D4D', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
@@ -377,7 +367,6 @@ const ResetPasswordPage = () => {
               Ingresa y confirma tu nueva contraseña. Debe ser fuerte y única.
             </p>
 
-            {/* Mensaje de Error */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
                 <XCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -464,7 +453,6 @@ const ResetPasswordPage = () => {
                     )}
                   </button>
                 </div>
-                {/* Indicador de coincidencia */}
                 {confirmPassword.length > 0 && (
                   <p className={`mt-1 text-xs flex items-center gap-1 ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
                     {passwordsMatch ? (
@@ -557,7 +545,7 @@ const ResetPasswordPage = () => {
               {/* Enlace Volver */}
               <div className="text-center">
                 <Link
-                  to="/admin/login"
+                  to="/estudiante/login"
                   className="inline-flex items-center gap-1 text-sm font-medium hover:underline transition-all"
                   style={{ color: '#C7A740', fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
                 >
@@ -582,6 +570,5 @@ const ResetPasswordPage = () => {
   );
 };
 
-export default ResetPasswordPage;
-
+export default ResetPasswordEstudiantePage;
 

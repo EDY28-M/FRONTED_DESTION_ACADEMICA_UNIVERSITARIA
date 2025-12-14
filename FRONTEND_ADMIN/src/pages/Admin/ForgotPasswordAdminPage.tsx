@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
 
-const ForgotPasswordPage: React.FC = () => {
+const ForgotPasswordAdminPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -38,9 +38,8 @@ const ForgotPasswordPage: React.FC = () => {
         TipoUsuario: "Usuario" // Especificar que es para Administrador
       });
       
-      // La API devuelve success: false cuando el correo no existe
       if (response.data?.success === false) {
-        setError(response.data?.message || 'No existe una cuenta con este correo');
+        setError(response.data?.message || 'No existe una cuenta de administrador con este correo');
       } else {
         setEmailSent(true);
         toast.success('Se ha enviado un correo con las instrucciones');
@@ -49,7 +48,7 @@ const ForgotPasswordPage: React.FC = () => {
       console.error('Error al solicitar recuperación:', error);
       
       if (error.response?.status === 404) {
-        setError('No existe una cuenta con este correo');
+        setError('No existe una cuenta de administrador con este correo');
       } else if (error.response?.data?.success === false) {
         setError(error.response?.data?.message || 'No existe una cuenta con este correo');
       } else if (error.response?.status === 400) {
@@ -72,7 +71,6 @@ const ForgotPasswordPage: React.FC = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Overlay */}
       <div 
         className="absolute inset-0"
         style={{
@@ -81,7 +79,6 @@ const ForgotPasswordPage: React.FC = () => {
         }}
       />
 
-      {/* Contenedor Principal */}
       <div 
         className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
@@ -89,7 +86,6 @@ const ForgotPasswordPage: React.FC = () => {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
-        {/* Logo y Marca */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-24 relative mb-4">
             <img 
@@ -104,12 +100,11 @@ const ForgotPasswordPage: React.FC = () => {
           </h1>
           
           <h2 className="text-2xl font-bold text-zinc-800">
-            Recuperar Contraseña
+            Recuperar Contraseña - Administrador
           </h2>
         </div>
 
         {emailSent ? (
-          /* Mensaje de éxito */
           <div className="text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
@@ -118,10 +113,10 @@ const ForgotPasswordPage: React.FC = () => {
               ¡Correo enviado!
             </h2>
             <p className="text-gray-600 mb-6">
-              Si existe una cuenta asociada a <strong>{email}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
+              Si existe una cuenta de administrador asociada a <strong>{email}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
             </p>
             <p className="text-sm text-gray-500 mb-6">
-              El enlace expirará en 1 hora.
+              El enlace expirará en 24 horas.
             </p>
             <Link
               to="/admin/login"
@@ -132,14 +127,12 @@ const ForgotPasswordPage: React.FC = () => {
             </Link>
           </div>
         ) : (
-          /* Formulario */
           <>
             <p className="text-zinc-500 text-sm text-center mb-6">
               Ingresa tu correo institucional y te enviaremos las instrucciones para restablecer tu contraseña.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campo Correo */}
               <div>
                 <label 
                   htmlFor="email" 
@@ -169,7 +162,6 @@ const ForgotPasswordPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Botón Enviar */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -191,7 +183,6 @@ const ForgotPasswordPage: React.FC = () => {
               </button>
             </form>
 
-            {/* Link para volver */}
             <div className="mt-6 text-center">
               <Link 
                 to="/admin/login"
@@ -204,7 +195,6 @@ const ForgotPasswordPage: React.FC = () => {
           </>
         )}
 
-        {/* Footer */}
         <div className="mt-8 pt-6 border-t border-zinc-200 text-center">
           <p className="text-xs text-zinc-500">
             Tu futuro comienza aquí.
@@ -215,7 +205,5 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage;
-
-
+export default ForgotPasswordAdminPage;
 

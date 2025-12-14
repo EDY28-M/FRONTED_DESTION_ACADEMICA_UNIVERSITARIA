@@ -33,7 +33,10 @@ export const ForgotPasswordDocentePage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/forgot-password`, { email: correo });
+      const response = await axios.post(`${API_URL}/auth/forgot-password`, { 
+        Email: correo,
+        TipoUsuario: "Docente" // Especificar que es para Docente
+      });
       
       // La API devuelve success: false cuando el correo no existe
       if (response.data?.success === false) {

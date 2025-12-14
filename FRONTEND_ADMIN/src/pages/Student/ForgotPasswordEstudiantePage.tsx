@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
 
-const ForgotPasswordPage: React.FC = () => {
+const ForgotPasswordEstudiantePage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -35,12 +35,12 @@ const ForgotPasswordPage: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { 
         Email: email,
-        TipoUsuario: "Usuario" // Especificar que es para Administrador
+        TipoUsuario: "Estudiante" // Especificar que es para Estudiante
       });
       
       // La API devuelve success: false cuando el correo no existe
       if (response.data?.success === false) {
-        setError(response.data?.message || 'No existe una cuenta con este correo');
+        setError(response.data?.message || 'No existe una cuenta de estudiante con este correo');
       } else {
         setEmailSent(true);
         toast.success('Se ha enviado un correo con las instrucciones');
@@ -49,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
       console.error('Error al solicitar recuperación:', error);
       
       if (error.response?.status === 404) {
-        setError('No existe una cuenta con este correo');
+        setError('No existe una cuenta de estudiante con este correo');
       } else if (error.response?.data?.success === false) {
         setError(error.response?.data?.message || 'No existe una cuenta con este correo');
       } else if (error.response?.status === 400) {
@@ -104,7 +104,7 @@ const ForgotPasswordPage: React.FC = () => {
           </h1>
           
           <h2 className="text-2xl font-bold text-zinc-800">
-            Recuperar Contraseña
+            Recuperar Contraseña - Estudiante
           </h2>
         </div>
 
@@ -118,13 +118,13 @@ const ForgotPasswordPage: React.FC = () => {
               ¡Correo enviado!
             </h2>
             <p className="text-gray-600 mb-6">
-              Si existe una cuenta asociada a <strong>{email}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
+              Si existe una cuenta de estudiante asociada a <strong>{email}</strong>, recibirás un correo con las instrucciones para restablecer tu contraseña.
             </p>
             <p className="text-sm text-gray-500 mb-6">
-              El enlace expirará en 1 hora.
+              El enlace expirará en 24 horas.
             </p>
             <Link
-              to="/admin/login"
+              to="/estudiante/login"
               className="inline-flex items-center justify-center w-full py-3.5 px-4 rounded-lg text-white font-medium transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 hover:shadow-lg"
             >
               <ArrowLeftIcon className="w-5 h-5 mr-2" />
@@ -161,7 +161,7 @@ const ForgotPasswordPage: React.FC = () => {
                     }}
                     className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-400' : 'border-zinc-200'
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
-                    placeholder="correo@ejemplo.com"
+                    placeholder="estudiante@ejemplo.com"
                   />
                 </div>
                 {error && (
@@ -194,7 +194,7 @@ const ForgotPasswordPage: React.FC = () => {
             {/* Link para volver */}
             <div className="mt-6 text-center">
               <Link 
-                to="/admin/login"
+                to="/estudiante/login"
                 className="inline-flex items-center text-sm font-medium hover:underline text-zinc-600 hover:text-zinc-900 transition-all"
               >
                 <ArrowLeftIcon className="w-4 h-4 mr-1" />
@@ -215,7 +215,5 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage;
-
-
+export default ForgotPasswordEstudiantePage;
 

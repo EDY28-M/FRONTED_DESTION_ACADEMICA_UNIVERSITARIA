@@ -10,6 +10,12 @@ import { ProtectedDocenteRoute } from './components/ProtectedDocenteRoute'
 import LoginPage from './pages/Auth/LoginPage'
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage'
+import LoginAdminPage from './pages/Admin/LoginAdminPage'
+import ForgotPasswordAdminPage from './pages/Admin/ForgotPasswordAdminPage'
+import ResetPasswordAdminPage from './pages/Admin/ResetPasswordAdminPage'
+import LoginEstudiantePage from './pages/Student/LoginEstudiantePage'
+import ForgotPasswordEstudiantePage from './pages/Student/ForgotPasswordEstudiantePage'
+import ResetPasswordEstudiantePage from './pages/Student/ResetPasswordEstudiantePage'
 import { 
   DashboardDocentePage,
   GestionCursoDocentePage,
@@ -53,50 +59,76 @@ function App() {
   return (
     <DocenteAuthProvider>
       <Routes>
-        {/* Ruta de login - accesible sin autenticación */}
+        {/* Rutas de Admin - accesibles sin autenticación */}
+        <Route 
+          path="/admin/login" 
+          element={
+            isAuthenticated && user?.rol === 'Administrador' ? (
+              <Navigate to="/admin/dashboard" replace />
+            ) : (
+              <LoginAdminPage />
+            )
+          } 
+        />
+        <Route 
+          path="/admin/forgot-password" 
+          element={
+            isAuthenticated && user?.rol === 'Administrador' ? (
+              <Navigate to="/admin/dashboard" replace />
+            ) : (
+              <ForgotPasswordAdminPage />
+            )
+          } 
+        />
+        <Route 
+          path="/admin/reset-password" 
+          element={<ResetPasswordAdminPage />}
+        />
+
+        {/* Rutas de Estudiante - accesibles sin autenticación */}
+        <Route 
+          path="/estudiante/login" 
+          element={
+            isAuthenticated && user?.rol === 'Estudiante' ? (
+              <Navigate to="/estudiante/inicio" replace />
+            ) : (
+              <LoginEstudiantePage />
+            )
+          } 
+        />
+        <Route 
+          path="/estudiante/forgot-password" 
+          element={
+            isAuthenticated && user?.rol === 'Estudiante' ? (
+              <Navigate to="/estudiante/inicio" replace />
+            ) : (
+              <ForgotPasswordEstudiantePage />
+            )
+          } 
+        />
+        <Route 
+          path="/estudiante/reset-password" 
+          element={<ResetPasswordEstudiantePage />}
+        />
+
+        {/* Rutas de Docente - accesibles sin autenticación */}
+        <Route path="/docente/login" element={<LoginDocentePage />} />
+        <Route path="/docente/forgot-password" element={<ForgotPasswordDocentePage />} />
+        <Route path="/docente/reset-password" element={<ResetPasswordDocentePage />} />
+
+        {/* Rutas legacy (mantener para compatibilidad, redirigir a admin) */}
         <Route 
           path="/login" 
-          element={
-            isAuthenticated ? (
-              <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
-            ) : (
-              <LoginPage />
-            )
-          } 
+          element={<Navigate to="/admin/login" replace />}
         />
-
-        {/* Ruta de recuperación de contraseña - accesible sin autenticación */}
         <Route 
           path="/forgot-password" 
-          element={
-            isAuthenticated ? (
-              <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
-            ) : (
-              <ForgotPasswordPage />
-            )
-          } 
+          element={<Navigate to="/admin/forgot-password" replace />}
         />
-
-        {/* Ruta de resetear contraseña - accesible sin autenticación */}
         <Route 
           path="/reset-password" 
-          element={
-            isAuthenticated ? (
-              <Navigate to={user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard"} replace />
-            ) : (
-              <ResetPasswordPage />
-            )
-          } 
+          element={<ResetPasswordPage />}
         />
-
-        {/* Ruta de login para docentes - página separada */}
-        <Route path="/docente/login" element={<LoginDocentePage />} />
-
-        {/* Ruta de recuperación de contraseña para docentes */}
-        <Route path="/docente/forgot-password" element={<ForgotPasswordDocentePage />} />
-
-        {/* Ruta de resetear contraseña para docentes */}
-        <Route path="/docente/reset-password" element={<ResetPasswordDocentePage />} />
 
         {/* Rutas protegidas de docente - requieren autenticación como docente */}
         <Route
@@ -121,14 +153,10 @@ function App() {
       <Route
         path="/estudiante"
         element={
-          <ProtectedRoute>
-            {user?.rol === 'Estudiante' ? (
-              <StudentLayout>
-                <Outlet />
-              </StudentLayout>
-            ) : (
-              <Navigate to="/dashboard" replace />
-            )}
+          <ProtectedRoute requiredRoles={['Estudiante']}>
+            <StudentLayout>
+              <Outlet />
+            </StudentLayout>
           </ProtectedRoute>
         }
       >
@@ -148,18 +176,14 @@ function App() {
 
       {/* Rutas protegidas de administrador - requieren autenticación */}
       <Route
-        path="/"
+        path="/admin"
         element={
-          <ProtectedRoute>
-            {user?.rol === 'Estudiante' ? (
-              <Navigate to="/estudiante/inicio" replace />
-            ) : (
-              <Layout />
-            )}
+          <ProtectedRoute requiredRoles={['Administrador']}>
+            <Layout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="docentes" element={<DocentesPage />} />
         <Route path="docentes/gestion-passwords" element={<GestionDocentesPasswordPage />} />
@@ -179,8 +203,8 @@ function App() {
           <Navigate 
             to={
               isAuthenticated 
-                ? (user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/dashboard")
-                : "/login"
+                ? (user?.rol === 'Estudiante' ? "/estudiante/inicio" : "/admin/dashboard")
+                : "/admin/login"
             } 
             replace 
           />

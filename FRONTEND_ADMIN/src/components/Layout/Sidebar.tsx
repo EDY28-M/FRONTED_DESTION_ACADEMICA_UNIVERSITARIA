@@ -25,47 +25,47 @@ interface SidebarProps {
 const navigation = [
   {
     name: 'Dashboard',
-    href: '/dashboard',
+    href: '/admin/dashboard',
     icon: Home,
   },
   {
     name: 'Gestión Credenciales',
-    href: '/docentes/gestion-passwords',
+    href: '/admin/docentes/gestion-passwords',
     icon: Shield,
   },
   {
     name: 'Cursos',
-    href: '/cursos',
+    href: '/admin/cursos',
     icon: BookOpenCheck,
   },
   {
     name: 'Estudiantes',
-    href: '/estudiantes',
+    href: '/admin/estudiantes',
     icon: Users,
   },
   {
     name: 'Ver Estudiantes',
-    href: '/estudiantes/visualizar',
+    href: '/admin/estudiantes/visualizar',
     icon: Eye,
   },
   {
     name: 'Cursos Dirigidos',
-    href: '/cursos-dirigidos',
+    href: '/admin/cursos-dirigidos',
     icon: FolderOpen,
   },
   {
     name: 'Períodos',
-    href: '/periodos',
+    href: '/admin/periodos',
     icon: Calendar,
   },
   {
     name: 'Estadísticas',
-    href: '/estadisticas',
+    href: '/admin/estadisticas',
     icon: TrendingUp,
   },
   {
     name: 'Mi Perfil',
-    href: '/perfil',
+    href: '/admin/perfil',
     icon: UserCog,
   },
 ]
@@ -74,12 +74,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false,
   const location = useLocation()
 
   const isActive = (path: string) => {
-    if (path === '/dashboard') {
-      return location.pathname === '/' || location.pathname === '/dashboard'
+    if (path === '/admin/dashboard') {
+      return location.pathname === '/admin' || location.pathname === '/admin/dashboard'
     }
-    // Exact match for /estudiantes to avoid conflict with /estudiantes/visualizar
-    if (path === '/estudiantes') {
-      return location.pathname === '/estudiantes'
+    // Exact match for /admin/estudiantes to avoid conflict with /admin/estudiantes/visualizar
+    if (path === '/admin/estudiantes') {
+      return location.pathname === '/admin/estudiantes'
     }
     // For other routes, check exact match or if it starts with the path
     return location.pathname === path || location.pathname.startsWith(path + '/')
