@@ -11,7 +11,9 @@ import {
   Shield,
   Eye,
   X,
-  Zap
+  Zap,
+  Clock,
+  ClipboardCheck
 } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -37,6 +39,16 @@ const navigation = [
     name: 'Cursos',
     href: '/admin/cursos',
     icon: BookOpenCheck,
+  },
+  {
+    name: 'Horarios',
+    href: '/admin/horarios',
+    icon: Clock,
+  },
+  {
+    name: 'Asistencias',
+    href: '/admin/asistencias',
+    icon: ClipboardCheck,
   },
   {
     name: 'Estudiantes',

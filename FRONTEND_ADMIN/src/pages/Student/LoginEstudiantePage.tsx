@@ -16,6 +16,7 @@ const LoginEstudiantePage: React.FC = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [showSuccessBanner, setShowSuccessBanner] = useState(false)
 
+  // Verificar si viene de un reset de contraseña exitoso
   useEffect(() => {
     if (searchParams.get('passwordReset') === 'success') {
       setShowSuccessBanner(true)
@@ -154,7 +155,7 @@ const LoginEstudiantePage: React.FC = () => {
           </h1>
           
           <h2 className="text-2xl font-bold text-zinc-800">
-            Portal del Estudiante
+            Portal Estudiante
           </h2>
         </div>
 

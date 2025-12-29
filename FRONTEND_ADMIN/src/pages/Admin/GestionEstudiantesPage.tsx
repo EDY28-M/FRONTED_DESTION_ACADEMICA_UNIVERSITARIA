@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import toast from 'react-hot-toast';
-import { UserPlus, Users, Mail, Lock, Hash, GraduationCap, CreditCard, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface CrearEstudianteForm {
   email: string;
@@ -121,8 +121,7 @@ export default function GestionEstudiantesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Formulario de Creación */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50 flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-zinc-500" />
+          <div className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">
             <h2 className="font-semibold text-zinc-900">Crear Nuevo Estudiante</h2>
           </div>
 
@@ -135,36 +134,30 @@ export default function GestionEstudiantesPage() {
                   <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                     Nombres <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      name="nombres"
-                      value={formData.nombres}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-                      placeholder="Ej: Juan Carlos"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="nombres"
+                    value={formData.nombres}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                    placeholder="Ej: Juan Carlos"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                     Apellidos <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      name="apellidos"
-                      value={formData.apellidos}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-                      placeholder="Ej: Pérez García"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="apellidos"
+                    value={formData.apellidos}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                    placeholder="Ej: Pérez García"
+                  />
                 </div>
               </div>
             </div>
@@ -177,19 +170,16 @@ export default function GestionEstudiantesPage() {
                   <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                     Número de Documento (DNI) <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      name="numeroDocumento"
-                      value={formData.numeroDocumento}
-                      onChange={handleChange}
-                      required
-                      maxLength={8}
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-                      placeholder="12345678"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="numeroDocumento"
+                    value={formData.numeroDocumento}
+                    onChange={handleChange}
+                    required
+                    maxLength={8}
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                    placeholder="12345678"
+                  />
                 </div>
 
                 <div>
@@ -197,13 +187,12 @@ export default function GestionEstudiantesPage() {
                     Ciclo Académico <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
                     <select
                       name="ciclo"
                       value={formData.ciclo}
                       onChange={handleChange}
                       required
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all appearance-none bg-white"
+                      className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all appearance-none bg-white"
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(ciclo => (
                         <option key={ciclo} value={ciclo}>
@@ -229,18 +218,15 @@ export default function GestionEstudiantesPage() {
                   <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                     Email (Usuario) <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-                      placeholder="estudiante@email.com"
-                    />
-                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                    placeholder="estudiante@email.com"
+                  />
                   <p className="text-xs text-zinc-500 mt-1.5">
                     Este email será usado para iniciar sesión
                   </p>
@@ -250,19 +236,16 @@ export default function GestionEstudiantesPage() {
                   <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                     Contraseña <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      minLength={6}
-                      className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-                      placeholder="Mínimo 6 caracteres"
-                    />
-                  </div>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    minLength={6}
+                    className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
+                    placeholder="Mínimo 6 caracteres"
+                  />
                   <p className="text-xs text-zinc-500 mt-1.5">
                     Mínimo 6 caracteres
                   </p>
@@ -283,10 +266,7 @@ export default function GestionEstudiantesPage() {
                     Creando...
                   </>
                 ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    Crear Estudiante
-                  </>
+                  'Crear Estudiante'
                 )}
               </button>
             </div>
@@ -296,11 +276,8 @@ export default function GestionEstudiantesPage() {
         {/* Información Adicional */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6">
-            <h4 className="font-semibold text-zinc-900 mb-4 flex items-center gap-2">
-              <div className="p-1.5 bg-white rounded-md border border-zinc-200 shadow-sm">
-                <Hash className="w-4 h-4 text-zinc-600" />
-              </div>
-              Información Importante
+            <h4 className="font-semibold text-zinc-900 mb-4">
+              # Información Importante
             </h4>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-zinc-600">

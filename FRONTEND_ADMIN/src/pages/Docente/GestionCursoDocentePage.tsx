@@ -14,8 +14,10 @@ import {
   TrashIcon,
   PencilIcon,
 } from '@heroicons/react/24/outline';
+import { FileText } from 'lucide-react';
+import TrabajosDocentePage from './TrabajosDocentePage';
 
-type TabType = 'estudiantes' | 'notas' | 'asistencia';
+type TabType = 'estudiantes' | 'notas' | 'asistencia' | 'trabajos';
 
 interface AsistenciaItem {
   idEstudiante: number;
@@ -621,6 +623,16 @@ export const GestionCursoDocentePage = () => {
               <PencilSquareIcon className="w-5 h-5" />
               Registro de Notas
             </button>
+            <button
+              onClick={() => setActiveTab('trabajos')}
+              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'trabajos'
+                ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+            >
+              <FileText className="w-5 h-5" />
+              Trabajos
+            </button>
 
           </div>
         </div>
@@ -850,6 +862,11 @@ export const GestionCursoDocentePage = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Tab: Trabajos */}
+        {activeTab === 'trabajos' && (
+          <TrabajosDocentePage idCurso={cursoId} />
         )}
 
         {/* Tab: Asistencia */}

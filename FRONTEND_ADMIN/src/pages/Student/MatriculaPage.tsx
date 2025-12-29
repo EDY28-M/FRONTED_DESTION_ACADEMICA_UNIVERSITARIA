@@ -33,7 +33,7 @@ const MatriculaPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-zinc-900 mb-1">Cursos Matriculados</h2>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <span className="flex items-center gap-1.5">
-                <GraduationCap className="w-4 h-4" />
+               
                 <span>Ciclo</span>
                 <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs font-medium font-mono">{perfil?.cicloActual}</span>
               </span>
@@ -68,7 +68,7 @@ const MatriculaPage: React.FC = () => {
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-zinc-500" />
+            
             <h3 className="text-sm font-medium text-zinc-900">Mis Cursos del Período Actual</h3>
           </div>
         </div>

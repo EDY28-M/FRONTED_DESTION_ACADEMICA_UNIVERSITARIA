@@ -35,12 +35,16 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { 
         Email: email,
-        TipoUsuario: "Estudiante" // Especificar que es para Estudiante
+        TipoUsuario: "Estudiante"
       });
       
-      // La API devuelve success: false cuando el correo no existe
       if (response.data?.success === false) {
-        setError(response.data?.message || 'No existe una cuenta de estudiante con este correo');
+        const message = response.data?.message || 'No existe una cuenta de estudiante con este correo';
+        if (message.includes('no coincide') || message.includes('portal correcto')) {
+          setError('Este correo pertenece a otra cuenta (Docente o Administrador). Por favor, usa el portal correspondiente.');
+        } else {
+          setError(message);
+        }
       } else {
         setEmailSent(true);
         toast.success('Se ha enviado un correo con las instrucciones');
@@ -51,7 +55,12 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
       if (error.response?.status === 404) {
         setError('No existe una cuenta de estudiante con este correo');
       } else if (error.response?.data?.success === false) {
-        setError(error.response?.data?.message || 'No existe una cuenta con este correo');
+        const message = error.response?.data?.message || 'No existe una cuenta con este correo';
+        if (message.includes('no coincide') || message.includes('portal correcto')) {
+          setError('Este correo pertenece a otra cuenta (Docente o Administrador). Por favor, usa el portal correspondiente.');
+        } else {
+          setError(message);
+        }
       } else if (error.response?.status === 400) {
         setError(error.response?.data?.message || 'Datos inválidos');
       } else {
@@ -72,7 +81,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Overlay */}
       <div 
         className="absolute inset-0"
         style={{
@@ -81,7 +89,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
         }}
       />
 
-      {/* Contenedor Principal */}
       <div 
         className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
@@ -89,7 +96,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
-        {/* Logo y Marca */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-24 relative mb-4">
             <img 
@@ -109,7 +115,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
         </div>
 
         {emailSent ? (
-          /* Mensaje de éxito */
           <div className="text-center">
             <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
@@ -132,14 +137,12 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
             </Link>
           </div>
         ) : (
-          /* Formulario */
           <>
             <p className="text-zinc-500 text-sm text-center mb-6">
               Ingresa tu correo institucional y te enviaremos las instrucciones para restablecer tu contraseña.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campo Correo */}
               <div>
                 <label 
                   htmlFor="email" 
@@ -161,7 +164,7 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
                     }}
                     className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-400' : 'border-zinc-200'
                       } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
-                    placeholder="estudiante@ejemplo.com"
+                    placeholder="correo@ejemplo.com"
                   />
                 </div>
                 {error && (
@@ -169,7 +172,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
                 )}
               </div>
 
-              {/* Botón Enviar */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -191,7 +193,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
               </button>
             </form>
 
-            {/* Link para volver */}
             <div className="mt-6 text-center">
               <Link 
                 to="/estudiante/login"
@@ -204,7 +205,6 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
           </>
         )}
 
-        {/* Footer */}
         <div className="mt-8 pt-6 border-t border-zinc-200 text-center">
           <p className="text-xs text-zinc-500">
             Tu futuro comienza aquí.
@@ -216,4 +216,3 @@ const ForgotPasswordEstudiantePage: React.FC = () => {
 };
 
 export default ForgotPasswordEstudiantePage;
-

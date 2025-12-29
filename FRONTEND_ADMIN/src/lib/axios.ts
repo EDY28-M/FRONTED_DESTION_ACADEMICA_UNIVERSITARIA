@@ -30,13 +30,37 @@ const processQueue = (error: any, token: string | null = null) => {
 // Request interceptor: agregar token JWT a las peticiones
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('auth_token')
+    // ESTRATEGIA: Usar SOLO la ruta actual de la página para determinar qué token usar
+    // Esto evita conflictos cuando hay múltiples sesiones activas
+    const currentPath = window.location.pathname
+    
+    let token: string | null = null
+    let tokenType = 'default'
+    
+    // Determinar el token basándose ÚNICAMENTE en la ruta de la página
+    if (currentPath.startsWith('/docente')) {
+      // Estamos en portal de DOCENTE
+      token = localStorage.getItem('docenteToken')
+      tokenType = 'Docente'
+    } else if (currentPath.startsWith('/admin')) {
+      // Estamos en portal de ADMIN
+      token = localStorage.getItem('auth_token')
+      tokenType = 'Admin'
+    } else if (currentPath.startsWith('/estudiante')) {
+      // Estamos en portal de ESTUDIANTE
+      token = localStorage.getItem('auth_token')
+      tokenType = 'Estudiante'
+    } else {
+      // Ruta desconocida, usar auth_token por defecto
+      token = localStorage.getItem('auth_token')
+      tokenType = 'Default'
+    }
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`)
+    console.log(`🚀 ${config.method?.toUpperCase()} ${config.url} [Context: ${tokenType}]`)
     return config
   },
   (error) => {
@@ -58,21 +82,39 @@ api.interceptors.response.use(
     
     // Si es error 401 y no es la ruta de login/refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Detectar si es docente ANTES de cualquier otra lógica
+      const isDocente = !!localStorage.getItem('docenteToken')
+      
       if (originalRequest.url?.includes('/auth/login')) {
         // Si falla login, solo limpiar datos y rechazar el error (no redirigir)
         // El componente manejará el error y mostrará el mensaje correspondiente
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
+        if (isDocente) {
+          localStorage.removeItem('docenteToken')
+          localStorage.removeItem('docenteData')
+        }
         return Promise.reject(error)
       }
       
       if (originalRequest.url?.includes('/auth/refresh')) {
-        // Si falla refresh, limpiar datos y redirigir al login
+        // Si falla refresh, limpiar datos y redirigir al login correcto
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
-        window.location.href = '/admin/login'
+        localStorage.removeItem('docenteToken')
+        localStorage.removeItem('docenteData')
+        window.location.href = isDocente ? '/docente/login' : '/admin/login'
+        return Promise.reject(error)
+      }
+      
+      // Si es docente y recibe 401, redirigir directamente al login de docente
+      // (no intentar hacer refresh porque el sistema de refresh puede ser diferente)
+      if (isDocente) {
+        localStorage.removeItem('docenteToken')
+        localStorage.removeItem('docenteData')
+        window.location.href = '/docente/login'
         return Promise.reject(error)
       }
 
@@ -93,11 +135,19 @@ api.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
+      // isDocente ya está declarado arriba, reutilizamos esa variable
       const refreshToken = localStorage.getItem('refresh_token')
       const currentToken = localStorage.getItem('auth_token')
 
       if (!refreshToken || !currentToken) {
-        window.location.href = '/login'
+        // Si es docente, redirigir al login de docente
+        if (isDocente) {
+          localStorage.removeItem('docenteToken')
+          localStorage.removeItem('docenteData')
+          window.location.href = '/docente/login'
+        } else {
+          window.location.href = '/admin/login'
+        }
         return Promise.reject(error)
       }
 
@@ -132,11 +182,14 @@ api.interceptors.response.use(
         processQueue(refreshError, null)
         isRefreshing = false
         
-        // Si falla el refresh, limpiar datos y redirigir al login
+        // Si falla el refresh, limpiar datos y redirigir al login correcto
+        const isDocente = !!localStorage.getItem('docenteToken')
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
-        window.location.href = '/login'
+        localStorage.removeItem('docenteToken')
+        localStorage.removeItem('docenteData')
+        window.location.href = isDocente ? '/docente/login' : '/admin/login'
         
         return Promise.reject(refreshError)
       }

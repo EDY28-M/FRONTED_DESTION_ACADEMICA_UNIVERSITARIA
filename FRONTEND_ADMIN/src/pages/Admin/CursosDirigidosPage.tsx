@@ -181,7 +181,7 @@ export default function CursosDirigidosPage() {
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 sticky top-6">
             <h2 className="text-lg font-semibold text-zinc-900 mb-6 flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-zinc-100 text-xs font-bold text-zinc-600">1</span>
+              
               Configuración
             </h2>
             

@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { docenteHorariosApi } from '../../services/docenteApi';
-import { Horario } from '../../types/horario';
 import { HorarioSemanalView } from '../../components/Horario/HorarioSemanalView';
 import { CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
@@ -15,26 +14,18 @@ const EmptyState = ({ icon: Icon, title, description }: { icon: React.ElementTyp
 );
 
 export const HorarioDocentePage = () => {
-  const [horarios, setHorarios] = useState<Horario[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: horarios = [], isLoading } = useQuery({
+    queryKey: ['horarios-docente'],
+    queryFn: docenteHorariosApi.getMiHorario,
+    staleTime: 30000, // 30 segundos - se refrescará automáticamente
+    refetchOnWindowFocus: true, // Refresca al volver a la ventana
+    onError: (error) => {
+      console.error('Error al cargar horarios:', error);
+      toast.error('No se pudo cargar su horario académico.');
+    }
+  });
 
-  useEffect(() => {
-    const fetchHorarios = async () => {
-      try {
-        const data = await docenteHorariosApi.getMiHorario();
-        setHorarios(data);
-      } catch (error) {
-        console.error('Error al cargar horarios:', error);
-        toast.error('No se pudo cargar su horario académico.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHorarios();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
         <div className="animate-pulse text-zinc-400 text-sm">Cargando horario...</div>

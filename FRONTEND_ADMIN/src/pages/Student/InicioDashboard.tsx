@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
+import { asistenciasApi } from '../../services/asistenciasApi';
 import { 
   BookOpen, 
   GraduationCap, 
@@ -12,7 +13,9 @@ import {
   ClipboardList,
   Layers,
   Calendar as CalendarIcon,
-  Plus
+  Plus,
+  CheckCircle2,
+  Ban
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Horario } from '../../types/horario';
@@ -78,6 +81,28 @@ const InicioDashboard: React.FC = () => {
     queryKey: ['mi-horario'],
     queryFn: estudiantesApi.getMiHorario,
   });
+
+  // Obtener asistencias del estudiante
+  const { data: asistenciasPorCurso } = useQuery({
+    queryKey: ['asistencias-estudiante-dashboard', perfil?.id, periodo?.id],
+    queryFn: () => asistenciasApi.getAsistenciasEstudiante(perfil!.id, periodo?.id),
+    enabled: !!perfil?.id && !!periodo?.id,
+  });
+
+  // Calcular promedios de asistencia
+  const estadisticasAsistencia = useMemo(() => {
+    if (!asistenciasPorCurso || asistenciasPorCurso.length === 0) {
+      return { promedioAsistencia: 0, cursosConAlerta: 0, cursosBloqueados: 0 };
+    }
+    
+    const totalCursos = asistenciasPorCurso.length;
+    const sumaAsistencias = asistenciasPorCurso.reduce((sum, c) => sum + c.porcentajeAsistencia, 0);
+    const promedioAsistencia = sumaAsistencias / totalCursos;
+    const cursosConAlerta = asistenciasPorCurso.filter(c => c.alertaBajaAsistencia).length;
+    const cursosBloqueados = asistenciasPorCurso.filter(c => (100 - c.porcentajeAsistencia) >= 30).length;
+    
+    return { promedioAsistencia, cursosConAlerta, cursosBloqueados };
+  }, [asistenciasPorCurso]);
 
   // Cursos disponibles para matrícula
   const { data: cursosDisponibles } = useQuery({
@@ -194,6 +219,48 @@ const InicioDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* MÓVIL: Tarjeta de Asistencias */}
+      {asistenciasPorCurso && asistenciasPorCurso.length > 0 && (
+        <div className="md:hidden">
+          <Link 
+            to="/estudiante/asistencias"
+            className="block bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden hover:border-zinc-300 transition-colors"
+          >
+            <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <h3 className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">Asistencias</h3>
+              </div>
+              <ArrowRight className="w-4 h-4 text-zinc-400" />
+            </div>
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="bg-emerald-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600">
+                    {estadisticasAsistencia.promedioAsistencia.toFixed(0)}%
+                  </div>
+                  <div className="text-[10px] text-emerald-700 mt-0.5 uppercase font-medium">Promedio</div>
+                </div>
+                <div className="bg-amber-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-amber-600">
+                    {estadisticasAsistencia.cursosConAlerta}
+                  </div>
+                  <div className="text-[10px] text-amber-700 mt-0.5 uppercase font-medium">Con Alerta</div>
+                </div>
+              </div>
+              {estadisticasAsistencia.cursosBloqueados > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <Ban className="h-4 w-4 text-red-600 flex-shrink-0" />
+                  <p className="text-xs text-red-700">
+                    {estadisticasAsistencia.cursosBloqueados} curso(s) bloqueado(s) para examen final
+                  </p>
+                </div>
+              )}
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* MÓVIL: Accesos Rápidos - Diseño mejorado */}
       <div className="md:hidden">

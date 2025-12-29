@@ -21,6 +21,7 @@ export default function GestionDocentesPasswordPage() {
     profesion: '',
     fechaNacimiento: '',
     correo: '',
+    emailUsuario: '',
     password: '',
   });
 
@@ -103,6 +104,7 @@ export default function GestionDocentesPasswordPage() {
       profesion: '',
       fechaNacimiento: '',
       correo: '',
+      emailUsuario: '',
       password: '',
     });
     setMostrarPassword(false);
@@ -491,7 +493,7 @@ export default function GestionDocentesPasswordPage() {
 
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                          Correo Electrónico
+                          Correo Electrónico (Institucional)
                         </label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
@@ -503,37 +505,58 @@ export default function GestionDocentesPasswordPage() {
                             placeholder="ejemplo@universidad.edu.pe"
                           />
                         </div>
+                        <p className="text-xs text-zinc-500 mt-1">Correo institucional del docente</p>
                       </div>
 
                       {modalAbierto === 'crear' && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                            Contraseña <span className="text-red-500">*</span>
-                          </label>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
-                            <input
-                              type={mostrarPassword ? 'text' : 'password'}
-                              required
-                              minLength={6}
-                              value={formData.password}
-                              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                              className="w-full pl-10 pr-12 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
-                              placeholder="Mínimo 6 caracteres"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setMostrarPassword(!mostrarPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                            >
-                              {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
+                        <>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                              Email de Usuario (Gmail u otro) <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <input
+                                type="email"
+                                required
+                                value={formData.emailUsuario}
+                                onChange={(e) => setFormData({ ...formData, emailUsuario: e.target.value })}
+                                className="w-full pl-10 pr-4 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                                placeholder="ejemplo@gmail.com"
+                              />
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-1">Email para acceder al sistema (puede ser Gmail, Outlook, etc.)</p>
                           </div>
-                          <p className="text-xs text-zinc-500 mt-1.5 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" />
-                            La contraseña debe tener al menos 6 caracteres
-                          </p>
-                        </div>
+
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                              Contraseña <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <input
+                                type={mostrarPassword ? 'text' : 'password'}
+                                required
+                                minLength={6}
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full pl-10 pr-12 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all"
+                                placeholder="Mínimo 6 caracteres"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setMostrarPassword(!mostrarPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                              >
+                                {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                              </button>
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-1.5 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" />
+                              La contraseña debe tener al menos 6 caracteres
+                            </p>
+                          </div>
+                        </>
                       )}
                     </div>
 

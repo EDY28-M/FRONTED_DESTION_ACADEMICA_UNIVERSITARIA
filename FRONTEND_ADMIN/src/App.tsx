@@ -31,6 +31,7 @@ import {
 import Dashboard from './pages/Dashboard'
 import DocentesPage from './pages/Docente/DocentesPage'
 import CursosPage from './pages/Cursos/CursosPage'
+import GestionHorariosPage from './pages/Admin/GestionHorariosPage'
 import EstadisticasPage from './pages/Estadisticas/EstadisticasPage'
 import PerfilPage from './pages/Perfil/PerfilPage'
 import GestionEstudiantesPage from './pages/Admin/GestionEstudiantesPage'
@@ -38,6 +39,7 @@ import CursosDirigidosPage from './pages/Admin/CursosDirigidosPage'
 import GestionPeriodosPage from './pages/Admin/GestionPeriodosPage'
 import VisualizacionEstudiantesPage from './pages/Admin/VisualizacionEstudiantesPage'
 import GestionDocentesPasswordPage from './pages/Admin/GestionDocentesPasswordPage'
+import GestionAsistenciasPage from './pages/Admin/GestionAsistenciasPage'
 import InicioDashboard from './pages/Student/InicioDashboard'
 import MisCursosPage from './pages/Student/MisCursosPage'
 import MatriculaPage from './pages/Student/MatriculaPage'
@@ -49,6 +51,8 @@ import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
 import RegistroNotasPage from './pages/Student/RegistroNotasPage'
 import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
 import { HorarioEstudiantePage } from './pages/Student/HorarioEstudiantePage'
+import TrabajosPage from './pages/Student/TrabajosPage'
+import TrabajoDetallePage from './pages/Student/TrabajoDetallePage'
 
 function App() {
   const { isAuthenticated, user } = useAuth()
@@ -172,6 +176,8 @@ function App() {
         <Route path="horario" element={<HorarioEstudiantePage />} />
         <Route path="orden-merito" element={<OrdenMeritoPage />} />
         <Route path="perfil" element={<PerfilEstudiantePage />} />
+        <Route path="trabajos/curso/:idCurso" element={<TrabajosPage />} />
+        <Route path="trabajos/:id" element={<TrabajoDetallePage />} />
       </Route>
 
       {/* Rutas protegidas de administrador - requieren autenticación */}
@@ -188,6 +194,8 @@ function App() {
         <Route path="docentes" element={<DocentesPage />} />
         <Route path="docentes/gestion-passwords" element={<GestionDocentesPasswordPage />} />
         <Route path="cursos" element={<CursosPage />} />
+        <Route path="horarios" element={<GestionHorariosPage />} />
+        <Route path="asistencias" element={<GestionAsistenciasPage />} />
         <Route path="estudiantes" element={<GestionEstudiantesPage />} />
         <Route path="estudiantes/visualizar" element={<VisualizacionEstudiantesPage />} />
         <Route path="cursos-dirigidos" element={<CursosDirigidosPage />} />

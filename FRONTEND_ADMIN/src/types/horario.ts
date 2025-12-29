@@ -26,3 +26,44 @@ export interface HorarioConflicto {
   cursoConflicto?: string;
   horarioConflicto?: string;
 }
+
+// Nuevos tipos para gestión de horarios por docente
+export interface CursoConHorarios {
+  idCurso: number;
+  nombreCurso: string;
+  codigo?: string;
+  ciclo: number;
+  creditos: number;
+  horasSemanal: number;
+  horarios: Horario[];
+}
+
+export interface DocenteConCursos {
+  idDocente: number;
+  nombreDocente: string;
+  profesion: string;
+  correo?: string;
+  cursos: CursoConHorarios[];
+  totalCursos: number;
+  totalHorariosAsignados: number;
+}
+
+export interface CrearHorariosBatchDto {
+  idDocente: number;
+  horarios: CreateHorarioDto[];
+}
+
+export interface ErrorHorario {
+  idCurso: number;
+  nombreCurso: string;
+  diaSemana: number;
+  error: string;
+}
+
+export interface ResultadoBatchHorarios {
+  totalEnviados: number;
+  totalCreados: number;
+  totalFallidos: number;
+  horariosCreados: Horario[];
+  errores: ErrorHorario[];
+}

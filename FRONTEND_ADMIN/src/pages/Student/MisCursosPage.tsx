@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { BookOpen, AlertTriangle, Filter, Trash2 } from 'lucide-react';
+import { BookOpen, AlertTriangle, Filter, Trash2, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationContext';
 
 const MisCursosPage: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | undefined>(undefined);
@@ -158,6 +160,7 @@ const MisCursosPage: React.FC = () => {
                   <th className="px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
@@ -202,6 +205,17 @@ const MisCursosPage: React.FC = () => {
                           year: 'numeric'
                         })}
                       </span>
+                    </td>
+                    <td className="px-6 py-3 text-center">
+                      {curso.estado === 'Matriculado' && (
+                        <button
+                          onClick={() => navigate(`/estudiante/trabajos/curso/${curso.idCurso}`)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          Trabajos
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

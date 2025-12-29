@@ -9,14 +9,12 @@ import {
   Trash2,
   BookOpen,
   Clock,
-  Award,
-  User
+  Award
 } from 'lucide-react'
 import { cursosApi } from '../../services/cursosService'
 import { docentesApi } from '../../services/docentesService'
 import { Curso } from '../../types'
 import CursoModal from '../../components/Cursos/CursoModal'
-import GestionHorarioModal from '../../components/Cursos/GestionHorarioModal'
 import ConfirmModal from '../../components/Common/ConfirmModal'
 import { useNotifications } from '../../contexts/NotificationContext'
 
@@ -24,7 +22,6 @@ const CursosPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isHorarioModalOpen, setIsHorarioModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [cursoToDelete, setCursoToDelete] = useState<Curso | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
@@ -90,11 +87,6 @@ const CursosPage = () => {
     setModalMode('view')
     setSelectedCurso(curso)
     setIsModalOpen(true)
-  }
-
-  const handleHorario = (curso: Curso) => {
-    setSelectedCurso(curso)
-    setIsHorarioModalOpen(true)
   }
 
   const handleDelete = (curso: Curso) => {
@@ -231,25 +223,17 @@ const CursosPage = () => {
                 {filteredCursos.map((curso) => (
                   <tr key={curso.id} className="hover:bg-zinc-50/50 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100">
-                          <BookOpen className="h-4 w-4 text-zinc-600" />
-                        </div>
-                        <span className="text-sm font-medium text-zinc-900">
-                          {curso.nombreCurso}
-                        </span>
-                      </div>
+                      <span className="text-sm font-medium text-zinc-900">
+                        {curso.nombreCurso}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {curso.docente ? (
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-zinc-400" />
-                          <div>
-                            <p className="text-sm text-zinc-900">
-                              {curso.docente.nombres} {curso.docente.apellidos}
-                            </p>
-                            <p className="text-xs text-zinc-500">{curso.docente.profesion}</p>
-                          </div>
+                        <div>
+                          <p className="text-sm text-zinc-900">
+                            {curso.docente.nombres} {curso.docente.apellidos}
+                          </p>
+                          <p className="text-xs text-zinc-500">{curso.docente.profesion}</p>
                         </div>
                       ) : (
                         <span className="text-sm text-zinc-400">Sin asignar</span>
@@ -282,13 +266,6 @@ const CursosPage = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleHorario(curso)}
-                          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
-                          title="Gestionar Horario"
-                        >
-                          <Clock className="h-4 w-4" />
-                        </button>
-                        <button
                           onClick={() => handleEdit(curso)}
                           className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
                           title="Editar"
@@ -319,12 +296,6 @@ const CursosPage = () => {
         curso={selectedCurso}
         mode={modalMode}
         docentes={docentes || []}
-      />
-
-      <GestionHorarioModal
-        isOpen={isHorarioModalOpen}
-        onClose={() => setIsHorarioModalOpen(false)}
-        curso={selectedCurso}
       />
 
       <ConfirmModal

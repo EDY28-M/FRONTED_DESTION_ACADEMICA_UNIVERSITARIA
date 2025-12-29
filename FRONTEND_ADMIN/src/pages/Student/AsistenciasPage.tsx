@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { asistenciasApi } from '../../services/asistenciasApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { Calendar, CheckCircle2, XCircle, AlertTriangle, X, Eye } from 'lucide-react';
+import { Calendar, CheckCircle2, XCircle, AlertTriangle, X, Eye, Ban, Clock } from 'lucide-react';
 
 const AsistenciasPage: React.FC = () => {
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | null>(null);
+  const [estadisticasCompletas, setEstadisticasCompletas] = useState<Record<number, any>>({});
 
   // Obtener perfil del estudiante
   const { data: perfil } = useQuery({
@@ -25,6 +26,36 @@ const AsistenciasPage: React.FC = () => {
     queryFn: () => asistenciasApi.getAsistenciasEstudiante(perfil!.id, periodoActivo?.id),
     enabled: !!perfil?.id,
   });
+
+  // Cargar estadísticas completas para cada curso
+  React.useEffect(() => {
+    const cargarEstadisticas = async () => {
+      if (perfil?.id && asistenciasPorCurso) {
+        const promises = asistenciasPorCurso.map(async (curso) => {
+          try {
+            const stats = await asistenciasApi.getEstadisticasCompletas(perfil.id, curso.idCurso);
+            console.log(`Estadísticas curso ${curso.nombreCurso}:`, stats);
+            return { idCurso: curso.idCurso, stats };
+          } catch (error) {
+            console.error(`Error cargando estadísticas para curso ${curso.idCurso}:`, error);
+            return { idCurso: curso.idCurso, stats: null };
+          }
+        });
+
+        const resultados = await Promise.all(promises);
+        const nuevasEstadisticas = resultados.reduce((acc, { idCurso, stats }) => {
+          if (stats) {
+            acc[idCurso] = stats;
+          }
+          return acc;
+        }, {} as Record<number, any>);
+
+        setEstadisticasCompletas(nuevasEstadisticas);
+      }
+    };
+
+    cargarEstadisticas();
+  }, [perfil?.id, asistenciasPorCurso]);
 
   const cursoDetallado = cursoSeleccionado
     ? asistenciasPorCurso?.find(c => c.idCurso === cursoSeleccionado)
@@ -48,13 +79,31 @@ const AsistenciasPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Alerta de baja asistencia */}
-      {asistenciasPorCurso?.some(c => c.alertaBajaAsistencia) && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
-          <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-          <p className="text-sm text-amber-800">
-            Tienes cursos con menos del 70% de asistencia
-          </p>
+      {/* Alerta de baja asistencia y bloqueo de examen */}
+      {asistenciasPorCurso?.some(c => {
+        const stats = estadisticasCompletas[c.idCurso];
+        return c.alertaBajaAsistencia || (stats && !stats.puedeDarExamenFinal);
+      }) && (
+        <div className="space-y-3">
+          {asistenciasPorCurso?.some(c => c.alertaBajaAsistencia) && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+              <p className="text-sm text-amber-800">
+                Tienes cursos con menos del 70% de asistencia
+              </p>
+            </div>
+          )}
+          {Object.values(estadisticasCompletas).some((stats: any) => !stats.puedeDarExamenFinal) && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-3">
+              <Ban className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">Bloqueado para Examen Final</p>
+                <p className="text-xs text-red-700 mt-0.5">
+                  Tienes cursos donde superaste el 30% de inasistencias. No podrás rendir el examen final en estos cursos.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -67,35 +116,40 @@ const AsistenciasPage: React.FC = () => {
                 <tr className="border-b border-zinc-200 bg-zinc-50/50">
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Curso</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Docente</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Clases</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Asistencias</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Presentes</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Faltas</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-40">Porcentaje</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">% Asist.</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">% Inasist.</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Estado</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {asistenciasPorCurso.map((curso) => (
+                {asistenciasPorCurso.map((curso) => {
+                  const stats = estadisticasCompletas[curso.idCurso];
+                  return (
                   <tr key={curso.idCurso} className="hover:bg-zinc-50/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</div>
                       <div className="text-xs text-zinc-500">{curso.codigoCurso} • {curso.creditos} cr.</div>
+                      {stats && !stats.puedeDarExamenFinal && (
+                        <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">
+                          <Ban className="h-2.5 w-2.5" />
+                          Sin examen final
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-zinc-600">{curso.nombreDocente || '-'}</td>
                     <td className="px-4 py-3 text-center">
-                      <span className="text-sm font-mono tabular-nums text-zinc-700">{curso.totalClases}</span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-emerald-600">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        {curso.totalAsistencias}
+                        {stats?.asistenciasPresente !== undefined ? stats.asistenciasPresente : curso.totalAsistencias}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-red-600">
                         <XCircle className="h-3.5 w-3.5" />
-                        {curso.totalFaltas}
+                        {stats?.asistenciasFalta !== undefined ? stats.asistenciasFalta : curso.totalFaltas}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -103,21 +157,36 @@ const AsistenciasPage: React.FC = () => {
                         <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                           <div 
                             className={`h-full rounded-full transition-all ${
-                              curso.alertaBajaAsistencia ? 'bg-red-500' : 'bg-emerald-500'
+                              stats?.porcentajeInasistencia >= 30 ? 'bg-red-500' : 
+                              (stats?.porcentajeAsistencia !== undefined && stats.porcentajeAsistencia < 70) || curso.alertaBajaAsistencia ? 'bg-amber-500' : 'bg-emerald-500'
                             }`}
-                            style={{ width: `${Math.min(curso.porcentajeAsistencia, 100)}%` }}
+                            style={{ width: `${Math.min(stats?.porcentajeAsistencia !== undefined ? stats.porcentajeAsistencia : curso.porcentajeAsistencia, 100)}%` }}
                           />
                         </div>
                         <span className={`text-sm font-mono tabular-nums font-medium ${
-                          curso.alertaBajaAsistencia ? 'text-red-600' : 'text-emerald-600'
+                          stats?.porcentajeInasistencia >= 30 ? 'text-red-600' :
+                          (stats?.porcentajeAsistencia !== undefined && stats.porcentajeAsistencia < 70) || curso.alertaBajaAsistencia ? 'text-amber-600' : 'text-emerald-600'
                         }`}>
-                          {curso.porcentajeAsistencia.toFixed(0)}%
+                          {(stats?.porcentajeAsistencia !== undefined ? stats.porcentajeAsistencia : curso.porcentajeAsistencia).toFixed(0)}%
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      {curso.alertaBajaAsistencia ? (
+                      <span className={`text-sm font-mono tabular-nums font-medium ${
+                        stats?.porcentajeInasistencia >= 30 ? 'text-red-600' :
+                        stats?.porcentajeInasistencia >= 25 ? 'text-amber-600' : 'text-zinc-600'
+                      }`}>
+                        {stats?.porcentajeInasistencia.toFixed(1) || '0.0'}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {stats && !stats.puedeDarExamenFinal ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 text-xs font-medium rounded-full">
+                          <Ban className="h-3 w-3" />
+                          Bloqueado
+                        </span>
+                      ) : curso.alertaBajaAsistencia ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium rounded-full">
                           <AlertTriangle className="h-3 w-3" />
                           Alerta
                         </span>
@@ -138,7 +207,8 @@ const AsistenciasPage: React.FC = () => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                );
+                })}
               </tbody>
             </table>
           </div>
@@ -175,20 +245,81 @@ const AsistenciasPage: React.FC = () => {
               </button>
             </div>
 
+            {/* Alerta de bloqueo */}
+            {estadisticasCompletas[cursoDetallado.idCurso] && !estadisticasCompletas[cursoDetallado.idCurso].puedeDarExamenFinal && (
+              <div className="mx-5 mt-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                <div className="flex items-start gap-3">
+                  <Ban className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-red-900">Examen Final Bloqueado</h3>
+                    <p className="text-xs text-red-700 mt-1">
+                      {estadisticasCompletas[cursoDetallado.idCurso].mensajeBloqueo}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Resumen */}
             <div className="px-5 py-4 border-b border-zinc-200">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-blue-50 rounded-lg p-3 text-center">
+                  <div className="text-lg font-bold font-mono tabular-nums text-blue-700">
+                    {estadisticasCompletas[cursoDetallado.idCurso]?.sesionesPorSemana || '-'}
+                  </div>
+                  <div className="text-[10px] text-blue-700 mt-0.5 uppercase font-medium">Ses/Semana</div>
+                </div>
                 <div className="bg-zinc-50 rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold font-mono tabular-nums text-zinc-700">{cursoDetallado.totalClases}</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">Total Clases</div>
+                  <div className="text-lg font-bold font-mono tabular-nums text-zinc-700">
+                    {estadisticasCompletas[cursoDetallado.idCurso]?.totalSesionesEsperadas || cursoDetallado.totalClases}
+                  </div>
+                  <div className="text-[10px] text-zinc-600 mt-0.5 uppercase font-medium">Esperadas</div>
                 </div>
                 <div className="bg-emerald-50 rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600">{cursoDetallado.totalAsistencias}</div>
-                  <div className="text-xs text-emerald-700 mt-0.5">Asistencias</div>
+                  <div className="text-lg font-bold font-mono tabular-nums text-emerald-600">{cursoDetallado.totalAsistencias}</div>
+                  <div className="text-[10px] text-emerald-700 mt-0.5 uppercase font-medium">Presentes</div>
                 </div>
                 <div className="bg-red-50 rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold font-mono tabular-nums text-red-600">{cursoDetallado.totalFaltas}</div>
-                  <div className="text-xs text-red-700 mt-0.5">Faltas</div>
+                  <div className="text-lg font-bold font-mono tabular-nums text-red-600">{cursoDetallado.totalFaltas}</div>
+                  <div className="text-[10px] text-red-700 mt-0.5 uppercase font-medium">Faltas</div>
+                </div>
+              </div>
+              
+              {/* Barra de porcentajes */}
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-zinc-600">Asistencia</span>
+                    <span className="text-xs font-mono font-semibold text-emerald-600">
+                      {cursoDetallado.porcentajeAsistencia.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500 rounded-full transition-all"
+                      style={{ width: `${Math.min(cursoDetallado.porcentajeAsistencia, 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-zinc-600">Inasistencia</span>
+                    <span className={`text-xs font-mono font-semibold ${
+                      estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia >= 30 ? 'text-red-600' :
+                      estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia >= 25 ? 'text-amber-600' : 'text-zinc-600'
+                    }`}>
+                      {estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia.toFixed(1) || '0.0'}%
+                    </span>
+                  </div>
+                  <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all ${
+                        estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia >= 30 ? 'bg-red-500' :
+                        estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia >= 25 ? 'bg-amber-500' : 'bg-zinc-400'
+                      }`}
+                      style={{ width: `${Math.min(estadisticasCompletas[cursoDetallado.idCurso]?.porcentajeInasistencia || 0, 100)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

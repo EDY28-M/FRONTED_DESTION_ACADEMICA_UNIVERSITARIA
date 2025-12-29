@@ -81,7 +81,7 @@ export interface RegistrarAsistenciasMasivasDto {
   idCurso: number;
   fecha: string;
   tipoClase: string; // "Teoría" o "Práctica"
-  asistencias: AsistenciaEstudiante[];
+  estudiantes: AsistenciaEstudiante[];
 }
 
 export interface Asistencia {
@@ -99,11 +99,13 @@ export interface Asistencia {
 export interface ResumenAsistencia {
   idEstudiante: number;
   nombreEstudiante: string;
-  totalClases: number;
-  asistenciasPresentes: number;
-  faltas: number;
+  idCurso: number;
+  nombreCurso: string;
+  totalAsistencias: number;
+  asistenciasPresente: number;
+  asistenciasFalta: number;
   porcentajeAsistencia: number;
-  detalleAsistencias: Asistencia[];
+  asistencias: Asistencia[];
 }
 
 // Respuesta cuando no hay estudiantes o hay mensaje informativo

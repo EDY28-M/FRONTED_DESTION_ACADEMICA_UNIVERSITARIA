@@ -132,7 +132,7 @@ const AttendanceModal = ({ isOpen, onClose, cursoId, cursoNombre, onSuccess }: A
         idCurso: cursoId,
         fecha,
         tipoClase,
-        asistencias: asistenciasArray
+        estudiantes: asistenciasArray
       });
 
       toast.success('Asistencia registrada correctamente');
@@ -565,13 +565,13 @@ export const AsistenciasDocentePage = () => {
                         <p className="text-sm font-medium text-zinc-900">{resumen.nombreEstudiante}</p>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="text-sm text-green-700 font-mono tabular-nums">{resumen.asistenciasPresentes}</span>
+                        <span className="text-sm text-green-700 font-mono tabular-nums">{resumen.asistenciasPresente}</span>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="text-sm text-red-700 font-mono tabular-nums">{resumen.faltas}</span>
+                        <span className="text-sm text-red-700 font-mono tabular-nums">{resumen.asistenciasFalta}</span>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="text-sm text-zinc-600 font-mono tabular-nums">{resumen.totalClases}</span>
+                        <span className="text-sm text-zinc-600 font-mono tabular-nums">{resumen.totalAsistencias}</span>
                       </td>
                       <td className="px-5 py-4 text-center">
                         <StatusBadge value={resumen.porcentajeAsistencia} type="attendance" />
