@@ -41,10 +41,6 @@ export interface Trabajo {
   idTipoEvaluacion?: number;
   nombreTipoEvaluacion?: string;
   pesoTipoEvaluacion?: number;
-  // Información de división de evaluación
-  numeroTrabajo?: number;
-  totalTrabajos?: number;
-  pesoIndividual?: number;
   // Información de la entrega del estudiante (si ya entregó)
   calificacion?: number;
   observacionesDocente?: string;
@@ -64,10 +60,6 @@ export interface TrabajoSimple {
   yaEntregado: boolean;
   idTipoEvaluacion?: number;
   nombreTipoEvaluacion?: string;
-  // Información de división de evaluación
-  numeroTrabajo?: number;
-  totalTrabajos?: number;
-  pesoIndividual?: number;
   // Información de calificación (si ya entregó)
   calificacion?: number;
 }
@@ -78,8 +70,6 @@ export interface TrabajoCreate {
   descripcion?: string;
   fechaLimite: string;
   idTipoEvaluacion?: number;
-  numeroTrabajo?: number; // Número del trabajo dentro de la serie (1, 2, 3, etc.)
-  totalTrabajos?: number; // Total de trabajos en la serie para este tipo de evaluación
   archivos?: File[];
   links?: { url: string; descripcion?: string }[];
 }
@@ -90,8 +80,6 @@ export interface TrabajoUpdate {
   fechaLimite?: string;
   activo?: boolean;
   idTipoEvaluacion?: number;
-  numeroTrabajo?: number; // Número del trabajo dentro de la serie (1, 2, 3, etc.)
-  totalTrabajos?: number; // Total de trabajos en la serie para este tipo de evaluación
   archivosNuevos?: File[];
   linksNuevos?: { url: string; descripcion?: string }[];
   archivosEliminar?: number[];
@@ -135,6 +123,17 @@ export interface CalificarEntrega {
   observaciones?: string;
 }
 
+export interface TrabajoPendiente {
+  id: number;
+  idCurso: number;
+  nombreCurso?: string;
+  titulo: string;
+  fechaLimite: string;
+  totalEntregas: number;
+  entregasPendientesCalificar: number;
+  fechaUltimaEntrega?: string;
+}
+
 // ============================================
 // API PARA DOCENTES
 // ============================================
@@ -152,6 +151,12 @@ export const trabajosDocenteApi = {
     return response.data;
   },
 
+  // Obtener trabajos pendientes del docente (con entregas sin calificar)
+  getTrabajosPendientes: async (): Promise<TrabajoPendiente[]> => {
+    const response = await axios.get('trabajos/docente/pendientes');
+    return response.data;
+  },
+
   // Obtener un trabajo específico
   getTrabajo: async (id: number): Promise<Trabajo> => {
     const response = await axios.get(`trabajos/${id}`);
@@ -166,9 +171,6 @@ export const trabajosDocenteApi = {
     if (data.descripcion) formData.append('Descripcion', data.descripcion);
     formData.append('FechaLimite', data.fechaLimite);
     if (data.idTipoEvaluacion) formData.append('IdTipoEvaluacion', data.idTipoEvaluacion.toString());
-    if (data.numeroTrabajo !== undefined) formData.append('NumeroTrabajo', data.numeroTrabajo.toString());
-    if (data.totalTrabajos !== undefined) formData.append('TotalTrabajos', data.totalTrabajos.toString());
-    if (data.totalEntregables !== undefined) formData.append('TotalEntregables', data.totalEntregables.toString());
 
     if (data.archivos && data.archivos.length > 0) {
       data.archivos.forEach((file) => {
@@ -196,8 +198,6 @@ export const trabajosDocenteApi = {
     if (data.idTipoEvaluacion !== undefined) {
       formData.append('IdTipoEvaluacion', data.idTipoEvaluacion?.toString() || '');
     }
-    if (data.numeroTrabajo !== undefined) formData.append('NumeroTrabajo', data.numeroTrabajo.toString());
-    if (data.totalTrabajos !== undefined) formData.append('TotalTrabajos', data.totalTrabajos.toString());
     if (data.archivosNuevos && data.archivosNuevos.length > 0) {
       data.archivosNuevos.forEach((file) => {
         formData.append('files', file);

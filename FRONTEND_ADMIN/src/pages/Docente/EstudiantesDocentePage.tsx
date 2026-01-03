@@ -116,7 +116,7 @@ export const EstudiantesDocentePage = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
+        <div className="px-6 py-4 max-w-1xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-sm font-medium text-zinc-900">Estudiantes</h1>
             <p className="text-xs text-zinc-500">Gestiona los estudiantes de tus cursos</p>
@@ -124,7 +124,7 @@ export const EstudiantesDocentePage = () => {
         </div>
       </header>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-0 pt-8 pb-6 max-w-1xl mx-auto">
         {/* Selector de Curso */}
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="flex-1 w-full sm:w-auto">

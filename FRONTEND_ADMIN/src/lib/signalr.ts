@@ -9,10 +9,14 @@ export const startSignalRConnection = async (token: string): Promise<HubConnecti
   }
 
   try {
+    // El backend espera el token como query parameter 'access_token'
+    const url = `/hub/notifications?access_token=${encodeURIComponent(token)}`;
+    
+    // Log solo para debugging (sin mostrar el token completo por seguridad)
+    console.log('🔌 Conectando a SignalR hub...');
+    
     connection = new HubConnectionBuilder()
-      .withUrl('/hub/notifications', {
-        accessTokenFactory: () => token,
-      })
+      .withUrl(url)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           // Reintentar después de 0s, 2s, 10s, 30s...

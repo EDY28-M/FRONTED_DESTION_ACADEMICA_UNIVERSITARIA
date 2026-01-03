@@ -77,7 +77,7 @@ export const MisCursosDocentePage = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
+        <div className="h-14 px-6 max-w-1xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-sm font-medium text-zinc-900">Mis Cursos</h1>
             <p className="text-xs text-zinc-500">Gestiona tus cursos asignados</p>
@@ -88,7 +88,7 @@ export const MisCursosDocentePage = () => {
         </div>
       </header>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-0 pt-8 pb-6 max-w-1xl mx-auto">
         {/* ========== DATA TABLE ========== */}
         <div className="border border-zinc-200 rounded-lg bg-white overflow-hidden">
           {cursos.length === 0 ? (

@@ -105,20 +105,20 @@ export default function GestionEstudiantesPage() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="mb-2">
-            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Estudiantes</h1>
-          </div>
-          <p className="text-zinc-500">
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Gestión de Estudiantes
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
             Crea nuevos estudiantes y genera sus credenciales de acceso al sistema.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Formulario de Creación */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-100 bg-zinc-50/50">

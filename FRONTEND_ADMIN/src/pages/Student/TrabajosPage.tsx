@@ -107,17 +107,6 @@ const TrabajosPage: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-lg font-semibold text-zinc-900">{trabajo.titulo}</h3>
-                        {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                            <Layers className="w-3.5 h-3.5" />
-                            Trabajo {trabajo.numeroTrabajo}/{trabajo.totalTrabajos}
-                            {trabajo.pesoIndividual && (
-                              <span className="text-blue-600 font-normal">
-                                {' '}({trabajo.pesoIndividual.toFixed(1)}%)
-                              </span>
-                            )}
-                          </span>
-                        )}
                         {trabajo.nombreTipoEvaluacion && (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <Award className="w-3.5 h-3.5" />
@@ -146,11 +135,6 @@ const TrabajosPage: React.FC = () => {
                         {!trabajo.yaEntregado && diasRestantes > 0 && (
                           <span className="text-amber-600 font-medium">
                             {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'} restantes
-                          </span>
-                        )}
-                        {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-                          <span className="text-xs text-zinc-500">
-                            Serie de {trabajo.totalTrabajos} trabajos - La nota final se calculará cuando todos estén calificados
                           </span>
                         )}
                       </div>

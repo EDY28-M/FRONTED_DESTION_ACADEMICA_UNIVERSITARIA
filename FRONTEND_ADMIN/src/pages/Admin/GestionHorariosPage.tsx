@@ -89,28 +89,29 @@ export default function GestionHorariosPage() {
   const totalHorarios = docentes.reduce((acc, d) => acc + d.totalHorariosAsignados, 0);
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header fijo */}
-      <div className="bg-white border-b border-zinc-200 sticky top-0 z-10">
-        <div className="max-w-[1800px] mx-auto px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-zinc-900">Panel de Gestión de Horarios</h1>
-              <p className="mt-1 text-sm text-zinc-500">
-                Configure y organice los horarios académicos por docente
-              </p>
-            </div>
-            <button
-              onClick={cargarDocentes}
-              className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 transition-colors shadow-sm"
-            >
-              <Clock className="h-4 w-4" />
-              Actualizar
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Panel de Gestión de Horarios
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Configure y organice los horarios académicos por docente
+          </p>
+        </div>
+        <button
+          onClick={cargarDocentes}
+          className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
+        >
+          <Clock className="h-4 w-4" />
+          Actualizar
+        </button>
+      </div>
 
-          {/* Estadísticas y búsqueda */}
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-4 gap-4">
+      {/* Estadísticas y búsqueda */}
+      <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             {/* Stats compactas */}
             <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
               <div className="flex items-center gap-3">
@@ -152,15 +153,14 @@ export default function GestionHorariosPage() {
                 placeholder="Buscar docente o curso..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
               />
             </div>
-          </div>
         </div>
       </div>
 
       {/* Kanban Board */}
-      <div className="max-w-[1800px] mx-auto px-6 py-6">
+      <div>
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-3">

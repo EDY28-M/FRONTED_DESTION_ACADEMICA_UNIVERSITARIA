@@ -153,15 +153,17 @@ export default function CursosDirigidosPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="mb-2">
-          <h1 className="text-2xl font-bold text-zinc-900">Cursos Dirigidos</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Cursos Dirigidos
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Autoriza a estudiantes específicos para matricularse en cursos fuera de su ciclo actual.
+          </p>
         </div>
-        <p className="text-zinc-500">
-          Autoriza a estudiantes específicos para matricularse en cursos fuera de su ciclo actual.
-        </p>
       </div>
 
       {/* Info Box */}
@@ -176,7 +178,7 @@ export default function CursosDirigidosPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna Izquierda: Configuración */}
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 sticky top-6">

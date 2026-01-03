@@ -327,14 +327,14 @@ export default function GestionPeriodosPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="mb-2">
-            <h1 className="text-2xl font-bold text-zinc-900">Gestión de Períodos</h1>
-          </div>
-          <p className="text-zinc-500">
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Gestión de Períodos
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
             Administra los ciclos académicos, aperturas y cierres de semestre.
           </p>
         </div>

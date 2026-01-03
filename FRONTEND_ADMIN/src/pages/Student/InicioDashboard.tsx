@@ -8,11 +8,6 @@ import {
   Clock, 
   TrendingUp,
   ArrowRight,
-  LayoutGrid,
-  FileText,
-  ClipboardList,
-  Layers,
-  Calendar as CalendarIcon,
   Plus,
   CheckCircle2,
   Ban
@@ -262,58 +257,6 @@ const InicioDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MÓVIL: Accesos Rápidos - Diseño mejorado */}
-      <div className="md:hidden">
-        <div className="space-y-2">
-          {/* Acceso principal - Horario */}
-          <Link 
-            to="/estudiante/horario" 
-            className="flex items-center gap-4 p-4 bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-xl text-white shadow-sm hover:shadow-md transition-all group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/10 group-hover:bg-white/20 transition-colors">
-              <LayoutGrid className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <span className="text-sm font-semibold block">Ver Horario</span>
-              <span className="text-xs text-zinc-400">Consulta tu horario semanal</span>
-            </div>
-            <ArrowRight className="w-5 h-5 text-zinc-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-          </Link>
-
-          {/* Fila de 3 accesos secundarios */}
-          <div className="grid grid-cols-3 gap-2">
-            <Link 
-              to="/estudiante/notas" 
-              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
-            >
-              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
-                <FileText className="w-5 h-5 text-zinc-600" />
-              </div>
-              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Notas</span>
-            </Link>
-            
-            <Link 
-              to="/estudiante/matricula" 
-              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
-            >
-              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
-                <ClipboardList className="w-5 h-5 text-zinc-600" />
-              </div>
-              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Matrícula</span>
-            </Link>
-            
-            <Link 
-              to="/estudiante/mis-cursos" 
-              className="flex flex-col items-center p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
-            >
-              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center mb-2 group-hover:bg-zinc-200 transition-colors">
-                <Layers className="w-5 h-5 text-zinc-600" />
-              </div>
-              <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-900">Cursos</span>
-            </Link>
-          </div>
-        </div>
-      </div>
 
       {/* MÓVIL: Cursos disponibles como lista compacta */}
       <div className="md:hidden">
@@ -465,7 +408,7 @@ const InicioDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Columna derecha: Próxima Clase + Accesos */}
+        {/* Columna derecha: Próxima Clase + Asistencias */}
         <div className="space-y-6">
           {/* Next Class Card */}
           <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden group">
@@ -502,31 +445,45 @@ const InicioDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-4">Accesos Rápidos</h3>
-            <div className="space-y-2">
-              <Link to="/estudiante/horario" className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
-                    <CalendarIcon className="w-4 h-4" />
-                  </div>
-                  <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900">Ver Horario Completo</span>
+          {/* Asistencias Card */}
+          {asistenciasPorCurso && asistenciasPorCurso.length > 0 && (
+            <Link 
+              to="/estudiante/asistencias"
+              className="block bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden hover:border-zinc-300 transition-colors"
+            >
+              <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wide">Asistencias</h3>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
-              </Link>
-              
-              <Link to="/estudiante/notas" className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all group">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-100 transition-colors">
-                    <TrendingUp className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-zinc-400" />
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-emerald-50 rounded-lg p-4 text-center">
+                    <div className="text-3xl font-bold font-mono tabular-nums text-emerald-600">
+                      {estadisticasAsistencia.promedioAsistencia.toFixed(0)}%
+                    </div>
+                    <div className="text-xs text-emerald-700 mt-1 uppercase font-medium">Promedio</div>
                   </div>
-                  <span className="text-sm font-medium text-zinc-700 group-hover:text-zinc-900">Consultar Notas</span>
+                  <div className="bg-amber-50 rounded-lg p-4 text-center">
+                    <div className="text-3xl font-bold font-mono tabular-nums text-amber-600">
+                      {estadisticasAsistencia.cursosConAlerta}
+                    </div>
+                    <div className="text-xs text-amber-700 mt-1 uppercase font-medium">Con Alerta</div>
+                  </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600" />
-              </Link>
-            </div>
-          </div>
+                {estadisticasAsistencia.cursosBloqueados > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <Ban className="h-4 w-4 text-red-600 flex-shrink-0" />
+                    <p className="text-xs text-red-700">
+                      {estadisticasAsistencia.cursosBloqueados} curso(s) bloqueado(s) para examen final
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>

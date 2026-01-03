@@ -13,7 +13,6 @@ import {
   Plus,
   CheckCircle2,
   AlertCircle,
-  Layers,
   Award
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -207,17 +206,6 @@ const TrabajoDetallePage: React.FC = () => {
           <p className="text-zinc-500 text-sm mt-1">{trabajo.nombreCurso}</p>
         </div>
         <div className="flex items-center gap-2">
-          {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
-              <Layers className="w-4 h-4" />
-              Trabajo {trabajo.numeroTrabajo}/{trabajo.totalTrabajos}
-              {trabajo.pesoIndividual && (
-                <span className="text-blue-600 font-normal">
-                  {' '}({trabajo.pesoIndividual.toFixed(1)}%)
-                </span>
-              )}
-            </span>
-          )}
           {trabajo.yaEntregado && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
               <CheckCircle2 className="w-4 h-4" />
@@ -245,27 +233,10 @@ const TrabajoDetallePage: React.FC = () => {
               <span className="text-sm font-medium text-zinc-900">
                 {trabajo.nombreTipoEvaluacion}
               </span>
-              {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 ? (
-                <span className="text-sm text-zinc-600">
-                  - Serie de {trabajo.totalTrabajos} trabajos
-                  {trabajo.pesoIndividual && (
-                    <span className="ml-1">
-                      ({trabajo.pesoIndividual.toFixed(1)}% cada uno)
-                    </span>
-                  )}
-                </span>
-              ) : (
-                <span className="text-sm text-zinc-600">
-                  ({trabajo.pesoTipoEvaluacion}%)
-                </span>
-              )}
+              <span className="text-sm text-zinc-600">
+                ({trabajo.pesoTipoEvaluacion}%)
+              </span>
             </div>
-            {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-              <p className="text-xs text-zinc-500 mt-1">
-                Este es el trabajo {trabajo.numeroTrabajo} de {trabajo.totalTrabajos}. 
-                La nota final se calculará automáticamente cuando todos los trabajos estén calificados.
-              </p>
-            )}
           </div>
         )}
 
@@ -615,16 +586,9 @@ const TrabajoDetallePage: React.FC = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h3 className="text-sm font-semibold text-blue-900 mb-1">
-                      {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 
-                        ? `Calificación - Trabajo ${trabajo.numeroTrabajo}` 
-                        : 'Calificación'}
+                      Calificación
                     </h3>
                     <p className="text-2xl font-bold text-blue-700">{trabajo.calificacion.toFixed(1)}</p>
-                    {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && trabajo.pesoIndividual && (
-                      <p className="text-xs text-blue-600 mt-1">
-                        Peso: {trabajo.pesoIndividual.toFixed(1)}% del total ({trabajo.pesoTipoEvaluacion}%)
-                      </p>
-                    )}
                     {trabajo.fechaCalificacion && (
                       <p className="text-xs text-blue-600 mt-1">
                         Calificado el {formatDate(trabajo.fechaCalificacion)}
@@ -635,14 +599,6 @@ const TrabajoDetallePage: React.FC = () => {
                     <span className="text-xs text-blue-600">de 20</span>
                   </div>
                 </div>
-                {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-                  <div className="mb-3 p-2 bg-blue-100 rounded border border-blue-300">
-                    <p className="text-xs text-blue-800">
-                      <span className="font-medium">Nota:</span> Esta es la calificación del trabajo {trabajo.numeroTrabajo} de {trabajo.totalTrabajos}. 
-                      La nota final del tipo de evaluación se calculará automáticamente cuando todos los trabajos estén calificados.
-                    </p>
-                  </div>
-                )}
                 {trabajo.observacionesDocente && (
                   <div className="mt-3 pt-3 border-t border-blue-200">
                     <p className="text-xs font-medium text-blue-700 mb-1">Observaciones del docente:</p>
@@ -655,11 +611,6 @@ const TrabajoDetallePage: React.FC = () => {
                 <p className="text-sm text-amber-800">
                   <Clock className="w-4 h-4 inline mr-2" />
                   El docente aún no ha calificado tu trabajo.
-                  {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-                    <span className="block mt-1 text-xs">
-                      La nota final se calculará cuando todos los {trabajo.totalTrabajos} trabajos estén calificados.
-                    </span>
-                  )}
                 </p>
               </div>
             )}

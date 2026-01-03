@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { docenteHorariosApi } from '../../services/docenteApi';
 import { HorarioSemanalView } from '../../components/Horario/HorarioSemanalView';
+import { Horario } from '../../types/horario';
 import { CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
@@ -14,15 +15,19 @@ const EmptyState = ({ icon: Icon, title, description }: { icon: React.ElementTyp
 );
 
 export const HorarioDocentePage = () => {
-  const { data: horarios = [], isLoading } = useQuery({
+  const { data: horarios = [], isLoading } = useQuery<Horario[]>({
     queryKey: ['horarios-docente'],
-    queryFn: docenteHorariosApi.getMiHorario,
+    queryFn: async () => {
+      try {
+        return await docenteHorariosApi.getMiHorario();
+      } catch (error) {
+        console.error('Error al cargar horarios:', error);
+        toast.error('No se pudo cargar su horario académico.');
+        throw error;
+      }
+    },
     staleTime: 30000, // 30 segundos - se refrescará automáticamente
     refetchOnWindowFocus: true, // Refresca al volver a la ventana
-    onError: (error) => {
-      console.error('Error al cargar horarios:', error);
-      toast.error('No se pudo cargar su horario académico.');
-    }
   });
 
   if (isLoading) {
@@ -37,7 +42,7 @@ export const HorarioDocentePage = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* Header Standard */}
       <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
+        <div className="h-14 px-10 max-w-1xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-sm font-medium text-zinc-900">Mi Horario Académico</h1>
             <p className="text-xs text-zinc-500">Visualiza tu carga académica semanal</p>
@@ -56,7 +61,7 @@ export const HorarioDocentePage = () => {
       </header>
 
       {/* Main Content */}
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-0 pt-8 pb-6 max-w-1xl mx-auto">
         {horarios.length > 0 ? (
           <div className="bg-white rounded-lg border border-zinc-200 shadow-sm overflow-hidden">
              <HorarioSemanalView horarios={horarios} />

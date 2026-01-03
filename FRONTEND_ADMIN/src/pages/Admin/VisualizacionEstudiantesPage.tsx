@@ -109,15 +109,17 @@ export default function VisualizacionEstudiantesPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <div className="mb-2">
-          <h1 className="text-2xl font-bold text-zinc-900">Visualización de Estudiantes</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Visualización de Estudiantes
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Gestión y consulta detallada de todos los estudiantes registrados en el sistema.
+          </p>
         </div>
-        <p className="text-zinc-500">
-          Gestión y consulta detallada de todos los estudiantes registrados en el sistema.
-        </p>
       </div>
 
       {/* Buscador */}

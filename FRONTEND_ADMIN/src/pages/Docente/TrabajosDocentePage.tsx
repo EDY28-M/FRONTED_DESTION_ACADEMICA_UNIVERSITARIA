@@ -93,6 +93,8 @@ const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCu
       trabajosDocenteApi.calificarEntrega(idEntrega, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entregas-trabajo'] });
+      // Invalidar trabajos pendientes para actualizar el dashboard
+      queryClient.invalidateQueries({ queryKey: ['trabajos-pendientes'] });
       toast.success('Calificación guardada exitosamente');
     },
     onError: (error: any) => {
@@ -209,25 +211,9 @@ const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCu
                             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                             <span className="text-emerald-700 font-medium">
                               {trabajo.nombreTipoEvaluacion} 
-                              {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 ? (
-                                <span className="ml-1">
-                                  - Trabajo {trabajo.numeroTrabajo}/{trabajo.totalTrabajos} 
-                                  {trabajo.pesoIndividual && (
-                                    <span className="text-zinc-600 font-normal">
-                                      {' '}({trabajo.pesoIndividual.toFixed(1)}% c/u)
-                                    </span>
-                                  )}
-                                </span>
-                              ) : (
-                                <span className="ml-1">({trabajo.pesoTipoEvaluacion}%)</span>
-                              )}
+                              <span className="ml-1">({trabajo.pesoTipoEvaluacion}%)</span>
                             </span>
                           </div>
-                        )}
-                        {trabajo.totalTrabajos && trabajo.totalTrabajos > 1 && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                            Serie de {trabajo.totalTrabajos} trabajos
-                          </span>
                         )}
                       </div>
                     </div>
@@ -528,11 +514,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
     trabajo?.fechaLimite ? new Date(trabajo.fechaLimite).toISOString().slice(0, 16) : ''
   );
   const [idTipoEvaluacion, setIdTipoEvaluacion] = useState<number | undefined>(trabajo?.idTipoEvaluacion);
-  const [dividirEvaluacion, setDividirEvaluacion] = useState<boolean>(
-    trabajo ? (trabajo.totalTrabajos !== undefined && trabajo.totalTrabajos > 1) : false
-  );
-  const [numeroTrabajo, setNumeroTrabajo] = useState<number | undefined>(trabajo?.numeroTrabajo);
-  const [totalTrabajos, setTotalTrabajos] = useState<number | undefined>(trabajo?.totalTrabajos);
   const [archivos, setArchivos] = useState<File[]>([]);
   const [links, setLinks] = useState<{ url: string; descripcion: string }[]>(
     trabajo?.links.map(l => ({ url: l.url, descripcion: l.descripcion || '' })) || []
@@ -583,22 +564,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
       return;
     }
 
-    // Validar división de evaluación
-    if (dividirEvaluacion) {
-      if (!numeroTrabajo || !totalTrabajos) {
-        toast.error('Si divides la evaluación, debes especificar el número de trabajo y el total de trabajos');
-        return;
-      }
-      if (numeroTrabajo < 1 || numeroTrabajo > totalTrabajos) {
-        toast.error(`El número de trabajo debe estar entre 1 y ${totalTrabajos}`);
-        return;
-      }
-      if (totalTrabajos < 2 || totalTrabajos > 10) {
-        toast.error('El total de trabajos debe estar entre 2 y 10');
-        return;
-      }
-    }
-
     if (trabajo) {
       // Actualizar
       const data: TrabajoUpdate = {
@@ -606,8 +571,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
         descripcion: descripcion || undefined,
         fechaLimite: fechaLimite,
         idTipoEvaluacion: idTipoEvaluacion || undefined,
-        numeroTrabajo: dividirEvaluacion ? numeroTrabajo : undefined,
-        totalTrabajos: dividirEvaluacion ? totalTrabajos : undefined,
         archivosNuevos: archivos.length > 0 ? archivos : undefined,
         linksNuevos: links.length > 0 ? links : undefined,
       };
@@ -620,8 +583,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
         descripcion: descripcion || undefined,
         fechaLimite: fechaLimite,
         idTipoEvaluacion: idTipoEvaluacion || undefined,
-        numeroTrabajo: dividirEvaluacion ? numeroTrabajo : undefined,
-        totalTrabajos: dividirEvaluacion ? totalTrabajos : undefined,
         archivos: archivos.length > 0 ? archivos : undefined,
         links: links.length > 0 ? links : undefined,
       };
@@ -703,12 +664,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
               onChange={(e) => {
                 const nuevoId = e.target.value ? Number(e.target.value) : undefined;
                 setIdTipoEvaluacion(nuevoId);
-                // Si se deselecciona el tipo, desactivar división
-                if (!nuevoId) {
-                  setDividirEvaluacion(false);
-                  setNumeroTrabajo(undefined);
-                  setTotalTrabajos(undefined);
-                }
               }}
               className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900"
             >
@@ -723,106 +678,6 @@ const ModalTrabajo: React.FC<ModalTrabajoProps> = ({ idCurso, trabajo, onClose, 
               Selecciona el tipo de evaluación para que la calificación se registre automáticamente en las notas
             </p>
           </div>
-
-          {/* Opción para dividir evaluación */}
-          {idTipoEvaluacion && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="dividirEvaluacion"
-                  checked={dividirEvaluacion}
-                  onChange={(e) => {
-                    setDividirEvaluacion(e.target.checked);
-                    if (!e.target.checked) {
-                      setNumeroTrabajo(undefined);
-                      setTotalTrabajos(undefined);
-                    } else {
-                      // Valores por defecto al activar
-                      if (!numeroTrabajo) setNumeroTrabajo(1);
-                      if (!totalTrabajos) setTotalTrabajos(2);
-                    }
-                  }}
-                  className="mt-0.5 w-4 h-4 text-zinc-900 border-zinc-300 rounded focus:ring-zinc-900"
-                />
-                <div className="flex-1">
-                  <label htmlFor="dividirEvaluacion" className="block text-sm font-medium text-zinc-900 mb-1 cursor-pointer">
-                    Dividir esta evaluación en múltiples trabajos
-                  </label>
-                  <p className="text-xs text-zinc-600 mb-3">
-                    Útil cuando quieres crear varios trabajos para el mismo tipo de evaluación (ej: 4 parciales, 2 trabajos encargados).
-                    El sistema calculará automáticamente el peso individual de cada trabajo y registrará la nota final cuando todos estén calificados.
-                  </p>
-                  
-                  {dividirEvaluacion && (
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                      <div>
-                        <label className="block text-xs font-medium text-zinc-700 mb-1">
-                          Número de este trabajo
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          max={totalTrabajos || 10}
-                          value={numeroTrabajo || ''}
-                          onChange={(e) => {
-                            const num = parseInt(e.target.value) || undefined;
-                            if (num && totalTrabajos && num > totalTrabajos) {
-                              toast.error(`El número de trabajo no puede ser mayor a ${totalTrabajos}`);
-                              return;
-                            }
-                            setNumeroTrabajo(num);
-                          }}
-                          className="w-full px-3 py-1.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-                          placeholder="Ej: 1"
-                        />
-                        <p className="text-xs text-zinc-500 mt-1">Ej: 1, 2, 3...</p>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-zinc-700 mb-1">
-                          Total de trabajos
-                        </label>
-                        <input
-                          type="number"
-                          min="2"
-                          max="10"
-                          value={totalTrabajos || ''}
-                          onChange={(e) => {
-                            const total = parseInt(e.target.value) || undefined;
-                            if (total && numeroTrabajo && numeroTrabajo > total) {
-                              setNumeroTrabajo(1);
-                            }
-                            setTotalTrabajos(total);
-                          }}
-                          className="w-full px-3 py-1.5 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
-                          placeholder="Ej: 4"
-                        />
-                        <p className="text-xs text-zinc-500 mt-1">Máximo 10 trabajos</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {dividirEvaluacion && numeroTrabajo && totalTrabajos && idTipoEvaluacion && (
-                    <div className="mt-3 p-2 bg-white rounded border border-blue-300">
-                      <p className="text-xs text-zinc-600">
-                        <span className="font-medium">Peso calculado:</span>{' '}
-                        {tiposEvaluacion?.find(t => t.id === idTipoEvaluacion) && (
-                          <span>
-                            {(tiposEvaluacion.find(t => t.id === idTipoEvaluacion)!.peso / totalTrabajos).toFixed(2)}% por trabajo
-                            {' '}({tiposEvaluacion.find(t => t.id === idTipoEvaluacion)!.peso}% ÷ {totalTrabajos})
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        La nota final se calculará automáticamente cuando todos los {totalTrabajos} trabajos estén calificados.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
 
           <div>
             <label className="block text-sm font-medium text-zinc-900 mb-2">

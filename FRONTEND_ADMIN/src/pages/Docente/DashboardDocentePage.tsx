@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { docenteCursosApi, docenteAsistenciaApi, docenteHorariosApi, CursoDocente, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
+import { trabajosDocenteApi, TrabajoPendiente } from '../../services/trabajosApi';
 import { Horario } from '../../types/horario';
 import { toast } from 'react-hot-toast';
 
@@ -165,7 +167,7 @@ const ModalAsistenciaRapida = ({ curso, onClose, onSuccess }: ModalAsistenciaPro
         idCurso: curso.id,
         fecha: fechaAsistencia,
         tipoClase: tipoClase,
-        asistencias: asistenciasMarcadas.map(a => ({
+        estudiantes: asistenciasMarcadas.map(a => ({
           idEstudiante: a.idEstudiante,
           presente: a.presente as boolean,
           observaciones: a.observaciones || undefined,
@@ -457,6 +459,24 @@ export const DashboardDocentePage = () => {
   const [isLoadingHorarios, setIsLoadingHorarios] = useState(true);
   const [modalAsistencia, setModalAsistencia] = useState<CursoDocente | null>(null);
 
+  // Usar React Query para trabajos pendientes (permite invalidación automática)
+  const { data: trabajosPendientes = [], isLoading: isLoadingTrabajos } = useQuery<TrabajoPendiente[]>({
+    queryKey: ['trabajos-pendientes'],
+    queryFn: async () => {
+      try {
+        const data = await trabajosDocenteApi.getTrabajosPendientes();
+        console.log('Trabajos pendientes cargados:', data);
+        return data;
+      } catch (error) {
+        console.error('Error al cargar trabajos pendientes:', error);
+        toast.error('Error al cargar trabajos pendientes');
+        throw error;
+      }
+    },
+    refetchInterval: 30000, // Recargar cada 30 segundos
+    refetchOnWindowFocus: true, // Recargar cuando se enfoca la ventana
+  });
+
   useEffect(() => {
     cargarCursos();
     cargarHorarios();
@@ -487,6 +507,7 @@ export const DashboardDocentePage = () => {
     }
   };
 
+
   // Cálculos
   const totalEstudiantes = cursos.reduce((sum, c) => sum + c.totalEstudiantes, 0);
   const promedioGeneral = cursos.length > 0 
@@ -513,7 +534,7 @@ export const DashboardDocentePage = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
-        <div className="h-14 px-6 max-w-7xl mx-auto flex items-center justify-between">
+        <div className="h-14 px-5 max-w-1xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-sm font-medium text-zinc-900">Dashboard</h1>
             {cursos[0]?.periodoNombre && (
@@ -526,7 +547,7 @@ export const DashboardDocentePage = () => {
         </div>
       </header>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-0 pt-6 pb-6 max-w-8xl mx-auto">
         {/* ========== STATS ROW ========== */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-200 border border-zinc-200 rounded-lg overflow-hidden mb-6">
           <div className="bg-white">
@@ -561,11 +582,69 @@ export const DashboardDocentePage = () => {
               <p className="text-xs text-zinc-500 uppercase tracking-wide">Tareas pendientes</p>
               <span className="text-xs text-zinc-400">Hoy</span>
             </div>
-            <EmptyState 
-              icon={InboxIcon}
-              title="Todo al día"
-              description="No hay tareas pendientes por revisar"
-            />
+            {isLoadingTrabajos ? (
+              <div className="py-12 text-center">
+                <div className="animate-pulse text-zinc-400 text-sm">Cargando tareas...</div>
+              </div>
+            ) : trabajosPendientes.length === 0 ? (
+              <EmptyState 
+                icon={InboxIcon}
+                title="Todo al día"
+                description="No hay trabajos pendientes por revisar"
+              />
+            ) : (
+              <div className="space-y-3">
+                {trabajosPendientes.map((trabajo) => (
+                  <div
+                    key={trabajo.id}
+                    className="flex items-center justify-between p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/docente/curso/${trabajo.idCurso}?tab=trabajos`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-medium text-zinc-900 truncate">
+                          {trabajo.titulo}
+                        </h4>
+                        {trabajo.entregasPendientesCalificar > 0 ? (
+                          <span className="px-2 py-0.5 bg-zinc-100 text-zinc-700 text-xs font-medium rounded border border-zinc-200">
+                            {trabajo.entregasPendientesCalificar} pendiente{trabajo.entregasPendientesCalificar !== 1 ? 's' : ''}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-zinc-100 text-zinc-700 text-xs font-medium rounded border border-zinc-200">
+                            Sin entregas aún
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-500 truncate">
+                        {trabajo.nombreCurso}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="text-xs text-zinc-400">
+                          Fecha límite: {new Date(trabajo.fechaLimite).toLocaleDateString('es-PE', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </span>
+                        {trabajo.fechaUltimaEntrega ? (
+                          <span className="text-xs text-zinc-400">
+                            • Última entrega: {new Date(trabajo.fechaUltimaEntrega).toLocaleDateString('es-PE', {
+                              day: '2-digit',
+                              month: '2-digit'
+                            })}
+                          </span>
+                        ) : trabajo.totalEntregas === 0 ? (
+                          <span className="text-xs text-zinc-400">
+                            • Sin entregas
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <ChevronRightIcon className="h-5 w-5 text-zinc-400 flex-shrink-0 ml-3" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

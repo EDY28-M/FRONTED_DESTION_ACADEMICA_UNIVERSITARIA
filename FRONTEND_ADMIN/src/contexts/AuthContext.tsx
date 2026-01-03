@@ -123,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(response.usuario)
 
       // Conectar a SignalR
-      const token = localStorage.getItem('token')
+      const token = authService.getToken()
       if (token) {
         try {
           await startSignalRConnection(token)

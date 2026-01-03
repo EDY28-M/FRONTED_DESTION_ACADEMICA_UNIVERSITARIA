@@ -85,12 +85,16 @@ export default function PerfilPage() {
   const getInitials = () => `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}`.toUpperCase();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className="space-y-6">
       {/* Header Minimalista */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Configuración de Cuenta</h1>
-          <p className="text-zinc-500 text-sm mt-1">Gestiona tu información personal y seguridad</p>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Configuración de Cuenta
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Gestiona tu información personal y seguridad
+          </p>
         </div>
         {message && !isModalOpen && (
           <motion.div 
@@ -106,7 +110,7 @@ export default function PerfilPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna Izquierda: Tarjeta de Identidad */}
         <div className="space-y-6">
           <div className="bg-white rounded-2xl p-6 border border-zinc-200 shadow-sm flex flex-col items-center text-center">

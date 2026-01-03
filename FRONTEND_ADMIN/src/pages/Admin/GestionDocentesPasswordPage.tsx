@@ -2,7 +2,7 @@ import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, Transition } from '@headlessui/react';
 import { adminDocentesApi, DocenteAdmin, CrearDocenteConPasswordRequest, AsignarPasswordRequest, ActualizarDocenteRequest } from '../../services/adminDocentesApi';
-import { GraduationCap, Plus, Key, Edit, X, Check, AlertCircle, Eye, EyeOff, Trash2, Search, User, Mail, Calendar, Briefcase, Lock } from 'lucide-react';
+import { GraduationCap, Plus, Key, Edit, X, AlertCircle, Eye, EyeOff, Trash2, Search, User, Mail, Calendar, Briefcase, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 type ModalType = 'crear' | 'asignarPassword' | 'editar' | 'eliminar' | null;
@@ -128,6 +128,7 @@ export default function GestionDocentesPasswordPage() {
         ? docente.fechaNacimiento.split('T')[0] 
         : '',
       correo: docente.correo || '',
+      emailUsuario: '',
       password: '',
     });
     setModalAbierto('editar');
@@ -221,14 +222,14 @@ export default function GestionDocentesPasswordPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <div className="mb-2">
-              <h1 className="text-2xl font-bold text-zinc-900">Gestión de Docentes</h1>
-            </div>
-          <p className="text-zinc-500">
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
+            Gestión de Docentes
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
             Administra docentes y sus credenciales de acceso al sistema.
           </p>
         </div>

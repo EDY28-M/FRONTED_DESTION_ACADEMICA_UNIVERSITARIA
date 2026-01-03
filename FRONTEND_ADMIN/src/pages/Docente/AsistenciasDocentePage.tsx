@@ -455,7 +455,7 @@ export const AsistenciasDocentePage = () => {
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="bg-white border-b border-zinc-200">
-        <div className="px-6 py-4 max-w-9xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="px-6 py-4 max-w-1xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-sm font-medium text-zinc-900">Asistencias</h1>
             <p className="text-xs text-zinc-500">Control de asistencia por curso</p>
@@ -473,7 +473,7 @@ export const AsistenciasDocentePage = () => {
         </div>
       </header>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="px-0 pt-8 pb-6 max-w-1xl mx-auto">
         {/* Selector de Curso */}
         <div className="mb-6">
           <label className="block text-xs text-zinc-500 mb-1.5">Seleccionar curso</label>
@@ -532,7 +532,7 @@ export const AsistenciasDocentePage = () => {
 
         {/* ========== TAB: RESUMEN ========== */}
         {activeTab === 'resumen' && (
-          <div className="border border-zinc-200 rounded-lg bg-white overflow-hidden">
+          <div className="w-full border border-zinc-200 rounded-lg bg-white overflow-hidden">
             {isLoadingAsistencias ? (
               <div className="py-16 text-center">
                 <div className="animate-pulse text-zinc-400 text-sm">Cargando asistencias...</div>
@@ -548,11 +548,11 @@ export const AsistenciasDocentePage = () => {
                 <table className="w-full min-w-[800px]">
                   <thead>
                   <tr className="text-left text-xs text-zinc-500 uppercase tracking-wide border-b border-zinc-200">
-                    <th className="px-5 py-3 font-medium">Estudiante</th>
-                    <th className="px-5 py-3 font-medium text-center">Asistencias</th>
-                    <th className="px-5 py-3 font-medium text-center">Faltas</th>
-                    <th className="px-5 py-3 font-medium text-center">Total Clases</th>
-                    <th className="px-5 py-3 font-medium text-center">% Asistencia</th>
+                    <th className="px-6 py-3 font-medium">Estudiante</th>
+                    <th className="px-6 py-3 font-medium text-center">Asistencias</th>
+                    <th className="px-6 py-3 font-medium text-center">Faltas</th>
+                    <th className="px-6 py-3 font-medium text-center">Total Clases</th>
+                    <th className="px-6 py-3 font-medium text-center">% Asistencia</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -561,19 +561,19 @@ export const AsistenciasDocentePage = () => {
                       key={resumen.idEstudiante}
                       className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/50 transition-colors"
                     >
-                      <td className="px-5 py-4">
+                      <td className="px-6 py-4">
                         <p className="text-sm font-medium text-zinc-900">{resumen.nombreEstudiante}</p>
                       </td>
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-6 py-4 text-center">
                         <span className="text-sm text-green-700 font-mono tabular-nums">{resumen.asistenciasPresente}</span>
                       </td>
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-6 py-4 text-center">
                         <span className="text-sm text-red-700 font-mono tabular-nums">{resumen.asistenciasFalta}</span>
                       </td>
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-6 py-4 text-center">
                         <span className="text-sm text-zinc-600 font-mono tabular-nums">{resumen.totalAsistencias}</span>
                       </td>
-                      <td className="px-5 py-4 text-center">
+                      <td className="px-6 py-4 text-center">
                         <StatusBadge value={resumen.porcentajeAsistencia} type="attendance" />
                       </td>
                     </tr>
@@ -583,7 +583,7 @@ export const AsistenciasDocentePage = () => {
             </div>
           )}            {/* Footer */}
             {resumenAsistencias.length > 0 && (
-              <div className="px-5 py-3 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between">
+              <div className="px-6 py-3 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between">
                 <p className="text-xs text-zinc-500">
                   {resumenAsistencias.length} estudiantes
                 </p>
@@ -620,9 +620,9 @@ export const AsistenciasDocentePage = () => {
                   return acc;
                 }, {} as Record<string, Asistencia[]>)
               ).map(([fecha, asistencias]) => (
-                <div key={fecha} className="border border-zinc-200 rounded-lg bg-white overflow-hidden">
+                <div key={fecha} className="w-full border border-zinc-200 rounded-lg bg-white overflow-hidden">
                   {/* Header de la fecha */}
-                  <div className="px-5 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
+                  <div className="px-6 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="h-4 w-4 text-zinc-400 stroke-[1.5]" />
                       <p className="text-sm font-medium text-zinc-900">
@@ -652,10 +652,10 @@ export const AsistenciasDocentePage = () => {
                   <table className="w-full min-w-[600px]">
                     <thead>
                       <tr className="text-left text-xs text-zinc-500 uppercase tracking-wide border-b border-zinc-200">
-                        <th className="px-5 py-3 font-medium">Estudiante</th>
-                        <th className="px-5 py-3 font-medium text-center">Estado</th>
-                        <th className="px-5 py-3 font-medium">Observaciones</th>
-                        <th className="px-5 py-3 font-medium text-right">Acciones</th>
+                        <th className="px-6 py-3 font-medium">Estudiante</th>
+                        <th className="px-6 py-3 font-medium text-center">Estado</th>
+                        <th className="px-6 py-3 font-medium">Observaciones</th>
+                        <th className="px-6 py-3 font-medium text-right">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -664,10 +664,10 @@ export const AsistenciasDocentePage = () => {
                           key={asistencia.id}
                           className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/50 transition-colors"
                         >
-                          <td className="px-5 py-4">
+                          <td className="px-6 py-4">
                             <p className="text-sm font-medium text-zinc-900">{asistencia.nombreEstudiante}</p>
                           </td>
-                          <td className="px-5 py-4 text-center">
+                          <td className="px-6 py-4 text-center">
                             {editingAsistencia?.id === asistencia.id ? (
                               <select
                                 value={editingAsistencia.presente ? 'presente' : 'ausente'}
@@ -689,12 +689,12 @@ export const AsistenciasDocentePage = () => {
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-6 py-4">
                             <p className="text-xs text-zinc-500">
                               {asistencia.observaciones || '-'}
                             </p>
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => setEditingAsistencia(asistencia)}

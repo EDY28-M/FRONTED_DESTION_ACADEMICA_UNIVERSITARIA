@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { docenteCursosApi, docenteAsistenciaApi, docenteTiposEvaluacionApi, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
 import { toast } from 'react-hot-toast';
 import {
@@ -29,9 +29,24 @@ interface AsistenciaItem {
 export const GestionCursoDocentePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const cursoId = parseInt(id || '0');
 
-  const [activeTab, setActiveTab] = useState<TabType>('estudiantes');
+  // Leer el tab de los query params, si existe
+  const tabParam = searchParams.get('tab') as TabType | null;
+  const initialTab: TabType = (tabParam && ['estudiantes', 'notas', 'asistencia', 'trabajos'].includes(tabParam)) 
+    ? tabParam 
+    : 'estudiantes';
+  
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // Actualizar activeTab cuando cambia el query param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as TabType | null;
+    if (tabParam && ['estudiantes', 'notas', 'asistencia', 'trabajos'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
   const [estudiantes, setEstudiantes] = useState<EstudianteCurso[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -470,7 +485,7 @@ export const GestionCursoDocentePage = () => {
         idCurso: cursoId,
         fecha: fechaAsistencia,
         tipoClase: tipoClaseAsistencia, // Agregar tipo de clase
-        asistencias: asistenciasMarcadasValidas.map(a => ({
+        estudiantes: asistenciasMarcadasValidas.map(a => ({
           idEstudiante: a.idEstudiante,
           presente: a.presente as boolean, // Ya filtramos los null
           observaciones: a.observaciones || undefined,
@@ -586,7 +601,7 @@ export const GestionCursoDocentePage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-1xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
               <button
@@ -602,9 +617,12 @@ export const GestionCursoDocentePage = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mt-4 overflow-x-auto pb-1">
+          <div className="flex gap-1 mt-0  overflow-x-auto pb-1">
             <button
-              onClick={() => setActiveTab('estudiantes')}
+              onClick={() => {
+                setActiveTab('estudiantes');
+                setSearchParams({});
+              }}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'estudiantes'
                 ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -614,7 +632,10 @@ export const GestionCursoDocentePage = () => {
               Estudiantes
             </button>
             <button
-              onClick={() => setActiveTab('notas')}
+              onClick={() => {
+                setActiveTab('notas');
+                setSearchParams({ tab: 'notas' });
+              }}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'notas'
                 ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -624,7 +645,10 @@ export const GestionCursoDocentePage = () => {
               Registro de Notas
             </button>
             <button
-              onClick={() => setActiveTab('trabajos')}
+              onClick={() => {
+                setActiveTab('trabajos');
+                setSearchParams({ tab: 'trabajos' });
+              }}
               className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'trabajos'
                 ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -639,7 +663,7 @@ export const GestionCursoDocentePage = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-1xl mx-auto px-1 sm:px-1 lg:px-0 py-5">
         {/* Tab: Estudiantes */}
         {activeTab === 'estudiantes' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
