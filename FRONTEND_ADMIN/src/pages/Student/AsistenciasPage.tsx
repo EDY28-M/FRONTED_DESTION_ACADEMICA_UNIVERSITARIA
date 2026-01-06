@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { asistenciasApi } from '../../services/asistenciasApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import { Calendar, CheckCircle2, XCircle, AlertTriangle, X, Eye, Ban, Clock } from 'lucide-react';
+import PageHeader from '../../components/Student/PageHeader';
 
 const AsistenciasPage: React.FC = () => {
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | null>(null);
@@ -69,15 +70,21 @@ const AsistenciasPage: React.FC = () => {
     );
   }
 
+  const filterComponent = periodoActivo ? (
+    <div className="flex items-center gap-2 text-sm text-zinc-600">
+      <Calendar className="h-4 w-4" />
+      <span>{periodoActivo.nombre}</span>
+    </div>
+  ) : undefined;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-zinc-200 rounded-xl p-5">
-        <h1 className="text-lg font-semibold text-zinc-900">Mis Asistencias</h1>
-        <p className="text-sm text-zinc-500 mt-0.5">
-          Período: {periodoActivo?.nombre || 'Sin período activo'}
-        </p>
-      </div>
+      <PageHeader
+        title="Mis Asistencias"
+        subtitle={`Período: ${periodoActivo?.nombre || 'Sin período activo'}`}
+        periodoMostrar={periodoActivo}
+        filterComponent={filterComponent}
+      />
 
       {/* Alerta de baja asistencia y bloqueo de examen */}
       {asistenciasPorCurso?.some(c => {
@@ -115,11 +122,7 @@ const AsistenciasPage: React.FC = () => {
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/50">
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Curso</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Docente</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Presentes</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Faltas</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">% Asist.</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">% Inasist.</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Asistencia</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide">Estado</th>
                   <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20"></th>
                 </tr>
@@ -127,11 +130,19 @@ const AsistenciasPage: React.FC = () => {
               <tbody className="divide-y divide-zinc-100">
                 {asistenciasPorCurso.map((curso) => {
                   const stats = estadisticasCompletas[curso.idCurso];
+                  const porcentajeAsistencia = stats?.porcentajeAsistencia !== undefined ? stats.porcentajeAsistencia : curso.porcentajeAsistencia;
+                  const porcentajeInasistencia = stats?.porcentajeInasistencia || 0;
+                  const presentes = stats?.asistenciasPresente !== undefined ? stats.asistenciasPresente : curso.totalAsistencias;
+                  const faltas = stats?.asistenciasFalta !== undefined ? stats.asistenciasFalta : curso.totalFaltas;
+                  
                   return (
                   <tr key={curso.idCurso} className="hover:bg-zinc-50/50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</div>
-                      <div className="text-xs text-zinc-500">{curso.codigoCurso} • {curso.creditos} cr.</div>
+                      <div className="text-xs text-zinc-500 mt-0.5">{curso.codigoCurso} • {curso.creditos} cr.</div>
+                      {curso.nombreDocente && (
+                        <div className="text-xs text-zinc-400 mt-0.5">{curso.nombreDocente}</div>
+                      )}
                       {stats && !stats.puedeDarExamenFinal && (
                         <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">
                           <Ban className="h-2.5 w-2.5" />
@@ -139,59 +150,50 @@ const AsistenciasPage: React.FC = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm text-zinc-600">{curso.nombreDocente || '-'}</td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-emerald-600">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        {stats?.asistenciasPresente !== undefined ? stats.asistenciasPresente : curso.totalAsistencias}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className="inline-flex items-center gap-1 text-sm font-mono tabular-nums text-red-600">
-                        <XCircle className="h-3.5 w-3.5" />
-                        {stats?.asistenciasFalta !== undefined ? stats.asistenciasFalta : curso.totalFaltas}
-                      </span>
-                    </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full transition-all ${
-                              stats?.porcentajeInasistencia >= 30 ? 'bg-red-500' : 
-                              (stats?.porcentajeAsistencia !== undefined && stats.porcentajeAsistencia < 70) || curso.alertaBajaAsistencia ? 'bg-amber-500' : 'bg-emerald-500'
-                            }`}
-                            style={{ width: `${Math.min(stats?.porcentajeAsistencia !== undefined ? stats.porcentajeAsistencia : curso.porcentajeAsistencia, 100)}%` }}
-                          />
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2 w-full">
+                          <div className="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all ${
+                                porcentajeInasistencia >= 30 ? 'bg-red-500' : 
+                                porcentajeAsistencia < 70 || curso.alertaBajaAsistencia ? 'bg-amber-500' : 'bg-emerald-500'
+                              }`}
+                              style={{ width: `${Math.min(porcentajeAsistencia, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-sm font-mono tabular-nums font-semibold min-w-[3rem] text-right ${
+                            porcentajeInasistencia >= 30 ? 'text-red-600' :
+                            porcentajeAsistencia < 70 || curso.alertaBajaAsistencia ? 'text-amber-600' : 'text-emerald-600'
+                          }`}>
+                            {porcentajeAsistencia.toFixed(0)}%
+                          </span>
                         </div>
-                        <span className={`text-sm font-mono tabular-nums font-medium ${
-                          stats?.porcentajeInasistencia >= 30 ? 'text-red-600' :
-                          (stats?.porcentajeAsistencia !== undefined && stats.porcentajeAsistencia < 70) || curso.alertaBajaAsistencia ? 'text-amber-600' : 'text-emerald-600'
-                        }`}>
-                          {(stats?.porcentajeAsistencia !== undefined ? stats.porcentajeAsistencia : curso.porcentajeAsistencia).toFixed(0)}%
-                        </span>
+                        <div className="flex items-center gap-3 text-xs text-zinc-500">
+                          <span className="inline-flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                            <span className="font-mono">{presentes}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <XCircle className="h-3 w-3 text-red-600" />
+                            <span className="font-mono">{faltas}</span>
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-sm font-mono tabular-nums font-medium ${
-                        stats?.porcentajeInasistencia >= 30 ? 'text-red-600' :
-                        stats?.porcentajeInasistencia >= 25 ? 'text-amber-600' : 'text-zinc-600'
-                      }`}>
-                        {stats?.porcentajeInasistencia.toFixed(1) || '0.0'}%
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
                       {stats && !stats.puedeDarExamenFinal ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 text-xs font-medium rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 text-xs font-medium rounded-full">
                           <Ban className="h-3 w-3" />
                           Bloqueado
                         </span>
                       ) : curso.alertaBajaAsistencia ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium rounded-full">
                           <AlertTriangle className="h-3 w-3" />
                           Alerta
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium rounded-full">
                           <CheckCircle2 className="h-3 w-3" />
                           Normal
                         </span>

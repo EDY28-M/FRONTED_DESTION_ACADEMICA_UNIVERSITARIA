@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { FileText, TrendingUp, Filter, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, Filter } from 'lucide-react';
+import PageHeader from '../../components/Student/PageHeader';
 
 const NotasPage: React.FC = () => {
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | undefined>(undefined);
-  const [cursosExpandidos, setCursosExpandidos] = useState<Set<string>>(new Set());
 
   const { data: periodos } = useQuery({
     queryKey: ['periodos'],
@@ -31,38 +31,35 @@ const NotasPage: React.FC = () => {
     queryFn: () => estudiantesApi.getMisCursos(periodoSeleccionado),
   });
 
+  const { data: perfil } = useQuery({
+    queryKey: ['estudiante-perfil'],
+    queryFn: estudiantesApi.getPerfil,
+  });
+
   // Extraer datos del response
-  const notas = notasResponse?.notas || [];
-  const promedioGeneralServidor = notasResponse?.promedioGeneral || 0;
+  const cursosConEvaluaciones = notasResponse?.cursosConEvaluaciones || [];
+  const periodoMostrar = periodoSeleccionado 
+    ? periodos?.find(p => p.id === periodoSeleccionado) 
+    : periodoActivo;
 
-  // Agrupar notas por curso
-  const notasPorCurso = notas.reduce((acc, nota) => {
-    if (!acc[nota.nombreCurso]) {
-      acc[nota.nombreCurso] = [];
-    }
-    acc[nota.nombreCurso].push(nota);
-    return acc;
-  }, {} as Record<string, typeof notas>);
+  // Crear mapa de idCurso a codigoCurso desde misCursos
+  const mapaCodigos = React.useMemo(() => {
+    const mapa: Record<number, string> = {};
+    misCursos?.forEach(curso => {
+      if (curso.idCurso && curso.codigoCurso) {
+        mapa[curso.idCurso] = curso.codigoCurso;
+      }
+    });
+    return mapa;
+  }, [misCursos]);
 
-  // Calcular promedio ponderado por curso
-  const calcularPromedioGeneral = (notasCurso: typeof notas) => {
-    if (!notasCurso || notasCurso.length === 0) return 0;
-    const totalPuntaje = notasCurso.reduce((sum, n) => sum + (n.notaValor * n.peso / 100), 0);
-    return totalPuntaje;
-  };
-
-  // Calcular promedio final considerando solo notas con valor
-  const calcularPromedioFinal = (notasCurso: typeof notas) => {
-    if (!notasCurso || notasCurso.length === 0) return 0;
-    const notasConValor = notasCurso.filter(n => n.notaValor > 0);
-    if (notasConValor.length === 0) return 0;
-    const pesoTotal = notasConValor.reduce((sum, n) => sum + n.peso, 0);
-    if (pesoTotal === 0) return 0;
-    const totalPuntaje = notasConValor.reduce((sum, n) => sum + (n.notaValor * n.peso / 100), 0);
-    return Math.round(totalPuntaje);
-  };
-
-  const promedioGeneral = promedioGeneralServidor;
+  // Enriquecer cursosConEvaluaciones con codigoCurso correcto
+  const cursosEnriquecidos = React.useMemo(() => {
+    return cursosConEvaluaciones.map(curso => ({
+      ...curso,
+      codigoCurso: curso.codigoCurso || mapaCodigos[curso.idCurso] || ''
+    }));
+  }, [cursosConEvaluaciones, mapaCodigos]);
 
   const getNotaColor = (nota: number) => {
     if (nota >= 14) return 'text-emerald-600';
@@ -70,14 +67,54 @@ const NotasPage: React.FC = () => {
     return 'text-red-600';
   };
 
-  const getNotaBgColor = (nota: number) => {
-    if (nota >= 14) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (nota >= 11) return 'bg-amber-50 text-amber-700 border-amber-200';
-    return 'bg-red-50 text-red-700 border-red-200';
+  const generarAbreviacion = (tipoEvaluacion: string): string => {
+    const tipo = tipoEvaluacion.toLowerCase();
+    const numeroMatch = tipoEvaluacion.match(/\d+/);
+    const numero = numeroMatch ? numeroMatch[0] : '';
+
+    if (tipo.includes('examen final') || tipo.includes('exámen final')) {
+      return `EF${numero || '1'}`;
+    }
+    if (tipo.includes('promedio general')) {
+      return 'PG';
+    }
+    if (tipo.includes('promedio final')) {
+      return 'PF';
+    }
+    if (tipo.includes('parcial')) {
+      return `EP${numero || ''}`;
+    }
+    if (tipo.includes('práctica') || tipo.includes('practica')) {
+      return `PR${numero || ''}`;
+    }
+    if (tipo.includes('medio curso') || tipo.includes('mediocurso')) {
+      return 'MC';
+    }
+    if (tipo.includes('actitud')) {
+      return `EA${numero || ''}`;
+    }
+    if (tipo.includes('trabajo')) {
+      return `T${numero || ''}`;
+    }
+    
+    const palabras = tipoEvaluacion.split(' ').filter(p => p.length > 0);
+    if (palabras.length >= 2) {
+      return palabras.slice(0, 2).map(p => p[0].toUpperCase()).join('') + numero;
+    }
+    return tipoEvaluacion.substring(0, 2).toUpperCase() + numero;
   };
 
   const getBadgeClasses = (tipoEvaluacion: string) => {
     const tipo = tipoEvaluacion.toLowerCase();
+    if (tipo.includes('ef1') || tipo.includes('examen final') || tipo.includes('exámen final')) {
+      return 'bg-purple-50 text-purple-700 border-purple-200';
+    }
+    if (tipo.includes('pg') || tipo.includes('promedio general')) {
+      return 'bg-zinc-100 text-zinc-700 border-zinc-200';
+    }
+    if (tipo.includes('pf') || tipo.includes('promedio final')) {
+      return 'bg-zinc-100 text-zinc-700 border-zinc-200';
+    }
     if (tipo.includes('práctica') || tipo.includes('practica')) {
       return 'bg-teal-50 text-teal-700 border-teal-200';
     }
@@ -96,80 +133,58 @@ const NotasPage: React.FC = () => {
     return 'bg-zinc-100 text-zinc-700 border-zinc-200';
   };
 
-  const generarAbreviacion = (tipoEvaluacion: string): string => {
-    const tipo = tipoEvaluacion.toLowerCase();
-    const numeroMatch = tipoEvaluacion.match(/\d+/);
-    const numero = numeroMatch ? numeroMatch[0] : '';
+  const filterComponent = (
+    <div className="flex items-center gap-2">
+      <Filter className="h-4 w-4 text-zinc-400" />
+      <select
+        value={periodoSeleccionado || ''}
+        onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
+        className="px-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 text-zinc-700 bg-white"
+      >
+        <option value="">Periodo Activo</option>
+        {periodosActivos?.map((periodo) => (
+          <option key={periodo.id} value={periodo.id}>
+            {periodo.nombre} {periodo.activo && '(Activo)'}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 
-    if (tipo.includes('trabajo') && tipo.includes('encargado')) return `TE${numero}`;
-    if (tipo.includes('práctica') || tipo.includes('practica')) return `PR${numero}`;
-    if (tipo.includes('parcial')) return `EP${numero}`;
-    if (tipo.includes('medio curso') || tipo.includes('mediocurso')) return 'MC';
-    if (tipo.includes('examen') && tipo.includes('final')) return 'EF';
-    if (tipo.includes('actitud')) return `EA${numero}`;
-    if (tipo.includes('trabajo')) return `T${numero}`;
-    if (tipo.includes('examen')) return `EX${numero}`;
-    
-    const palabras = tipoEvaluacion.split(' ').filter(p => p.length > 0);
-    if (palabras.length >= 2) {
-      return palabras.slice(0, 2).map(p => p[0].toUpperCase()).join('') + numero;
-    }
-    return tipoEvaluacion.substring(0, 2).toUpperCase() + numero;
-  };
-
-  const toggleCurso = (nombreCurso: string) => {
-    setCursosExpandidos(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(nombreCurso)) {
-        newSet.delete(nombreCurso);
-      } else {
-        newSet.add(nombreCurso);
-      }
-      return newSet;
-    });
-  };
+  // Obtener el nombre del semestre para el título
+  const nombreSemestre = periodoMostrar?.nombre || 'Actual';
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white border border-zinc-200 rounded-xl p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Mis Notas</h2>
-            <p className="text-sm text-zinc-500 mt-0.5">Consulta tus calificaciones por período académico</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-zinc-400" />
-            <select
-              id="periodo"
-              value={periodoSeleccionado || ''}
-              onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 text-zinc-700 bg-white"
-            >
-              <option value="">Periodo Activo</option>
-              {periodosActivos?.map((periodo) => (
-                <option key={periodo.id} value={periodo.id}>
-                  {periodo.nombre} {periodo.activo && '(Activo)'}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      <PageHeader
+        title="Notas"
+        subtitle="Consulta tus calificaciones por período académico"
+        periodoMostrar={periodoMostrar}
+        filterComponent={filterComponent}
+      />
+
+      {/* Título del Registro */}
+      <div className="bg-white border border-zinc-200 rounded-xl px-5 py-4">
+        <h2 className="text-lg font-bold text-zinc-900 uppercase tracking-wide text-center">
+          REGISTRO DE NOTAS PARCIALES - SEMESTRE {nombreSemestre}
+        </h2>
       </div>
 
-      {/* Promedio General KPI */}
-      {!isLoading && misCursos && misCursos.length > 0 && (
+      {/* Información del Estudiante */}
+      {perfil && (
         <div className="bg-white border border-zinc-200 rounded-xl p-5">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Promedio General</p>
-              <p className={`text-4xl font-bold font-mono tabular-nums ${getNotaColor(promedioGeneral)}`}>
-                {promedioGeneral.toFixed(2)}
-              </p>
-              <p className="text-xs text-zinc-400 mt-1">Escala 0 - 20</p>
+              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Código</p>
+              <p className="text-sm font-mono text-zinc-900">{perfil.codigo}</p>
             </div>
-            <div className="h-14 w-14 bg-zinc-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-zinc-600" />
+            <div>
+              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Apellidos y Nombres</p>
+              <p className="text-sm text-zinc-900">{perfil.apellidos} {perfil.nombres}</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-1">Escuela Profesional</p>
+              <p className="text-sm text-zinc-900">{perfil.carrera || '—'}</p>
             </div>
           </div>
         </div>
@@ -186,112 +201,102 @@ const NotasPage: React.FC = () => {
         </div>
       )}
 
-      {/* Notas por Curso - Accordion Style */}
+      {/* Tabla de Notas */}
       {isLoading ? (
         <div className="py-16 text-center">
           <div className="animate-pulse text-zinc-400 text-sm">Cargando notas...</div>
         </div>
-      ) : periodosActivos.length > 0 && notasPorCurso && Object.keys(notasPorCurso).length > 0 ? (
-        <div className="space-y-3">
-          {Object.entries(notasPorCurso).map(([nombreCurso, notasCurso]) => {
-            const promedioGeneral = calcularPromedioGeneral(notasCurso);
-            const promedioFinal = calcularPromedioFinal(notasCurso);
-            const pesoTotal = notasCurso.reduce((sum, n) => sum + n.peso, 0);
-            const isExpanded = cursosExpandidos.has(nombreCurso);
+      ) : periodosActivos.length > 0 && cursosEnriquecidos.length > 0 ? (
+        <div className="space-y-6">
+          {cursosEnriquecidos.map((curso) => {
+            const evaluaciones = curso.evaluaciones || [];
             
             return (
-              <div key={nombreCurso} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
-                {/* Header del curso - Clickeable */}
-                <button
-                  onClick={() => toggleCurso(nombreCurso)}
-                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-50/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4 text-zinc-400" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 text-zinc-400" />
-                    )}
-                    <span className="text-sm font-medium text-zinc-900">{nombreCurso}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-zinc-500">Promedio:</span>
-                    <span className={`px-2.5 py-1 rounded-full text-sm font-bold font-mono tabular-nums border ${getNotaBgColor(promedioFinal)}`}>
-                      {promedioFinal}
+              <div key={curso.idMatricula} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+                {/* Encabezado del curso */}
+                <div className="px-4 py-3 bg-zinc-50/30 border-b border-zinc-200">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center px-2.5 py-1 bg-teal-100 text-teal-700 text-xs font-semibold rounded border border-teal-200">
+                      {curso.codigoCurso}
                     </span>
+                    <span className="text-base font-semibold text-slate-700">{curso.nombreCurso}</span>
                   </div>
-                </button>
-
-                {/* Contenido expandible */}
-                {isExpanded && (
-                  <div className="border-t border-zinc-200">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-zinc-200 bg-zinc-50/50">
-                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide w-16">Tipo</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Evaluación</th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20">Nota</th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20">Peso</th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-24">Puntaje</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-100">
-                        {notasCurso.map((nota) => {
-                          const puntaje = (nota.notaValor * nota.peso / 100).toFixed(2);
-                          const abreviacion = generarAbreviacion(nota.tipoEvaluacion);
+                </div>
+                
+                {/* Tabla de evaluaciones */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-zinc-200 bg-zinc-50/50">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-20">ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Evaluacion</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide w-24">Nota</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide w-24">Prom</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wide w-24">Peso</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide w-24">Puntaje</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {evaluaciones.length > 0 ? (
+                        evaluaciones.map((evaluacion, idx) => {
+                          const puntaje = evaluacion.tieneNota && evaluacion.notaValor > 0 
+                            ? (evaluacion.notaValor * evaluacion.peso / 100).toFixed(2)
+                            : '0.00';
+                          const esPromedioGeneral = evaluacion.tipoEvaluacion.toLowerCase().includes('promedio general');
+                          const esPromedioFinal = evaluacion.tipoEvaluacion.toLowerCase().includes('promedio final');
+                          const abreviacion = generarAbreviacion(evaluacion.tipoEvaluacion);
                           
                           return (
-                            <tr key={nota.id} className="hover:bg-zinc-50/50 transition-colors">
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex items-center justify-center w-10 h-8 rounded text-xs font-bold border ${getBadgeClasses(nota.tipoEvaluacion)}`}>
+                            <tr key={`${curso.idMatricula}-${evaluacion.id}-${idx}`} className="hover:bg-zinc-50/50 transition-colors">
+                              <td className="px-4 py-3 text-center">
+                                <span className={`inline-flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded text-xs font-bold border ${getBadgeClasses(evaluacion.tipoEvaluacion)}`}>
                                   {abreviacion}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-sm text-zinc-700">{nota.tipoEvaluacion}</td>
-                              <td className="px-4 py-3 text-center">
-                                {nota.notaValor > 0 ? (
-                                  <span className={`text-sm font-bold font-mono tabular-nums ${getNotaColor(nota.notaValor)}`}>
-                                    {nota.notaValor.toFixed(1)}
+                              <td className="px-4 py-3 text-sm text-zinc-700">{evaluacion.tipoEvaluacion}</td>
+                              <td className="px-4 py-3 text-right">
+                                {evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
+                                  <span className={`text-sm font-bold font-mono tabular-nums ${getNotaColor(evaluacion.notaValor)}`}>
+                                    {evaluacion.notaValor.toFixed(2)}
                                   </span>
                                 ) : (
+                                  <span className="text-xs text-zinc-400">0</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-right">
+                                {esPromedioGeneral || esPromedioFinal ? (
                                   <span className="text-xs text-zinc-400">—</span>
+                                ) : evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
+                                  <span className={`text-sm font-bold font-mono tabular-nums ${getNotaColor(evaluacion.notaValor)}`}>
+                                    {evaluacion.notaValor.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-zinc-400">0</span>
                                 )}
                               </td>
                               <td className="px-4 py-3 text-center">
-                                <span className="text-xs font-mono tabular-nums text-zinc-500">{nota.peso}%</span>
+                                <span className="text-xs font-mono tabular-nums text-zinc-500">{evaluacion.peso}%</span>
                               </td>
-                              <td className="px-4 py-3 text-center">
-                                {nota.notaValor > 0 ? (
-                                  <span className="text-sm font-mono tabular-nums text-zinc-700">{puntaje}</span>
+                              <td className="px-4 py-3 text-right">
+                                {evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
+                                  <span className="text-sm font-mono tabular-nums text-zinc-700 font-semibold">{puntaje}</span>
                                 ) : (
-                                  <span className="text-xs text-zinc-400">—</span>
+                                  <span className="text-xs text-zinc-400">0.00</span>
                                 )}
                               </td>
                             </tr>
                           );
-                        })}
-
-                        {/* Fila de Resumen */}
-                        <tr className="bg-zinc-50/80 border-t border-zinc-200">
-                          <td colSpan={2} className="px-4 py-3">
-                            <span className="text-xs font-medium text-zinc-500 uppercase">Total</span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="text-xs text-zinc-400">—</span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="text-xs font-mono tabular-nums text-zinc-600 font-medium">{pesoTotal}%</span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`text-lg font-bold font-mono tabular-nums ${getNotaColor(promedioGeneral)}`}>
-                              {promedioGeneral.toFixed(1)}
-                            </span>
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-3 text-center text-sm text-zinc-500">
+                            No hay evaluaciones configuradas para este curso
                           </td>
                         </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             );
           })}
@@ -312,4 +317,3 @@ const NotasPage: React.FC = () => {
 };
 
 export default NotasPage;
-

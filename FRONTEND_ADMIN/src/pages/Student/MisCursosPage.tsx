@@ -5,6 +5,7 @@ import { estudiantesApi } from '../../services/estudiantesApi';
 import { BookOpen, AlertTriangle, Filter, Trash2, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationContext';
+import PageHeader from '../../components/Student/PageHeader';
 
 const MisCursosPage: React.FC = () => {
   const navigate = useNavigate();
@@ -99,45 +100,48 @@ const MisCursosPage: React.FC = () => {
   const cursosMatriculados = misCursos?.filter(c => c.estado === 'Matriculado') || [];
   const cursosRetirados = misCursos?.filter(c => c.estado === 'Retirado') || [];
 
+  const periodoMostrar = periodoSeleccionado 
+    ? periodos?.find(p => p.id === periodoSeleccionado) 
+    : periodoActivo;
+
+  const filterComponent = (
+    <div className="flex items-center gap-3">
+      <div className="relative">
+        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <select
+          value={periodoSeleccionado || ''}
+          onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
+          className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
+        >
+          <option value="">Período Activo</option>
+          {periodos?.map((periodo) => (
+            <option key={periodo.id} value={periodo.id}>
+              {periodo.nombre} {periodo.activo && '(Activo)'}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      {cursosSeleccionados.length > 0 && (
+        <button
+          onClick={handleRetirarSeleccionados}
+          className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
+        >
+          <Trash2 className="w-4 h-4" />
+          Retirar ({cursosSeleccionados.length})
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header & Filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Mis Cursos</h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            Gestiona tus matrículas y revisa tu historial académico
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <select
-              value={periodoSeleccionado || ''}
-              onChange={(e) => setPeriodoSeleccionado(e.target.value ? Number(e.target.value) : undefined)}
-              className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
-            >
-              <option value="">Período Activo</option>
-              {periodos?.map((periodo) => (
-                <option key={periodo.id} value={periodo.id}>
-                  {periodo.nombre} {periodo.activo && '(Activo)'}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          {cursosSeleccionados.length > 0 && (
-            <button
-              onClick={handleRetirarSeleccionados}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Retirar ({cursosSeleccionados.length})
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Mis Cursos"
+        subtitle="Gestiona tus matrículas y revisa tu historial académico"
+        periodoMostrar={periodoMostrar}
+        filterComponent={filterComponent}
+      />
 
       {/* Main Table Card */}
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">

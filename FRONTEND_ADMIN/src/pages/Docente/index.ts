@@ -8,3 +8,5 @@ export { AsistenciasDocentePage } from './AsistenciasDocentePage';
 export { HorarioDocentePage } from './HorarioDocentePage';
 export { ForgotPasswordDocentePage } from './ForgotPasswordDocentePage';
 export { ResetPasswordDocentePage } from './ResetPasswordDocentePage';
+export { AnunciosDocentePage } from './AnunciosDocentePage';
+export { MaterialesDocentePage } from './MaterialesDocentePage';

@@ -26,7 +26,9 @@ import {
   MisCursosDocentePage,
   EstudiantesDocentePage,
   AsistenciasDocentePage,
-  HorarioDocentePage
+  HorarioDocentePage,
+  AnunciosDocentePage,
+  MaterialesDocentePage
 } from './pages/Docente'
 import Dashboard from './pages/Dashboard'
 import DocentesPage from './pages/Docente/DocentesPage'
@@ -53,6 +55,8 @@ import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
 import { HorarioEstudiantePage } from './pages/Student/HorarioEstudiantePage'
 import TrabajosPage from './pages/Student/TrabajosPage'
 import TrabajoDetallePage from './pages/Student/TrabajoDetallePage'
+import { AnunciosPage } from './pages/Student/AnunciosPage'
+import { MaterialesPage } from './pages/Student/MaterialesPage'
 
 function App() {
   const { isAuthenticated, user } = useAuth()
@@ -149,6 +153,8 @@ function App() {
           <Route path="estudiantes" element={<EstudiantesDocentePage />} />
           <Route path="asistencias" element={<AsistenciasDocentePage />} />
           <Route path="horario" element={<HorarioDocentePage />} />
+          <Route path="anuncios" element={<AnunciosDocentePage />} />
+          <Route path="materiales" element={<MaterialesDocentePage />} />
           <Route path="curso/:id" element={<GestionCursoDocentePage />} />
           <Route path="perfil" element={<PerfilDocentePage />} />
         </Route>
@@ -167,6 +173,8 @@ function App() {
         <Route index element={<Navigate to="/estudiante/inicio" replace />} />
         <Route path="inicio" element={<InicioDashboard />} />
         <Route path="mis-cursos" element={<MisCursosPage />} />
+        <Route path="anuncios" element={<AnunciosPage />} />
+        <Route path="materiales" element={<MaterialesPage />} />
         <Route path="matricula" element={<MatriculaPage />} />
         <Route path="aumento-cursos" element={<AumentoCursosPage />} />
         <Route path="retiro-cursos" element={<RetiroCursosPage />} />

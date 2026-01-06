@@ -224,30 +224,30 @@ const InicioDashboard: React.FC = () => {
           >
             <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-zinc-600 stroke-[1.5]" />
                 <h3 className="text-xs font-semibold text-zinc-900 uppercase tracking-wide">Asistencias</h3>
               </div>
               <ArrowRight className="w-4 h-4 text-zinc-400" />
             </div>
             <div className="p-4">
               <div className="grid grid-cols-2 gap-3 mb-3">
-                <div className="bg-emerald-50 rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600">
-                    {estadisticasAsistencia.promedioAsistencia.toFixed(0)}%
-                  </div>
-                  <div className="text-[10px] text-emerald-700 mt-0.5 uppercase font-medium">Promedio</div>
-                </div>
-                <div className="bg-amber-50 rounded-lg p-3 text-center">
-                  <div className="text-2xl font-bold font-mono tabular-nums text-amber-600">
+                <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-zinc-900">
                     {estadisticasAsistencia.cursosConAlerta}
                   </div>
-                  <div className="text-[10px] text-amber-700 mt-0.5 uppercase font-medium">Con Alerta</div>
+                  <div className="text-[10px] text-zinc-700 mt-0.5 uppercase font-medium">Con Alerta</div>
+                </div>
+                <div className="bg-zinc-100 border border-zinc-200 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-zinc-900">
+                    {asistenciasPorCurso.length}
+                  </div>
+                  <div className="text-[10px] text-zinc-700 mt-0.5 uppercase font-medium">Total Cursos</div>
                 </div>
               </div>
               {estadisticasAsistencia.cursosBloqueados > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <Ban className="h-4 w-4 text-red-600 flex-shrink-0" />
-                  <p className="text-xs text-red-700">
+                <div className="bg-zinc-900 text-white border-t border-zinc-800 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                  <Ban className="h-4 w-4 text-white flex-shrink-0 stroke-[1.5]" />
+                  <p className="text-xs text-white">
                     {estadisticasAsistencia.cursosBloqueados} curso(s) bloqueado(s) para examen final
                   </p>
                 </div>
@@ -453,30 +453,30 @@ const InicioDashboard: React.FC = () => {
             >
               <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-zinc-600 stroke-[1.5]" />
                   <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wide">Asistencias</h3>
                 </div>
                 <ArrowRight className="w-4 h-4 text-zinc-400" />
               </div>
               <div className="p-5">
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold font-mono tabular-nums text-emerald-600">
-                      {estadisticasAsistencia.promedioAsistencia.toFixed(0)}%
-                    </div>
-                    <div className="text-xs text-emerald-700 mt-1 uppercase font-medium">Promedio</div>
-                  </div>
-                  <div className="bg-amber-50 rounded-lg p-4 text-center">
-                    <div className="text-3xl font-bold font-mono tabular-nums text-amber-600">
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4 text-center">
+                    <div className="text-3xl font-bold font-mono tabular-nums text-zinc-900">
                       {estadisticasAsistencia.cursosConAlerta}
                     </div>
-                    <div className="text-xs text-amber-700 mt-1 uppercase font-medium">Con Alerta</div>
+                    <div className="text-xs text-zinc-700 mt-1 uppercase font-medium">Con Alerta</div>
+                  </div>
+                  <div className="bg-zinc-100 border border-zinc-200 rounded-lg p-4 text-center">
+                    <div className="text-3xl font-bold font-mono tabular-nums text-zinc-900">
+                      {asistenciasPorCurso.length}
+                    </div>
+                    <div className="text-xs text-zinc-700 mt-1 uppercase font-medium">Total Cursos</div>
                   </div>
                 </div>
                 {estadisticasAsistencia.cursosBloqueados > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 flex items-center gap-2">
-                    <Ban className="h-4 w-4 text-red-600 flex-shrink-0" />
-                    <p className="text-xs text-red-700">
+                  <div className="bg-zinc-900 text-white border-t border-zinc-800 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                    <Ban className="h-4 w-4 text-white flex-shrink-0 stroke-[1.5]" />
+                    <p className="text-xs text-white">
                       {estadisticasAsistencia.cursosBloqueados} curso(s) bloqueado(s) para examen final
                     </p>
                   </div>

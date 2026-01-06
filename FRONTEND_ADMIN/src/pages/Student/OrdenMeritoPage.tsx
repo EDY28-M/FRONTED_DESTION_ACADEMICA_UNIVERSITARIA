@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi, OrdenMerito } from '../../services/estudiantesApi';
 import { Users, Filter, Trophy, TrendingUp } from 'lucide-react';
+import PageHeader from '../../components/Student/PageHeader';
 
 export default function OrdenMeritoPage() {
   const [promocionSeleccionada, setPromocionSeleccionada] = useState<string>('');
@@ -56,44 +57,31 @@ export default function OrdenMeritoPage() {
     return estilos[rango] || 'bg-zinc-50 text-zinc-700 border-zinc-200';
   };
 
+  const filterComponent = (
+    <div className="relative">
+      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+      <select
+        value={promocionSeleccionada}
+        onChange={(e) => setPromocionSeleccionada(e.target.value)}
+        className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
+      >
+        <option value="">Todas las promociones</option>
+        {promociones.map((promo) => (
+          <option key={promo} value={promo}>
+            Promoción {promo}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Orden de Mérito</h1>
-          <div className="flex items-center gap-3 mt-1">
-            {ordenMerito.length > 0 && ordenMerito[0].periodoNombre && (
-              <>
-                <span className="text-zinc-500 text-sm">{ordenMerito[0].periodoNombre}</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                  ordenMerito[0].estadoPeriodo === 'CERRADO' 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                }`}>
-                  {ordenMerito[0].estadoPeriodo === 'CERRADO' ? 'Cerrado' : 'En curso'}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="relative">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <select
-            value={promocionSeleccionada}
-            onChange={(e) => setPromocionSeleccionada(e.target.value)}
-            className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
-          >
-            <option value="">Todas las promociones</option>
-            {promociones.map((promo) => (
-              <option key={promo} value={promo}>
-                Promoción {promo}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <PageHeader
+        title="Orden de Mérito"
+        subtitle={ordenMerito.length > 0 && ordenMerito[0].periodoNombre ? `Período: ${ordenMerito[0].periodoNombre}` : undefined}
+        filterComponent={filterComponent}
+      />
 
       {/* Mi Posición Card */}
       {miPosicion && (

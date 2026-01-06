@@ -23,6 +23,7 @@ import {
   Minus,
   Building2
 } from 'lucide-react';
+import { MegaphoneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
 const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -69,6 +70,8 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigation = [
     { name: 'Inicio', href: '/estudiante/inicio', icon: Home },
     { name: 'Mis Cursos', href: '/estudiante/mis-cursos', icon: BookOpen },
+    { name: 'Anuncios', href: '/estudiante/anuncios', icon: MegaphoneIcon },
+    { name: 'Materiales', href: '/estudiante/materiales', icon: PaperClipIcon },
     { name: 'Notas', href: '/estudiante/notas', icon: FileText },
     { name: 'Asistencias', href: '/estudiante/asistencias', icon: Calendar },
     { name: 'Mi Horario', href: '/estudiante/horario', icon: Clock },

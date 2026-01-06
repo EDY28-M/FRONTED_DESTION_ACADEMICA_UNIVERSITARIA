@@ -13,6 +13,8 @@ import {
   ArrowRightStartOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  MegaphoneIcon,
+  PaperClipIcon,
 } from '@heroicons/react/24/outline';
 
 // ============================================
@@ -185,6 +187,16 @@ export const DocenteLayout = () => {
             to="/docente/horario"
             icon={CalendarDaysIcon}
             label="Mi Horario"
+          />
+          <SidebarItem
+            to="/docente/anuncios"
+            icon={MegaphoneIcon}
+            label="Anuncios"
+          />
+          <SidebarItem
+            to="/docente/materiales"
+            icon={PaperClipIcon}
+            label="Materiales"
           />
         </nav>
 

@@ -51,9 +51,10 @@ export const estudiantesApi = {
 
   // Obtener notas
   getNotas: async (idPeriodo?: number): Promise<{
-    notas: NotaDetalle[];
+    cursosConEvaluaciones: CursoConEvaluaciones[];
     promedioGeneral: number;
-    promedioPonderado?: number;
+    promedioAcumulado?: number;
+    promedioSemestral?: number;
     creditosAcumulados: number;
   }> => {
     const params = idPeriodo ? { idPeriodo } : {};
@@ -182,7 +183,83 @@ export const estudiantesApi = {
     const response = await axios.put('/estudiantes/actualizar-perfil', data);
     return response.data;
   },
+
+  // Obtener anuncios de los cursos del estudiante
+  getAnuncios: async (idCurso?: number): Promise<Anuncio[]> => {
+    const params = idCurso ? { idCurso } : {};
+    const response = await axios.get('/estudiantes/anuncios', { params });
+    return response.data;
+  },
+
+  // Obtener materiales de los cursos del estudiante
+  getMateriales: async (idCurso?: number): Promise<MaterialCurso[]> => {
+    const params = idCurso ? { idCurso } : {};
+    const response = await axios.get('/estudiantes/materiales', { params });
+    return response.data;
+  },
 };
+
+// Tipos para Anuncios y Materiales
+export interface Anuncio {
+  id: number;
+  idDocente: number;
+  nombreDocente: string;
+  idCurso: number | null;
+  nombreCurso: string | null;
+  titulo: string;
+  contenido: string;
+  prioridad: string;
+  fechaCreacion: string;
+  fechaActualizacion: string | null;
+  fechaPublicacion: string | null;
+  fechaExpiracion: string | null;
+  activo: boolean;
+}
+
+export interface MaterialCurso {
+  id: number;
+  idCurso: number;
+  nombreCurso: string;
+  idDocente: number;
+  nombre: string;
+  descripcion: string | null;
+  tipo: string;
+  categoria: string | null;
+  url: string | null;
+  rutaArchivo: string | null;
+  nombreArchivo: string | null;
+  tipoArchivo: string | null;
+  tamaño: number | null;
+  fechaCreacion: string;
+  fechaActualizacion: string | null;
+  fechaDisponibleDesde: string | null;
+  fechaDisponibleHasta: string | null;
+  activo: boolean;
+  orden: number;
+}
+
+// Tipos para Notas con Evaluaciones
+export interface NotaConTipoEvaluacion {
+  id: number;
+  idMatricula: number;
+  nombreCurso: string;
+  tipoEvaluacion: string;
+  notaValor: number; // 0 si no hay nota registrada
+  peso: number; // Peso del tipo de evaluación
+  orden: number; // Orden del tipo de evaluación
+  fecha: string | null;
+  observaciones: string | null;
+  tieneNota: boolean; // Indica si hay una nota registrada
+}
+
+export interface CursoConEvaluaciones {
+  idMatricula: number;
+  idCurso: number;
+  codigoCurso: string;
+  nombreCurso: string;
+  promedioFinal: number; // 0 si no hay notas
+  evaluaciones: NotaConTipoEvaluacion[];
+}
 
 // Tipos adicionales
 export interface OrdenMerito {
