@@ -9,7 +9,7 @@ interface ChartsSectionProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-900 text-white px-3 py-2 rounded-lg shadow-lg text-sm">
+      <div className="bg-zinc-900 text-white px-3 py-2 shadow-lg text-sm">
         <p className="font-medium">{label}</p>
         <p className="text-zinc-300">{payload[0].value} cursos</p>
       </div>
@@ -39,19 +39,19 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
     <div className="space-y-6">
       {/* Summary Cards - Bento Grid */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white border border-zinc-200 p-5">
           <p className="text-sm font-medium text-zinc-500">Total Créditos</p>
           <p className="text-2xl font-semibold text-zinc-900 mt-1">
             {cursos.reduce((sum, curso) => sum + curso.creditos, 0)}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white border border-zinc-200 p-5">
           <p className="text-sm font-medium text-zinc-500">Horas Semanales</p>
           <p className="text-2xl font-semibold text-zinc-900 mt-1">
             {cursos.reduce((sum, curso) => sum + curso.horasSemanal, 0)}
           </p>
         </div>
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white border border-zinc-200 p-5">
           <p className="text-sm font-medium text-zinc-500">Promedio Créditos</p>
           <p className="text-2xl font-semibold text-zinc-900 mt-1">
             {Math.round((cursos.reduce((sum, curso) => sum + curso.creditos, 0) / cursos.length) || 0)}
@@ -62,7 +62,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Courses by Cycle */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white border border-zinc-200 p-5">
           <h3 className="text-sm font-semibold text-zinc-900 mb-4">
             Cursos por Ciclo
           </h3>
@@ -85,7 +85,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
                 <Bar 
                   dataKey="cantidad" 
                   fill="#18181b" 
-                  radius={[4, 4, 0, 0]}
+                  radius={[0, 0, 0, 0]}
                   maxBarSize={40}
                 />
               </BarChart>
@@ -94,7 +94,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
         </div>
 
         {/* Credits Distribution */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-5">
+        <div className="bg-white border border-zinc-200 p-5">
           <h3 className="text-sm font-semibold text-zinc-900 mb-4">
             Distribución de Créditos
           </h3>
@@ -117,7 +117,7 @@ const ChartsSection: React.FC<ChartsSectionProps> = ({ cursos = [] }) => {
                 <Bar 
                   dataKey="cantidad" 
                   fill="#52525b" 
-                  radius={[4, 4, 0, 0]}
+                  radius={[0, 0, 0, 0]}
                   maxBarSize={40}
                 />
               </BarChart>

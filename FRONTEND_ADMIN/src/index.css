@@ -95,6 +95,58 @@
   }
 }
 
+/* Panel Admin: sin bordes redondeados (no afecta Estudiante/Docente) */
+body.admin-square [class*="rounded"],
+.admin-square [class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+/* Clases utilitarias propias (usan border-radius vía @apply, no por "rounded-*" en el className) */
+body.admin-square .btn,
+body.admin-square .card,
+body.admin-square .input,
+body.admin-square .table-container,
+.admin-square .btn,
+.admin-square .card,
+.admin-square .input,
+.admin-square .table-container {
+  border-radius: 0 !important;
+}
+
+/* Portal Docente: sin bordes redondeados (no afecta Admin/Estudiante) */
+body.docente-square [class*="rounded"],
+.docente-square [class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+body.docente-square .btn,
+body.docente-square .card,
+body.docente-square .input,
+body.docente-square .table-container,
+.docente-square .btn,
+.docente-square .card,
+.docente-square .input,
+.docente-square .table-container {
+  border-radius: 0 !important;
+}
+
+/* Portal Estudiante: sin bordes redondeados (no afecta Admin/Docente) */
+body.estudiante-square [class*="rounded"],
+.estudiante-square [class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+body.estudiante-square .btn,
+body.estudiante-square .card,
+body.estudiante-square .input,
+body.estudiante-square .table-container,
+.estudiante-square .btn,
+.estudiante-square .card,
+.estudiante-square .input,
+.estudiante-square .table-container {
+  border-radius: 0 !important;
+}
+
 /* Animaciones personalizadas */
 @keyframes fadeInDown {
   from {

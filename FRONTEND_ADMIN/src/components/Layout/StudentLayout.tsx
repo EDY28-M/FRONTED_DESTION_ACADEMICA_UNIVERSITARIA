@@ -36,6 +36,15 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const { user, logout } = useAuth();
   const { notifications, clearNotifications, markAsRead } = useNotifications();
 
+  // Marcar el <body> para que el "no rounded" aplique también a modales portaleados
+  // dentro del portal estudiante.
+  useEffect(() => {
+    document.body.classList.add('estudiante-square');
+    return () => {
+      document.body.classList.remove('estudiante-square');
+    };
+  }, []);
+
   // Obtener IP del cliente
   useEffect(() => {
     const fetchIp = async () => {
@@ -93,7 +102,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     location.pathname.includes('/estudiante/retiro-cursos');
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 estudiante-square">
       {/* Sidebar móvil */}
       <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? '' : 'pointer-events-none'}`}>
         <div

@@ -87,6 +87,15 @@ export const DocenteLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const location = useLocation();
 
+  // Marcar el <body> para que el "no rounded" aplique también a modales portaleados
+  // dentro del portal docente.
+  useEffect(() => {
+    document.body.classList.add('docente-square');
+    return () => {
+      document.body.classList.remove('docente-square');
+    };
+  }, []);
+
   // Close sidebar on mobile when route changes
   useEffect(() => {
     if (window.innerWidth < 1024) {
@@ -125,7 +134,7 @@ export const DocenteLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 docente-square">
       {/* ========== MOBILE OVERLAY ========== */}
       {isSidebarOpen && (
         <div

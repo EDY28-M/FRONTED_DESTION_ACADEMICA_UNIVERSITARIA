@@ -230,7 +230,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleExportarDatos}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />
             Exportar
@@ -238,7 +238,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleGenerarReporte}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
             Generar Reporte

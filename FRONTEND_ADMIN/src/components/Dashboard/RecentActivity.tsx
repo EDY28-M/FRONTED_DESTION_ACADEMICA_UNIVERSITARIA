@@ -55,7 +55,7 @@ const colorMap = {
 
 const RecentActivity = () => {
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-5">
+    <div className="bg-white border border-zinc-200 p-5">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="h-4 w-4 text-zinc-400" />
         <h3 className="text-sm font-semibold text-zinc-900">Actividad Reciente</h3>
@@ -68,7 +68,7 @@ const RecentActivity = () => {
           
           return (
             <div key={activity.id} className="flex items-start gap-3">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${colorClass}`}>
+              <div className={`flex h-8 w-8 items-center justify-center shrink-0 ${colorClass}`}>
                 <IconComponent className="h-4 w-4" />
               </div>
               <div className="flex-1 min-w-0">

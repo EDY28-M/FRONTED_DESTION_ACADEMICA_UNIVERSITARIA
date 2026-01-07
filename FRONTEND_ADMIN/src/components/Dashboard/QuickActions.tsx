@@ -24,16 +24,16 @@ const actions = [
 
 const QuickActions = () => {
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-5">
+    <div className="bg-white border border-zinc-200 p-5">
       <h3 className="text-sm font-semibold text-zinc-900 mb-4">Acciones Rápidas</h3>
       <div className="space-y-2">
         {actions.map((action) => (
           <Link
             key={action.name}
             to={action.href}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-50 transition-colors group"
+            className="flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors group"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
+            <div className="flex h-9 w-9 items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
               <action.icon className="h-4 w-4 text-white" />
             </div>
             <div className="flex-1 min-w-0">

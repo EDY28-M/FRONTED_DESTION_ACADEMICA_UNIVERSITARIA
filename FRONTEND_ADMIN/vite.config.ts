@@ -8,6 +8,12 @@ export default defineConfig({
     // que corre localmente sin Docker.
     host: 'localhost',
     port: 3000,
+    // Permitir acceder al dev-server desde ngrok (evita: "This host is not allowed")
+    // Nota: el prefijo puede cambiar en cada ejecución de ngrok.
+    allowedHosts: [
+      'kiara-unascendant-trustingly.ngrok-free.dev',
+      '.ngrok-free.dev'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:5251',

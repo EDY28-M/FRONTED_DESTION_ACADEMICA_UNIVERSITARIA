@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
@@ -7,8 +7,17 @@ const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  // HeadlessUI Dialog renderiza en un portal al <body>, así que ponemos la marca ahí
+  // para que el "no rounded" aplique también a modales del admin.
+  useEffect(() => {
+    document.body.classList.add('admin-square')
+    return () => {
+      document.body.classList.remove('admin-square')
+    }
+  }, [])
+
   return (
-    <div className="h-screen bg-zinc-50/50">
+    <div className="h-screen bg-zinc-50/50 admin-square">
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 

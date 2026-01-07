@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { docenteCursosApi, docenteAsistenciaApi, docenteHorariosApi, CursoDocente, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
+import { docenteAuthApi, docenteCursosApi, docenteAsistenciaApi, docenteHorariosApi, CursoDocente, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
 import { trabajosDocenteApi, TrabajoPendiente } from '../../services/trabajosApi';
 import { Horario } from '../../types/horario';
 import { toast } from 'react-hot-toast';
@@ -459,9 +459,12 @@ export const DashboardDocentePage = () => {
   const [isLoadingHorarios, setIsLoadingHorarios] = useState(true);
   const [modalAsistencia, setModalAsistencia] = useState<CursoDocente | null>(null);
 
+  const docenteActual = useMemo(() => docenteAuthApi.getCurrentDocente(), []);
+
   // Usar React Query para trabajos pendientes (permite invalidación automática)
   const { data: trabajosPendientes = [], isLoading: isLoadingTrabajos } = useQuery<TrabajoPendiente[]>({
-    queryKey: ['trabajos-pendientes'],
+    // Incluir el id del docente para evitar cache cruzado entre docentes
+    queryKey: ['trabajos-pendientes', docenteActual?.id],
     queryFn: async () => {
       try {
         const data = await trabajosDocenteApi.getTrabajosPendientes();
@@ -506,6 +509,15 @@ export const DashboardDocentePage = () => {
       setIsLoadingHorarios(false);
     }
   };
+
+  // Filtrar tareas pendientes: SOLO cursos del docente logueado
+  // (si el backend devuelve tareas de más, este filtro lo corrige en UI)
+  const trabajosPendientesFiltrados = useMemo(() => {
+    if (!trabajosPendientes?.length) return [];
+    if (!cursos?.length) return [];
+    const idsCursos = new Set(cursos.map(c => c.id));
+    return trabajosPendientes.filter(t => idsCursos.has(t.idCurso));
+  }, [trabajosPendientes, cursos]);
 
 
   // Cálculos
@@ -586,7 +598,7 @@ export const DashboardDocentePage = () => {
               <div className="py-12 text-center">
                 <div className="animate-pulse text-zinc-400 text-sm">Cargando tareas...</div>
               </div>
-            ) : trabajosPendientes.length === 0 ? (
+            ) : trabajosPendientesFiltrados.length === 0 ? (
               <EmptyState 
                 icon={InboxIcon}
                 title="Todo al día"
@@ -594,7 +606,7 @@ export const DashboardDocentePage = () => {
               />
             ) : (
               <div className="space-y-3">
-                {trabajosPendientes.map((trabajo) => (
+                {trabajosPendientesFiltrados.map((trabajo) => (
                   <div
                     key={trabajo.id}
                     className="flex items-center justify-between p-3 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors cursor-pointer"

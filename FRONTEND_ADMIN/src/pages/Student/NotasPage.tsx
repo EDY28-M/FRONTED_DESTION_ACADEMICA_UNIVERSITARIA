@@ -67,6 +67,30 @@ const NotasPage: React.FC = () => {
     return 'text-red-600';
   };
 
+  const calcularPromedioFinalCurso = (evaluaciones: any[]) => {
+    // 1) Si el backend ya manda "Promedio Final", úsalo.
+    const pf = evaluaciones?.find((e) =>
+      String(e?.tipoEvaluacion || '').toLowerCase().includes('promedio final')
+    );
+    if (pf?.tieneNota && typeof pf.notaValor === 'number' && pf.notaValor > 0) {
+      return Number(pf.notaValor.toFixed(2));
+    }
+
+    // 2) Si no viene, calcula: suma de (nota * peso / 100) excluyendo "promedios".
+    const total = (evaluaciones || [])
+      .filter((e) => {
+        const tipo = String(e?.tipoEvaluacion || '').toLowerCase();
+        return !tipo.includes('promedio final') && !tipo.includes('promedio general');
+      })
+      .reduce((sum, e) => {
+        if (!e?.tieneNota || typeof e.notaValor !== 'number' || e.notaValor <= 0) return sum;
+        const peso = typeof e.peso === 'number' ? e.peso : Number(e.peso) || 0;
+        return sum + (e.notaValor * peso) / 100;
+      }, 0);
+
+    return Number(total.toFixed(2));
+  };
+
   const generarAbreviacion = (tipoEvaluacion: string): string => {
     const tipo = tipoEvaluacion.toLowerCase();
     const numeroMatch = tipoEvaluacion.match(/\d+/);
@@ -210,6 +234,24 @@ const NotasPage: React.FC = () => {
         <div className="space-y-6">
           {cursosEnriquecidos.map((curso) => {
             const evaluaciones = curso.evaluaciones || [];
+            const promedioFinalCurso = calcularPromedioFinalCurso(evaluaciones);
+
+            // Si el backend NO envía "Promedio Final", lo agregamos como fila al final (como en la captura)
+            const tienePromedioFinal = evaluaciones.some((e: any) =>
+              String(e?.tipoEvaluacion || '').toLowerCase().includes('promedio final')
+            );
+            const evaluacionesConPF = tienePromedioFinal
+              ? evaluaciones
+              : [
+                  ...evaluaciones,
+                  {
+                    id: '__pf__',
+                    tipoEvaluacion: 'Promedio Final',
+                    tieneNota: true,
+                    notaValor: promedioFinalCurso,
+                    peso: 100,
+                  },
+                ];
             
             return (
               <div key={curso.idMatricula} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
@@ -237,25 +279,39 @@ const NotasPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-100">
-                      {evaluaciones.length > 0 ? (
-                        evaluaciones.map((evaluacion, idx) => {
+                      {evaluacionesConPF.length > 0 ? (
+                        evaluacionesConPF.map((evaluacion, idx) => {
                           const puntaje = evaluacion.tieneNota && evaluacion.notaValor > 0 
                             ? (evaluacion.notaValor * evaluacion.peso / 100).toFixed(2)
                             : '0.00';
                           const esPromedioGeneral = evaluacion.tipoEvaluacion.toLowerCase().includes('promedio general');
                           const esPromedioFinal = evaluacion.tipoEvaluacion.toLowerCase().includes('promedio final');
                           const abreviacion = generarAbreviacion(evaluacion.tipoEvaluacion);
+
+                          const puntajeResumen = () => {
+                            if (!evaluacion.tieneNota || typeof evaluacion.notaValor !== 'number') return '0';
+                            // En la captura: PF aparece como entero (ej: 17), PG puede tener decimales (ej: 17.35)
+                            if (esPromedioFinal) return String(Math.round(evaluacion.notaValor));
+                            return evaluacion.notaValor.toFixed(2);
+                          };
                           
                           return (
-                            <tr key={`${curso.idMatricula}-${evaluacion.id}-${idx}`} className="hover:bg-zinc-50/50 transition-colors">
+                            <tr
+                              key={`${curso.idMatricula}-${evaluacion.id}-${idx}`}
+                              className={`hover:bg-zinc-50/50 transition-colors ${esPromedioGeneral || esPromedioFinal ? 'bg-white' : ''}`}
+                            >
                               <td className="px-4 py-3 text-center">
                                 <span className={`inline-flex items-center justify-center min-w-[2.5rem] h-8 px-2 rounded text-xs font-bold border ${getBadgeClasses(evaluacion.tipoEvaluacion)}`}>
                                   {abreviacion}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-sm text-zinc-700">{evaluacion.tipoEvaluacion}</td>
+                              <td className={`px-4 py-3 text-sm ${esPromedioGeneral || esPromedioFinal ? 'font-semibold text-zinc-900' : 'text-zinc-700'}`}>
+                                {evaluacion.tipoEvaluacion}
+                              </td>
                               <td className="px-4 py-3 text-right">
-                                {evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
+                                {esPromedioGeneral || esPromedioFinal ? (
+                                  <span className="text-xs text-zinc-400">—</span>
+                                ) : evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
                                   <span className={`text-sm font-bold font-mono tabular-nums ${getNotaColor(evaluacion.notaValor)}`}>
                                     {evaluacion.notaValor.toFixed(2)}
                                   </span>
@@ -275,10 +331,16 @@ const NotasPage: React.FC = () => {
                                 )}
                               </td>
                               <td className="px-4 py-3 text-center">
-                                <span className="text-xs font-mono tabular-nums text-zinc-500">{evaluacion.peso}%</span>
+                                <span className="text-xs font-mono tabular-nums text-zinc-500">
+                                  {esPromedioGeneral || esPromedioFinal ? '100%' : `${evaluacion.peso}%`}
+                                </span>
                               </td>
                               <td className="px-4 py-3 text-right">
-                                {evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
+                                {(esPromedioGeneral || esPromedioFinal) ? (
+                                  <span className={`text-sm font-mono tabular-nums font-semibold ${getNotaColor(Number(puntajeResumen()))}`}>
+                                    {puntajeResumen()}
+                                  </span>
+                                ) : evaluacion.tieneNota && evaluacion.notaValor > 0 ? (
                                   <span className="text-sm font-mono tabular-nums text-zinc-700 font-semibold">{puntaje}</span>
                                 ) : (
                                   <span className="text-xs text-zinc-400">0.00</span>
