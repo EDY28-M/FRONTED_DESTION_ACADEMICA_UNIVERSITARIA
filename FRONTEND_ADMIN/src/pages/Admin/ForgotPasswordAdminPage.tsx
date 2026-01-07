@@ -82,7 +82,6 @@ const ForgotPasswordAdminPage: React.FC = () => {
       <div 
         className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
-          borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
@@ -106,7 +105,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
 
         {emailSent ? (
           <div className="text-center">
-            <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 rounded-none bg-green-100 flex items-center justify-center mb-4">
               <CheckCircleIcon className="w-10 h-10 text-green-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -120,7 +119,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
             </p>
             <Link
               to="/admin/login"
-              className="inline-flex items-center justify-center w-full py-3.5 px-4 rounded-lg text-white font-medium transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 hover:shadow-lg"
+              className="inline-flex items-center justify-center w-full py-3.5 px-4 rounded-none text-white font-medium transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 hover:shadow-lg"
             >
               <ArrowLeftIcon className="w-5 h-5 mr-2" />
               Volver al inicio de sesión
@@ -153,7 +152,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
                       setError('');
                     }}
                     className={`block w-full pl-10 pr-3 py-3 border ${error ? 'border-red-400' : 'border-zinc-200'
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
+                      } rounded-none focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                     placeholder="correo@ejemplo.com"
                   />
                 </div>
@@ -165,7 +164,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-lg transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
                   isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
                 }`}
               >

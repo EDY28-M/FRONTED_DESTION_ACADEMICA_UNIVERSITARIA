@@ -27,6 +27,8 @@ import {
   EstudiantesDocentePage,
   AsistenciasDocentePage,
   HorarioDocentePage,
+  EstadisticasDocentePage,
+  NotasConsolidadasDocentePage,
   AnunciosDocentePage,
   MaterialesDocentePage
 } from './pages/Docente'
@@ -42,6 +44,10 @@ import GestionPeriodosPage from './pages/Admin/GestionPeriodosPage'
 import VisualizacionEstudiantesPage from './pages/Admin/VisualizacionEstudiantesPage'
 import GestionDocentesPasswordPage from './pages/Admin/GestionDocentesPasswordPage'
 import GestionAsistenciasPage from './pages/Admin/GestionAsistenciasPage'
+import NotasConsolidadasAdminPage from './pages/Admin/NotasConsolidadasAdminPage'
+import AnunciosAdminPage from './pages/Admin/AnunciosAdminPage'
+import MaterialesAdminPage from './pages/Admin/MaterialesAdminPage'
+import ActivacionCursosPage from './pages/Admin/ActivacionCursosPage'
 import InicioDashboard from './pages/Student/InicioDashboard'
 import MisCursosPage from './pages/Student/MisCursosPage'
 import MatriculaPage from './pages/Student/MatriculaPage'
@@ -153,6 +159,8 @@ function App() {
           <Route path="estudiantes" element={<EstudiantesDocentePage />} />
           <Route path="asistencias" element={<AsistenciasDocentePage />} />
           <Route path="horario" element={<HorarioDocentePage />} />
+          <Route path="estadisticas" element={<EstadisticasDocentePage />} />
+          <Route path="notas-consolidadas" element={<NotasConsolidadasDocentePage />} />
           <Route path="anuncios" element={<AnunciosDocentePage />} />
           <Route path="materiales" element={<MaterialesDocentePage />} />
           <Route path="curso/:id" element={<GestionCursoDocentePage />} />
@@ -209,6 +217,10 @@ function App() {
         <Route path="cursos-dirigidos" element={<CursosDirigidosPage />} />
         <Route path="periodos" element={<GestionPeriodosPage />} />
         <Route path="estadisticas" element={<EstadisticasPage />} />
+        <Route path="notas-consolidadas" element={<NotasConsolidadasAdminPage />} />
+        <Route path="anuncios" element={<AnunciosAdminPage />} />
+        <Route path="materiales" element={<MaterialesAdminPage />} />
+        <Route path="activacion-cursos" element={<ActivacionCursosPage />} />
         <Route path="perfil" element={<PerfilPage />} />
       </Route>
 

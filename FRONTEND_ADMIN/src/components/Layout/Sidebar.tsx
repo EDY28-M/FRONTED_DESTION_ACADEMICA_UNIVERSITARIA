@@ -15,6 +15,10 @@ import {
   Clock,
   ClipboardCheck
 } from 'lucide-react'
+import {
+  DocumentTextIcon,
+  MegaphoneIcon,
+} from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 
 interface SidebarProps {
@@ -71,9 +75,29 @@ const navigation = [
     icon: Calendar,
   },
   {
+    name: 'Activación de Cursos',
+    href: '/admin/activacion-cursos',
+    icon: BookOpenCheck,
+  },
+  {
     name: 'Estadísticas',
     href: '/admin/estadisticas',
     icon: TrendingUp,
+  },
+  {
+    name: 'Notas Consolidadas',
+    href: '/admin/notas-consolidadas',
+    icon: DocumentTextIcon,
+  },
+  {
+    name: 'Anuncios',
+    href: '/admin/anuncios',
+    icon: MegaphoneIcon,
+  },
+  {
+    name: 'Materiales',
+    href: '/admin/materiales',
+    icon: FolderOpen,
   },
   {
     name: 'Mi Perfil',

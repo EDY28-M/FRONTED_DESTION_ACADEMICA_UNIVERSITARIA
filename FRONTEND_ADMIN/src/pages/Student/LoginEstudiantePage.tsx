@@ -113,7 +113,6 @@ const LoginEstudiantePage: React.FC = () => {
       <div 
         className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
         style={{
-          borderRadius: '12px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
@@ -123,7 +122,7 @@ const LoginEstudiantePage: React.FC = () => {
             style={{ animation: 'fadeInDown 0.5s ease-out' }}
           >
             <div
-              className="flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg"
+              className="flex items-center gap-3 px-4 py-3 rounded-none shadow-lg"
               style={{ backgroundColor: '#10B981' }}
             >
               <CheckCircleIcon className="w-6 h-6 text-white flex-shrink-0" />
@@ -184,7 +183,7 @@ const LoginEstudiantePage: React.FC = () => {
                   if (errors.email) setErrors({ ...errors, email: undefined })
                 }}
                 className={`block w-full pl-10 pr-3 py-3 border ${errors.email ? 'border-red-400' : 'border-zinc-200'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
+                  } rounded-none focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                 placeholder="estudiante@unas.edu.pe"
               />
             </div>
@@ -216,7 +215,7 @@ const LoginEstudiantePage: React.FC = () => {
                   if (errors.password) setErrors({ ...errors, password: undefined })
                 }}
                 className={`block w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-400' : 'border-zinc-200'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
+                  } rounded-none focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 transition-all duration-200 text-zinc-900 bg-white/80`}
                 placeholder="••••••••"
               />
               <button
@@ -240,7 +239,7 @@ const LoginEstudiantePage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-lg transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
               isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
             }`}
           >

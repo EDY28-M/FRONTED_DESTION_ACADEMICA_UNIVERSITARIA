@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { docenteCursosApi, docenteAsistenciaApi, docenteTiposEvaluacionApi, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
 import { toast } from 'react-hot-toast';
 import {
@@ -30,6 +31,7 @@ export const GestionCursoDocentePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const cursoId = parseInt(id || '0');
 
   // Leer el tab de los query params, si existe
@@ -97,8 +99,35 @@ export const GestionCursoDocentePage = () => {
   useEffect(() => {
     if (activeTab === 'notas') {
       cargarTiposEvaluacion();
+      // Recargar estudiantes cuando se entra a la pestaña de notas
+      cargarEstudiantes();
     }
   }, [activeTab]);
+
+  // Escuchar cambios en las queries de trabajos para recargar estudiantes cuando se califica
+  useEffect(() => {
+    if (activeTab !== 'notas') return;
+
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      // Si se invalidó una query relacionada con trabajos y estamos en la pestaña de notas, recargar estudiantes
+      if (event?.type === 'updated') {
+        const queryKey = event.query.queryKey;
+        if (Array.isArray(queryKey) && (
+          queryKey.includes('entregas-trabajo') || 
+          queryKey.includes('trabajos-pendientes')
+        )) {
+          // Esperar un momento para que el backend termine de procesar
+          setTimeout(() => {
+            cargarEstudiantes();
+            // Limpiar ediciones después de recargar para mostrar los valores del backend
+            setNotasEditadas(new Map());
+          }, 1000);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeTab, queryClient]);
 
   const cargarEstudiantes = async () => {
     try {
@@ -234,7 +263,12 @@ export const GestionCursoDocentePage = () => {
       // Recargar estudiantes para reflejar las notas guardadas
       await cargarEstudiantes();
 
-      // NO limpiar las ediciones - mantener los valores en los inputs
+      // Limpiar las ediciones de este estudiante después de guardar exitosamente
+      setNotasEditadas(prev => {
+        const nuevas = new Map(prev);
+        nuevas.delete(estudiante.idMatricula);
+        return nuevas;
+      });
     } catch (error: any) {
       console.error('Error al guardar notas:', error);
       toast.error(error.response?.data?.message || 'Error al guardar notas');
@@ -302,7 +336,8 @@ export const GestionCursoDocentePage = () => {
       // Recargar estudiantes para reflejar los cambios
       await cargarEstudiantes();
 
-      // NO limpiar las ediciones - mantener los valores en los inputs
+      // Limpiar todas las ediciones después de guardar exitosamente
+      setNotasEditadas(new Map());
     } catch (error: any) {
       console.error('Error al guardar todas las notas:', error);
       toast.error('Error al guardar las notas');
@@ -839,11 +874,36 @@ export const GestionCursoDocentePage = () => {
                             .sort((a, b) => a.orden - b.orden)
                             .map((tipo) => {
                               const campoNota = mapearNombreACampo(tipo.nombre); // Para guardar en notasEditadas
-                              const nombreTipo = tipo.nombre; // Nombre exacto para leer del backend
+                              const nombreTipo = tipo.nombre.trim(); // Nombre exacto para leer del backend (con trim)
 
-                              // Buscar valor editado en notasEditadas (camelCase) o valor existente del backend (nombre exacto)
-                              const valorActual = notasEditadasEstudiante[campoNota] ??
-                                (estudiante.notas as any)?.[nombreTipo] ?? '';
+                              // Buscar valor existente del backend (nombre exacto, case-insensitive)
+                              const notasBackend = estudiante.notas as any;
+                              let valorBackend: number | string | undefined = undefined;
+                              
+                              // Buscar el valor en las notas del backend usando el nombre exacto (case-insensitive)
+                              if (notasBackend) {
+                                // Intentar con el nombre exacto
+                                valorBackend = notasBackend[nombreTipo];
+                                
+                                // Si no se encuentra, buscar case-insensitive
+                                if (valorBackend === undefined) {
+                                  const keys = Object.keys(notasBackend);
+                                  const keyEncontrada = keys.find(k => 
+                                    k.trim().toLowerCase() === nombreTipo.toLowerCase()
+                                  );
+                                  if (keyEncontrada) {
+                                    valorBackend = notasBackend[keyEncontrada];
+                                  }
+                                }
+                              }
+
+                              // Priorizar valor editado si existe y no está vacío, sino usar valor del backend
+                              const valorEditado = notasEditadasEstudiante[campoNota];
+                              const valorActual = (valorEditado !== undefined && valorEditado !== '') 
+                                ? valorEditado 
+                                : (valorBackend !== undefined && valorBackend !== null)
+                                  ? valorBackend.toString()
+                                  : '';
 
                               return (
                                 <td key={tipo.id || tipo.nombre} className="px-3 py-3">
@@ -890,7 +950,17 @@ export const GestionCursoDocentePage = () => {
 
         {/* Tab: Trabajos */}
         {activeTab === 'trabajos' && (
-          <TrabajosDocentePage idCurso={cursoId} />
+          <TrabajosDocentePage 
+            idCurso={cursoId} 
+            onCalificacionGuardada={() => {
+              // Recargar estudiantes cuando se califica un trabajo para actualizar el registro de notas
+              if (activeTab === 'notas' || true) { // Siempre recargar por si el usuario cambia de pestaña
+                setTimeout(() => {
+                  cargarEstudiantes();
+                }, 500);
+              }
+            }}
+          />
         )}
 
         {/* Tab: Asistencia */}

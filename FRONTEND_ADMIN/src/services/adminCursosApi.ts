@@ -180,6 +180,31 @@ export interface ResultadoCierrePeriodo {
   };
 }
 
+export interface ActivarCursoPeriodoRequest {
+  idCurso: number;
+  idPeriodo: number;
+  observaciones?: string;
+}
+
+export interface DesactivarCursoPeriodoRequest {
+  idCurso: number;
+  idPeriodo: number;
+}
+
+export interface CursoActivacionPeriodo {
+  id: number;
+  idCurso: number;
+  nombreCurso: string;
+  codigoCurso?: string;
+  idPeriodo: number;
+  nombrePeriodo: string;
+  activo: boolean;
+  fechaActivacion: string;
+  idUsuarioActivador?: number;
+  nombreUsuarioActivador?: string;
+  observaciones?: string;
+}
+
 export const adminCursosApi = {
   // Obtener todos los estudiantes (admin)
   getTodosEstudiantes: async (): Promise<EstudianteAdmin[]> => {
@@ -246,6 +271,38 @@ export const adminCursosApi = {
   // Abrir nuevo período académico (avanzar ciclos)
   abrirPeriodo: async (id: number): Promise<{ mensaje: string; periodoActivo: any; resumenCiclos: any[]; fechaApertura: string }> => {
     const response = await axios.post(`/admin/periodos/${id}/abrir`);
+    return response.data;
+  },
+
+  // === ACTIVACIÓN DE CURSOS POR PERÍODO ===
+
+  // Activar un curso para un período específico
+  activarCursoPeriodo: async (data: ActivarCursoPeriodoRequest): Promise<{ mensaje: string; activacion: CursoActivacionPeriodo }> => {
+    const response = await axios.post('/admin/cursos/activar', data);
+    return response.data;
+  },
+
+  // Desactivar un curso para un período específico
+  desactivarCursoPeriodo: async (data: DesactivarCursoPeriodoRequest): Promise<{ mensaje: string }> => {
+    const response = await axios.post('/admin/cursos/desactivar', data);
+    return response.data;
+  },
+
+  // Obtener cursos activados (con filtros opcionales)
+  getCursosActivados: async (idPeriodo?: number, idCurso?: number): Promise<CursoActivacionPeriodo[]> => {
+    const params = new URLSearchParams();
+    if (idPeriodo) params.append('idPeriodo', idPeriodo.toString());
+    if (idCurso) params.append('idCurso', idCurso.toString());
+    
+    const queryString = params.toString();
+    const url = `/admin/cursos/activados${queryString ? `?${queryString}` : ''}`;
+    const response = await axios.get(url);
+    return response.data;
+  },
+
+  // Obtener cursos activados para un período específico
+  getCursosActivadosPeriodo: async (idPeriodo: number): Promise<CursoActivacionPeriodo[]> => {
+    const response = await axios.get(`/admin/periodos/${idPeriodo}/cursos-activados`);
     return response.data;
   },
 };

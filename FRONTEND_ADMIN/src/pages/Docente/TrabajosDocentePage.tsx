@@ -33,9 +33,10 @@ const formatDate = (date: Date | string) => {
 
 interface TrabajosDocentePageProps {
   idCurso?: number;
+  onCalificacionGuardada?: () => void;
 }
 
-const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCursoProp }) => {
+const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCursoProp, onCalificacionGuardada }) => {
   // Si idCurso viene como prop, usarlo directamente. Si no, intentar obtenerlo de los params
   const { id } = useParams<{ id: string }>();
   const idCurso = idCursoProp || (id ? Number(id) : 0);
@@ -95,7 +96,21 @@ const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCu
       queryClient.invalidateQueries({ queryKey: ['entregas-trabajo'] });
       // Invalidar trabajos pendientes para actualizar el dashboard
       queryClient.invalidateQueries({ queryKey: ['trabajos-pendientes'] });
-      toast.success('Calificación guardada exitosamente');
+      // Invalidar todas las queries relacionadas con estudiantes para actualizar el registro de notas
+      queryClient.invalidateQueries({ queryKey: ['estudiantes-curso'] });
+      queryClient.invalidateQueries({ predicate: (query) => 
+        query.queryKey[0] === 'estudiantes-curso' || 
+        (Array.isArray(query.queryKey) && query.queryKey.some(key => 
+          typeof key === 'string' && key.includes('estudiante')
+        ))
+      });
+      // Notificar al componente padre para que recargue estudiantes
+      if (onCalificacionGuardada) {
+        setTimeout(() => {
+          onCalificacionGuardada();
+        }, 500);
+      }
+      toast.success('Calificación guardada exitosamente. Las notas se actualizarán automáticamente.');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.error || 'Error al calificar');
