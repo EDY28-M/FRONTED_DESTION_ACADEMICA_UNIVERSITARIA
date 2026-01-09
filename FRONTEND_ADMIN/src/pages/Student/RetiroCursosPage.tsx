@@ -325,8 +325,9 @@ const RetiroCursosPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="py-16 text-center">
-            <div className="animate-pulse text-zinc-400 text-sm">Cargando cursos matriculados...</div>
+          <div className="p-12 text-center">
+            <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-zinc-500 text-sm">Cargando cursos matriculados...</p>
           </div>
         ) : cursosMatriculados.length > 0 ? (
           <>

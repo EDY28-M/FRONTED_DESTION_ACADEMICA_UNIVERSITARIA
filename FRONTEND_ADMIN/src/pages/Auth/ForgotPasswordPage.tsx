@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '/api';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -33,11 +33,11 @@ const ForgotPasswordPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { 
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, {
         Email: email,
         TipoUsuario: "Usuario"
       });
-      
+
       if (response.data?.success === false) {
         setError(response.data?.message || 'No existe una cuenta con este correo');
       } else {
@@ -46,7 +46,7 @@ const ForgotPasswordPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error al solicitar recuperación:', error);
-      
+
       if (error.response?.status === 404) {
         setError('No existe una cuenta con este correo');
       } else if (error.response?.data?.success === false) {
@@ -67,8 +67,8 @@ const ForgotPasswordPage: React.FC = () => {
       <div className="w-full lg:w-1/2 bg-[#1a1a2e] flex items-center justify-center p-6 sm:p-8 lg:p-12 min-h-screen lg:min-h-0">
         <div className="w-full max-w-md">
           {/* Botón volver */}
-          <Link 
-            to="/login" 
+          <Link
+            to="/login"
             className="inline-flex items-center text-gray-400 hover:text-purple-400 transition-colors mb-8"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
@@ -121,9 +121,8 @@ const ForgotPasswordPage: React.FC = () => {
                     setEmail(e.target.value);
                     setError('');
                   }}
-                  className={`block w-full px-0 py-3 bg-transparent border-0 border-b-2 ${
-                    error ? 'border-red-500' : 'border-gray-600'
-                  } text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors text-base`}
+                  className={`block w-full px-0 py-3 bg-transparent border-0 border-b-2 ${error ? 'border-red-500' : 'border-gray-600'
+                    } text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors text-base`}
                   placeholder="Correo electrónico"
                 />
                 {error && (
@@ -135,11 +134,10 @@ const ForgotPasswordPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-4 px-6 rounded-full font-semibold text-white transition-all duration-300 ${
-                  isLoading 
-                    ? 'bg-purple-600/50 cursor-not-allowed' 
+                className={`w-full py-4 px-6 rounded-full font-semibold text-white transition-all duration-300 ${isLoading
+                    ? 'bg-purple-600/50 cursor-not-allowed'
                     : 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 hover:shadow-lg hover:shadow-purple-500/25'
-                }`}
+                  }`}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -163,7 +161,7 @@ const ForgotPasswordPage: React.FC = () => {
         {/* Círculos decorativos de fondo */}
         <div className="absolute top-20 right-20 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-purple-800/30 rounded-full blur-3xl"></div>
-        
+
         <div className="relative z-10 text-center max-w-lg">
           {/* Título Welcome */}
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
@@ -180,41 +178,41 @@ const ForgotPasswordPage: React.FC = () => {
           <div className="relative mx-auto w-full max-w-md">
             <svg viewBox="0 0 400 300" className="w-full h-auto">
               {/* Documento/Formulario central */}
-              <rect x="120" y="80" width="160" height="200" rx="8" fill="white" opacity="0.95"/>
-              <rect x="140" y="110" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="130" width="100" height="6" rx="3" fill="#e9d5ff"/>
-              <rect x="140" y="150" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="170" width="80" height="6" rx="3" fill="#e9d5ff"/>
-              <rect x="140" y="190" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="210" width="60" height="6" rx="3" fill="#e9d5ff"/>
-              
+              <rect x="120" y="80" width="160" height="200" rx="8" fill="white" opacity="0.95" />
+              <rect x="140" y="110" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="130" width="100" height="6" rx="3" fill="#e9d5ff" />
+              <rect x="140" y="150" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="170" width="80" height="6" rx="3" fill="#e9d5ff" />
+              <rect x="140" y="190" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="210" width="60" height="6" rx="3" fill="#e9d5ff" />
+
               {/* Círculo de email/sobre */}
-              <circle cx="120" cy="220" r="35" fill="#7c3aed" opacity="0.9"/>
-              <circle cx="120" cy="220" r="25" fill="white" opacity="0.3"/>
-              <rect x="105" y="212" width="30" height="20" rx="2" fill="white"/>
-              <path d="M105 214 L120 225 L135 214" stroke="#7c3aed" strokeWidth="2" fill="none"/>
-              
+              <circle cx="120" cy="220" r="35" fill="#7c3aed" opacity="0.9" />
+              <circle cx="120" cy="220" r="25" fill="white" opacity="0.3" />
+              <rect x="105" y="212" width="30" height="20" rx="2" fill="white" />
+              <path d="M105 214 L120 225 L135 214" stroke="#7c3aed" strokeWidth="2" fill="none" />
+
               {/* Persona 1 - sentada a la izquierda */}
-              <ellipse cx="80" cy="250" rx="25" ry="10" fill="#1e1b4b" opacity="0.3"/>
-              <rect x="60" y="200" width="40" height="50" rx="4" fill="#f3f4f6"/>
-              <circle cx="80" cy="180" r="15" fill="#fef3c7"/>
-              <path d="M65 175 Q80 165 95 175" stroke="#1f2937" strokeWidth="2" fill="none"/>
-              <ellipse cx="80" cy="182" rx="10" ry="8" fill="#fef3c7"/>
-              
+              <ellipse cx="80" cy="250" rx="25" ry="10" fill="#1e1b4b" opacity="0.3" />
+              <rect x="60" y="200" width="40" height="50" rx="4" fill="#f3f4f6" />
+              <circle cx="80" cy="180" r="15" fill="#fef3c7" />
+              <path d="M65 175 Q80 165 95 175" stroke="#1f2937" strokeWidth="2" fill="none" />
+              <ellipse cx="80" cy="182" rx="10" ry="8" fill="#fef3c7" />
+
               {/* Persona 2 - arriba a la derecha con laptop */}
-              <ellipse cx="320" cy="180" rx="30" ry="12" fill="#1e1b4b" opacity="0.3"/>
-              <rect x="290" y="130" width="50" height="8" rx="2" fill="#374151"/>
-              <rect x="295" y="110" width="40" height="25" rx="3" fill="#60a5fa"/>
-              <circle cx="320" cy="95" r="18" fill="#fef3c7"/>
-              <path d="M302 90 Q320 78 338 90" stroke="#1f2937" strokeWidth="2" fill="none"/>
-              <rect x="300" y="130" width="40" height="45" rx="4" fill="#f3f4f6"/>
-              <path d="M290 175 Q280 160 295 150" stroke="#fef3c7" strokeWidth="8" fill="none"/>
-              <path d="M350 175 Q360 160 345 150" stroke="#fef3c7" strokeWidth="8" fill="none"/>
-              
+              <ellipse cx="320" cy="180" rx="30" ry="12" fill="#1e1b4b" opacity="0.3" />
+              <rect x="290" y="130" width="50" height="8" rx="2" fill="#374151" />
+              <rect x="295" y="110" width="40" height="25" rx="3" fill="#60a5fa" />
+              <circle cx="320" cy="95" r="18" fill="#fef3c7" />
+              <path d="M302 90 Q320 78 338 90" stroke="#1f2937" strokeWidth="2" fill="none" />
+              <rect x="300" y="130" width="40" height="45" rx="4" fill="#f3f4f6" />
+              <path d="M290 175 Q280 160 295 150" stroke="#fef3c7" strokeWidth="8" fill="none" />
+              <path d="M350 175 Q360 160 345 150" stroke="#fef3c7" strokeWidth="8" fill="none" />
+
               {/* Hojas decorativas */}
-              <ellipse cx="350" cy="260" rx="20" ry="40" fill="#22c55e" opacity="0.6" transform="rotate(-20 350 260)"/>
-              <ellipse cx="340" cy="250" rx="15" ry="35" fill="#16a34a" opacity="0.7" transform="rotate(-35 340 250)"/>
-              <ellipse cx="60" cy="120" rx="12" ry="25" fill="#22c55e" opacity="0.5" transform="rotate(15 60 120)"/>
+              <ellipse cx="350" cy="260" rx="20" ry="40" fill="#22c55e" opacity="0.6" transform="rotate(-20 350 260)" />
+              <ellipse cx="340" cy="250" rx="15" ry="35" fill="#16a34a" opacity="0.7" transform="rotate(-35 340 250)" />
+              <ellipse cx="60" cy="120" rx="12" ry="25" fill="#22c55e" opacity="0.5" transform="rotate(15 60 120)" />
             </svg>
           </div>
         </div>

@@ -1,20 +1,48 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { toast } from 'react-toastify'
-import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, CheckCircleIcon, XMarkIcon, ShieldCheckIcon, FingerPrintIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { useWebAuthnLogin } from '../../hooks/useWebAuthnLogin'
 
 const LoginEstudiantePage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { login } = useAuth()
+  const { login: authLogin, refreshUser } = useAuth()
+  const { login: loginWithPasskey } = useWebAuthnLogin()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; captcha?: string }>({})
   const [showSuccessBanner, setShowSuccessBanner] = useState(false)
+
+  // CAPTCHA state
+  const [captchaCode, setCaptchaCode] = useState('')
+  const [captchaAnswer, setCaptchaAnswer] = useState('')
+
+  // Generate new alphanumeric CAPTCHA
+  const generateCaptcha = useCallback(() => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Excluded confusing: I, O, 0, 1
+    let code = ''
+    for (let i = 0; i < 5; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    setCaptchaCode(code)
+    setCaptchaAnswer('')
+  }, [])
+
+  // Initialize CAPTCHA and load saved email on mount
+  useEffect(() => {
+    generateCaptcha()
+
+    // Cargar último email exitoso
+    const lastEmail = localStorage.getItem('last_login_estudiante_email')
+    if (lastEmail) {
+      setEmail(lastEmail)
+    }
+  }, [generateCaptcha])
 
   // Verificar si viene de un reset de contraseña exitoso
   useEffect(() => {
@@ -29,7 +57,7 @@ const LoginEstudiantePage: React.FC = () => {
   }, [searchParams, setSearchParams])
 
   const validateForm = (): boolean => {
-    const newErrors: { email?: string; password?: string } = {}
+    const newErrors: { email?: string; password?: string; captcha?: string } = {}
 
     if (!email) {
       newErrors.email = 'El email es requerido'
@@ -41,6 +69,14 @@ const LoginEstudiantePage: React.FC = () => {
       newErrors.password = 'La contraseña es requerida'
     } else if (password.length < 6) {
       newErrors.password = 'La contraseña debe tener al menos 6 caracteres'
+    }
+
+    // Validate CAPTCHA
+    if (!captchaAnswer) {
+      newErrors.captcha = 'Ingresa el código de seguridad'
+    } else if (captchaAnswer.toUpperCase() !== captchaCode) {
+      newErrors.captcha = 'Código incorrecto'
+      generateCaptcha() // Generate new captcha on wrong answer
     }
 
     setErrors(newErrors)
@@ -58,24 +94,27 @@ const LoginEstudiantePage: React.FC = () => {
 
     try {
       // Enviar tipo de usuario esperado al backend para validación
-      const loggedUser = await login({ email, password, tipoUsuario: 'Estudiante' })
-      
+      const loggedUser = await authLogin({ email, password, tipoUsuario: 'Estudiante' })
+
       // Validación adicional en frontend: asegurar que el rol sea Estudiante
       if (loggedUser.rol?.toLowerCase() !== 'estudiante') {
         // Limpiar datos de autenticación si el rol no coincide
-        localStorage.removeItem('token')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user_data')
         toast.error('Acceso denegado. Estas credenciales no corresponden a un estudiante.')
         setPassword('')
         return
       }
-      
+
+      // Guardar email para futuros inicios de sesión
+      localStorage.setItem('last_login_estudiante_email', email)
+
       toast.success('¡Bienvenido! Inicio de sesión exitoso')
       navigate('/estudiante/inicio')
     } catch (error: any) {
       console.error('Error en login:', error)
-      
+
       if (error.response?.status === 401) {
         toast.error('Correo o contraseña incorrectos')
       } else if (error.response?.status === 400) {
@@ -83,15 +122,53 @@ const LoginEstudiantePage: React.FC = () => {
       } else {
         toast.error('Error al iniciar sesión. Por favor, intente nuevamente')
       }
-      
+
       setPassword('')
+      generateCaptcha() // Regenerate CAPTCHA
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handlePasskeyLogin = async () => {
+    try {
+      // Pasamos el email para login directo si existe
+      const response = await loginWithPasskey(email);
+      if (response && response.token) {
+        // Guardar tokens y usuario en localStorage (claves de authService)
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('refresh_token', response.refreshToken);
+        localStorage.setItem('user_data', JSON.stringify(response.usuario));
+
+        // Actualizar estado de autenticación
+        await refreshUser();
+
+        // Validar rol
+        const user = response.usuario;
+        if (user.rol?.toLowerCase() !== 'estudiante') {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('user_data');
+          toast.error('Acceso denegado. Esta credencial no corresponde a un estudiante.');
+          return;
+        }
+
+        // Guardar email para autocompletado
+        if (user.email) {
+          localStorage.setItem('last_login_estudiante_email', user.email);
+        }
+
+        toast.success(`¡Bienvenido ${user.nombre || 'Estudiante'}!`);
+        navigate('/estudiante/inicio');
+      }
+    } catch (error: any) {
+      console.error("Passkey error", error);
+      toast.error("Error iniciando con huella/passkey");
+    }
+  }
+
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative"
       style={{
         backgroundImage: `url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1986&q=80')`,
@@ -101,7 +178,7 @@ const LoginEstudiantePage: React.FC = () => {
       }}
     >
       {/* Overlay */}
-      <div 
+      <div
         className="absolute inset-0"
         style={{
           backdropFilter: 'blur(3px)',
@@ -110,8 +187,8 @@ const LoginEstudiantePage: React.FC = () => {
       />
 
       {/* Contenedor Principal */}
-      <div 
-        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
+      <div
+        className="relative max-w-sm w-full bg-white px-8 py-10 sm:px-10 sm:py-12 shadow-2xl border border-zinc-200/50"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
@@ -142,17 +219,17 @@ const LoginEstudiantePage: React.FC = () => {
         {/* Logo y Marca */}
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-24 relative mb-4">
-            <img 
-              src="/src/image/fondouni.svg" 
-              alt="Escudo Universitario" 
+            <img
+              src="/src/image/fondouni.svg"
+              alt="Escudo Universitario"
               className="w-full h-full object-contain"
             />
           </div>
-          
+
           <h1 className="text-xl font-bold tracking-wider text-zinc-800 mb-2">
             UNIVERSIDAD ACADEMICA
           </h1>
-          
+
           <h2 className="text-2xl font-bold text-zinc-800">
             Portal Estudiante
           </h2>
@@ -162,8 +239,8 @@ const LoginEstudiantePage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Campo Email */}
           <div>
-            <label 
-              htmlFor="email" 
+            <label
+              htmlFor="email"
               className="block text-sm font-medium mb-2 text-zinc-700"
             >
               Correo Institucional
@@ -194,8 +271,8 @@ const LoginEstudiantePage: React.FC = () => {
 
           {/* Campo Contraseña */}
           <div>
-            <label 
-              htmlFor="password" 
+            <label
+              htmlFor="password"
               className="block text-sm font-medium mb-2 text-zinc-700"
             >
               Contraseña
@@ -235,13 +312,63 @@ const LoginEstudiantePage: React.FC = () => {
             )}
           </div>
 
+          {/* CAPTCHA Field */}
+          <div>
+            <label className="block text-sm font-medium mb-2 text-zinc-700">
+              <ShieldCheckIcon className="inline h-4 w-4 mr-1" />
+              Código de Seguridad
+            </label>
+            {/* Responsive row */}
+            <div className="flex flex-row items-stretch gap-2">
+              {/* CAPTCHA Code Display */}
+              <div
+                className="flex items-center justify-center px-3 py-2 rounded border border-zinc-300 bg-zinc-100 flex-1 min-w-0"
+              >
+                <span
+                  className="text-base sm:text-lg font-bold select-none whitespace-nowrap"
+                  style={{
+                    fontFamily: 'Courier New, monospace',
+                    color: '#374151',
+                    letterSpacing: '2px',
+                  }}
+                >
+                  {captchaCode}
+                </span>
+              </div>
+              {/* Answer Input */}
+              <input
+                type="text"
+                maxLength={5}
+                value={captchaAnswer}
+                onChange={(e) => {
+                  setCaptchaAnswer(e.target.value.toUpperCase())
+                  if (errors.captcha) setErrors({ ...errors, captcha: undefined })
+                }}
+                className={`flex-1 min-w-0 px-2 py-2 border ${errors.captcha ? 'border-red-400' : 'border-zinc-200'
+                  } rounded focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-400 text-zinc-900 bg-white text-center text-sm sm:text-base font-semibold tracking-wider uppercase`}
+                placeholder="Código"
+              />
+              {/* Refresh Button */}
+              <button
+                type="button"
+                onClick={generateCaptcha}
+                className="px-3 py-2 border border-zinc-200 rounded hover:bg-zinc-50 transition-colors flex-shrink-0"
+                title="Nuevo código"
+              >
+                <ArrowPathIcon className="h-4 w-4 text-zinc-500" />
+              </button>
+            </div>
+            {errors.captcha && (
+              <p className="mt-1 text-sm text-red-600">{errors.captcha}</p>
+            )}
+          </div>
+
           {/* Botón de Login */}
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
-            }`}
+            className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
+              }`}
           >
             {isLoading ? (
               <>
@@ -257,9 +384,29 @@ const LoginEstudiantePage: React.FC = () => {
           </button>
         </form>
 
+        {/* Separador */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-zinc-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-zinc-500">O ingresa con</span>
+          </div>
+        </div>
+
+        {/* Passkey Login Button */}
+        <button
+          type="button"
+          onClick={handlePasskeyLogin}
+          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-zinc-300 text-zinc-700 font-medium rounded hover:bg-zinc-50 transition-all duration-200 hover:shadow-sm"
+        >
+          <FingerPrintIcon className="h-5 w-5" />
+          Huella / FaceID
+        </button>
+
         {/* Link para recuperar contraseña */}
         <div className="mt-6 text-center">
-          <Link 
+          <Link
             to="/estudiante/forgot-password"
             className="text-sm font-medium hover:underline text-zinc-600 hover:text-zinc-900 transition-all"
           >

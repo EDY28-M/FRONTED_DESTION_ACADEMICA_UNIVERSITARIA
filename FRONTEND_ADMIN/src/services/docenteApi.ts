@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Horario } from '../types/horario';
 
-const API_URL = 'http://localhost:5251/api';
+const API_URL = '/api';
 
 // Interfaces que coinciden con los DTOs del backend
 export interface LoginDocenteDto {

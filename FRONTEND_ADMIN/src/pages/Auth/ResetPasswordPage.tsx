@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircleIcon, XCircleIcon, EyeIcon, EyeSlashIcon, ShieldCheckIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '/api';
 
 // Requisitos de contraseña
 interface PasswordRequirement {
@@ -266,8 +266,8 @@ const ResetPasswordPage = () => {
             /* Formulario de Reseteo */
             <>
               {/* Botón volver */}
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="inline-flex items-center text-gray-400 hover:text-purple-400 transition-colors mb-8"
               >
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
@@ -328,13 +328,12 @@ const ResetPasswordPage = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       disabled={isLoading}
-                      className={`block w-full px-0 py-3 pr-10 bg-transparent border-0 border-b-2 ${
-                        confirmPassword.length > 0
+                      className={`block w-full px-0 py-3 pr-10 bg-transparent border-0 border-b-2 ${confirmPassword.length > 0
                           ? passwordsMatch
                             ? 'border-emerald-500'
                             : 'border-red-500'
                           : 'border-gray-600'
-                      } text-white placeholder-gray-500 focus:outline-none transition-colors text-base`}
+                        } text-white placeholder-gray-500 focus:outline-none transition-colors text-base`}
                       placeholder="Confirmar Contraseña"
                     />
                     <button
@@ -374,9 +373,8 @@ const ResetPasswordPage = () => {
                     {requirementStatus.map((req) => (
                       <li
                         key={req.id}
-                        className={`flex items-center gap-2 text-sm transition-all ${
-                          req.met ? 'text-emerald-400' : 'text-gray-500'
-                        }`}
+                        className={`flex items-center gap-2 text-sm transition-all ${req.met ? 'text-emerald-400' : 'text-gray-500'
+                          }`}
                       >
                         {req.met ? (
                           <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
@@ -393,11 +391,10 @@ const ResetPasswordPage = () => {
                 <button
                   type="submit"
                   disabled={!isFormValid || isLoading}
-                  className={`w-full py-4 px-6 rounded-full font-semibold text-white transition-all duration-300 ${
-                    isFormValid && !isLoading
+                  className={`w-full py-4 px-6 rounded-full font-semibold text-white transition-all duration-300 ${isFormValid && !isLoading
                       ? 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 hover:shadow-lg hover:shadow-purple-500/25'
                       : 'bg-gray-600 cursor-not-allowed opacity-50'
-                  }`}
+                    }`}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -438,7 +435,7 @@ const ResetPasswordPage = () => {
         {/* Círculos decorativos de fondo */}
         <div className="absolute top-20 right-20 w-64 h-64 bg-purple-400/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-80 h-80 bg-purple-800/30 rounded-full blur-3xl"></div>
-        
+
         <div className="relative z-10 text-center max-w-lg">
           {/* Título Welcome */}
           <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
@@ -455,41 +452,41 @@ const ResetPasswordPage = () => {
           <div className="relative mx-auto w-full max-w-md">
             <svg viewBox="0 0 400 300" className="w-full h-auto">
               {/* Documento/Formulario central */}
-              <rect x="120" y="80" width="160" height="200" rx="8" fill="white" opacity="0.95"/>
-              <rect x="140" y="110" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="130" width="100" height="6" rx="3" fill="#e9d5ff"/>
-              <rect x="140" y="150" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="170" width="80" height="6" rx="3" fill="#e9d5ff"/>
-              <rect x="140" y="190" width="120" height="8" rx="4" fill="#a855f7"/>
-              <rect x="140" y="210" width="60" height="6" rx="3" fill="#e9d5ff"/>
-              
+              <rect x="120" y="80" width="160" height="200" rx="8" fill="white" opacity="0.95" />
+              <rect x="140" y="110" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="130" width="100" height="6" rx="3" fill="#e9d5ff" />
+              <rect x="140" y="150" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="170" width="80" height="6" rx="3" fill="#e9d5ff" />
+              <rect x="140" y="190" width="120" height="8" rx="4" fill="#a855f7" />
+              <rect x="140" y="210" width="60" height="6" rx="3" fill="#e9d5ff" />
+
               {/* Círculo de seguridad/shield */}
-              <circle cx="120" cy="220" r="35" fill="#7c3aed" opacity="0.9"/>
-              <circle cx="120" cy="220" r="25" fill="white" opacity="0.3"/>
-              <path d="M120 200 L105 210 L105 225 Q105 235 120 240 Q135 235 135 225 L135 210 Z" fill="white"/>
-              <path d="M113 220 L118 225 L127 215" stroke="#7c3aed" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-              
+              <circle cx="120" cy="220" r="35" fill="#7c3aed" opacity="0.9" />
+              <circle cx="120" cy="220" r="25" fill="white" opacity="0.3" />
+              <path d="M120 200 L105 210 L105 225 Q105 235 120 240 Q135 235 135 225 L135 210 Z" fill="white" />
+              <path d="M113 220 L118 225 L127 215" stroke="#7c3aed" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
               {/* Persona 1 - sentada a la izquierda */}
-              <ellipse cx="80" cy="250" rx="25" ry="10" fill="#1e1b4b" opacity="0.3"/>
-              <rect x="60" y="200" width="40" height="50" rx="4" fill="#f3f4f6"/>
-              <circle cx="80" cy="180" r="15" fill="#fef3c7"/>
-              <path d="M65 175 Q80 165 95 175" stroke="#1f2937" strokeWidth="2" fill="none"/>
-              <ellipse cx="80" cy="182" rx="10" ry="8" fill="#fef3c7"/>
-              
+              <ellipse cx="80" cy="250" rx="25" ry="10" fill="#1e1b4b" opacity="0.3" />
+              <rect x="60" y="200" width="40" height="50" rx="4" fill="#f3f4f6" />
+              <circle cx="80" cy="180" r="15" fill="#fef3c7" />
+              <path d="M65 175 Q80 165 95 175" stroke="#1f2937" strokeWidth="2" fill="none" />
+              <ellipse cx="80" cy="182" rx="10" ry="8" fill="#fef3c7" />
+
               {/* Persona 2 - arriba a la derecha con laptop */}
-              <ellipse cx="320" cy="180" rx="30" ry="12" fill="#1e1b4b" opacity="0.3"/>
-              <rect x="290" y="130" width="50" height="8" rx="2" fill="#374151"/>
-              <rect x="295" y="110" width="40" height="25" rx="3" fill="#60a5fa"/>
-              <circle cx="320" cy="95" r="18" fill="#fef3c7"/>
-              <path d="M302 90 Q320 78 338 90" stroke="#1f2937" strokeWidth="2" fill="none"/>
-              <rect x="300" y="130" width="40" height="45" rx="4" fill="#f3f4f6"/>
-              <path d="M290 175 Q280 160 295 150" stroke="#fef3c7" strokeWidth="8" fill="none"/>
-              <path d="M350 175 Q360 160 345 150" stroke="#fef3c7" strokeWidth="8" fill="none"/>
-              
+              <ellipse cx="320" cy="180" rx="30" ry="12" fill="#1e1b4b" opacity="0.3" />
+              <rect x="290" y="130" width="50" height="8" rx="2" fill="#374151" />
+              <rect x="295" y="110" width="40" height="25" rx="3" fill="#60a5fa" />
+              <circle cx="320" cy="95" r="18" fill="#fef3c7" />
+              <path d="M302 90 Q320 78 338 90" stroke="#1f2937" strokeWidth="2" fill="none" />
+              <rect x="300" y="130" width="40" height="45" rx="4" fill="#f3f4f6" />
+              <path d="M290 175 Q280 160 295 150" stroke="#fef3c7" strokeWidth="8" fill="none" />
+              <path d="M350 175 Q360 160 345 150" stroke="#fef3c7" strokeWidth="8" fill="none" />
+
               {/* Hojas decorativas */}
-              <ellipse cx="350" cy="260" rx="20" ry="40" fill="#22c55e" opacity="0.6" transform="rotate(-20 350 260)"/>
-              <ellipse cx="340" cy="250" rx="15" ry="35" fill="#16a34a" opacity="0.7" transform="rotate(-35 340 250)"/>
-              <ellipse cx="60" cy="120" rx="12" ry="25" fill="#22c55e" opacity="0.5" transform="rotate(15 60 120)"/>
+              <ellipse cx="350" cy="260" rx="20" ry="40" fill="#22c55e" opacity="0.6" transform="rotate(-20 350 260)" />
+              <ellipse cx="340" cy="250" rx="15" ry="35" fill="#16a34a" opacity="0.7" transform="rotate(-35 340 250)" />
+              <ellipse cx="60" cy="120" rx="12" ry="25" fill="#22c55e" opacity="0.5" transform="rotate(15 60 120)" />
             </svg>
           </div>
         </div>

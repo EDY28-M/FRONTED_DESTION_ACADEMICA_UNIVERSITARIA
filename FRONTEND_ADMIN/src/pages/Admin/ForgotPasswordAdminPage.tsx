@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '/api';
 
 const ForgotPasswordAdminPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -33,11 +33,11 @@ const ForgotPasswordAdminPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { 
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, {
         Email: email,
         TipoUsuario: "Usuario" // Especificar que es para Administrador
       });
-      
+
       if (response.data?.success === false) {
         setError(response.data?.message || 'No existe una cuenta de administrador con este correo');
       } else {
@@ -46,7 +46,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error al solicitar recuperación:', error);
-      
+
       if (error.response?.status === 404) {
         setError('No existe una cuenta de administrador con este correo');
       } else if (error.response?.data?.success === false) {
@@ -62,7 +62,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative"
       style={{
         backgroundImage: `url('https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1986&q=80')`,
@@ -71,7 +71,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      <div 
+      <div
         className="absolute inset-0"
         style={{
           backdropFilter: 'blur(3px)',
@@ -79,25 +79,25 @@ const ForgotPasswordAdminPage: React.FC = () => {
         }}
       />
 
-      <div 
-        className="relative max-w-md w-full bg-white p-8 sm:p-10 shadow-2xl border border-zinc-200/50"
+      <div
+        className="relative max-w-sm w-full bg-white px-8 py-10 sm:px-10 sm:py-12 shadow-2xl border border-zinc-200/50"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
         <div className="text-center mb-8">
           <div className="mx-auto w-20 h-24 relative mb-4">
-            <img 
-              src="/src/image/fondouni.svg" 
-              alt="Escudo Universitario" 
+            <img
+              src="/src/image/fondouni.svg"
+              alt="Escudo Universitario"
               className="w-full h-full object-contain"
             />
           </div>
-          
+
           <h1 className="text-xl font-bold tracking-wider text-zinc-800 mb-2">
             UNIVERSIDAD ACADEMICA
           </h1>
-          
+
           <h2 className="text-2xl font-bold text-zinc-800">
             Recuperar Contraseña - Administrador
           </h2>
@@ -133,8 +133,8 @@ const ForgotPasswordAdminPage: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label 
-                  htmlFor="email" 
+                <label
+                  htmlFor="email"
                   className="block text-sm font-medium mb-2 text-zinc-700"
                 >
                   Correo institucional
@@ -164,9 +164,8 @@ const ForgotPasswordAdminPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
-                }`}
+                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-medium rounded-none transition-all duration-200 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed ${isLoading ? 'cursor-not-allowed opacity-50' : 'hover:shadow-lg'
+                  }`}
               >
                 {isLoading ? (
                   <>
@@ -183,7 +182,7 @@ const ForgotPasswordAdminPage: React.FC = () => {
             </form>
 
             <div className="mt-6 text-center">
-              <Link 
+              <Link
                 to="/admin/login"
                 className="inline-flex items-center text-sm font-medium hover:underline text-zinc-600 hover:text-zinc-900 transition-all"
               >

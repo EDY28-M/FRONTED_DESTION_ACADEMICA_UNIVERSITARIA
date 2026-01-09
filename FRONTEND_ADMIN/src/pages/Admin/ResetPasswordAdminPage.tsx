@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { BookOpenIcon, CheckCircleIcon, XCircleIcon, EyeIcon, EyeSlashIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5251/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '/api';
 
 // Requisitos de contraseña
 interface PasswordRequirement {
@@ -431,13 +431,12 @@ const ResetPasswordAdminPage = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     disabled={isLoading}
-                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
-                      confirmPassword.length > 0
+                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all ${confirmPassword.length > 0
                         ? passwordsMatch
                           ? 'border-green-400 focus:ring-green-500'
                           : 'border-red-400 focus:ring-red-500'
                         : 'border-gray-300 focus:ring-primary-600'
-                    }`}
+                      }`}
                     placeholder="Confirmar Contraseña"
                     style={{ fontFamily: "'Montserrat', 'Roboto', sans-serif" }}
                   />
@@ -481,9 +480,8 @@ const ResetPasswordAdminPage = () => {
                   {requirementStatus.map((req) => (
                     <li
                       key={req.id}
-                      className={`flex items-center gap-2 text-sm transition-all ${
-                        req.met ? 'text-green-600' : 'text-red-500'
-                      }`}
+                      className={`flex items-center gap-2 text-sm transition-all ${req.met ? 'text-green-600' : 'text-red-500'
+                        }`}
                     >
                       {req.met ? (
                         <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
@@ -502,11 +500,10 @@ const ResetPasswordAdminPage = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-bold rounded-lg transition-all duration-300 ${
-                  isFormValid && !isLoading
+                className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-bold rounded-lg transition-all duration-300 ${isFormValid && !isLoading
                     ? 'hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer'
                     : 'cursor-not-allowed opacity-50'
-                }`}
+                  }`}
                 style={{
                   backgroundColor: isFormValid ? '#003366' : '#9CA3AF',
                   fontFamily: "'Montserrat', 'Roboto', sans-serif",

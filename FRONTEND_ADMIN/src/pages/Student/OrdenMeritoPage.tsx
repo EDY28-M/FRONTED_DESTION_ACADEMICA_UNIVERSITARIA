@@ -124,7 +124,10 @@ export default function OrdenMeritoPage() {
       {/* Tabla de Orden de Mérito */}
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full" />
+          <div className="text-center">
+            <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-zinc-500 text-sm">Cargando orden de mérito...</p>
+          </div>
         </div>
       ) : ordenMerito.length === 0 ? (
         <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center">

@@ -9,8 +9,12 @@ import {
   XMarkIcon,
   EyeIcon,
   EyeSlashIcon,
+
   BookOpenIcon,
+  FingerPrintIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
+import { useWebAuthnRegister } from '../../hooks/useWebAuthnRegister';
 
 // ============================================
 // COMPONENTES PEQUEÑOS Y FUNCIONALES
@@ -38,20 +42,20 @@ const InfoItem = ({ icon: Icon, label, value }: { icon: React.ElementType; label
 );
 
 // Badge para estados
-const StatusBadge = ({ 
-  value, 
-  type 
-}: { 
-  value: number; 
-  type: 'grade' | 'attendance' 
+const StatusBadge = ({
+  value,
+  type
+}: {
+  value: number;
+  type: 'grade' | 'attendance'
 }) => {
   let bgClass = 'bg-zinc-100 text-zinc-600';
-  
+
   if (type === 'grade') {
     if (value >= 14) bgClass = 'bg-green-50 text-green-700';
     else if (value < 11) bgClass = 'bg-red-50 text-red-700';
   }
-  
+
   return (
     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium tabular-nums ${bgClass}`}>
       {value.toFixed(2)}
@@ -75,6 +79,20 @@ const EmptyState = ({ icon: Icon, title, description }: { icon: React.ElementTyp
 export const PerfilDocentePage = () => {
   const { docente } = useDocenteAuth();
   const [modalAbierto, setModalAbierto] = useState(false);
+  const { register: registerPasskey, loading: isRegisterLoading } = useWebAuthnRegister();
+
+  const handleRegisterPasskey = async () => {
+    if (!docente?.correo) {
+      toast.error('No se pudo obtener el correo del usuario');
+      return;
+    }
+    const result = await registerPasskey(docente.correo);
+    if (result.success) {
+      toast.success('Huella/FaceID registrada exitosamente');
+    } else if (result.errorMessage) {
+      toast.error(result.errorMessage);
+    }
+  };
 
   // Obtener cursos para estadísticas
   const { data: cursos = [], isLoading } = useQuery({
@@ -83,8 +101,8 @@ export const PerfilDocentePage = () => {
   });
 
   const totalEstudiantes = cursos.reduce((sum: number, c: CursoDocente) => sum + c.totalEstudiantes, 0);
-  const promedioGeneral = cursos.length > 0 
-    ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.promedioGeneral, 0) / cursos.length 
+  const promedioGeneral = cursos.length > 0
+    ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.promedioGeneral, 0) / cursos.length
     : 0;
   const asistenciaPromedio = cursos.length > 0
     ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.porcentajeAsistenciaPromedio, 0) / cursos.length
@@ -145,6 +163,44 @@ export const PerfilDocentePage = () => {
           </div>
         </div>
 
+        {/* Seguridad Card */}
+        <div className="border border-zinc-200 rounded-lg bg-white mb-6">
+          <div className="px-5 py-4 border-b border-zinc-200">
+            <h3 className="text-sm font-medium text-zinc-900">Seguridad</h3>
+          </div>
+          <div className="p-5">
+            <div className="bg-zinc-50 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <ShieldCheckIcon className="h-5 w-5 text-zinc-500 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-zinc-900">Autenticación Biométrica</h4>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    Vincula tu huella o reconocimiento facial para iniciar sesión de forma rápida y segura sin contraseña.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleRegisterPasskey}
+              disabled={isRegisterLoading}
+              className="w-full h-10 bg-white border border-zinc-300 text-zinc-700 rounded-md text-sm font-medium
+                     hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-center gap-2"
+            >
+              {isRegisterLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-zinc-500 border-t-zinc-300 rounded-full animate-spin" />
+                  Registrando...
+                </>
+              ) : (
+                <>
+                  <FingerPrintIcon className="h-4 w-4" />
+                  Registrar Huella / FaceID
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Info Personal */}
           <div className="border border-zinc-200 rounded-lg bg-white">
@@ -188,7 +244,7 @@ export const PerfilDocentePage = () => {
           </div>
 
           {cursos.length === 0 ? (
-            <EmptyState 
+            <EmptyState
               icon={BookOpenIcon}
               title="Sin cursos asignados"
               description="Contacta al administrador para asignación"
@@ -197,40 +253,40 @@ export const PerfilDocentePage = () => {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead>
-                <tr className="text-left text-xs text-zinc-500 uppercase tracking-wide">
-                  <th className="px-5 py-3 font-medium">Curso</th>
-                  <th className="px-5 py-3 font-medium text-center">Ciclo</th>
-                  <th className="px-5 py-3 font-medium text-center">Créditos</th>
-                  <th className="px-5 py-3 font-medium text-center">Estudiantes</th>
-                  <th className="px-5 py-3 font-medium text-center">Promedio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cursos.map((curso: CursoDocente) => (
-                  <tr 
-                    key={curso.id} 
-                    className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/50 transition-colors"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</p>
-                      <p className="text-xs text-zinc-500 mt-0.5">{curso.horasSemanal}h semanales</p>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <span className="text-sm text-zinc-600 font-mono">{curso.ciclo}</span>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <span className="text-sm text-zinc-900 font-medium tabular-nums">{curso.totalEstudiantes}</span>
-                    </td>
-                    <td className="px-5 py-4 text-center">
-                      <StatusBadge value={curso.promedioGeneral} type="grade" />
-                    </td>
+                  <tr className="text-left text-xs text-zinc-500 uppercase tracking-wide">
+                    <th className="px-5 py-3 font-medium">Curso</th>
+                    <th className="px-5 py-3 font-medium text-center">Ciclo</th>
+                    <th className="px-5 py-3 font-medium text-center">Créditos</th>
+                    <th className="px-5 py-3 font-medium text-center">Estudiantes</th>
+                    <th className="px-5 py-3 font-medium text-center">Promedio</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {cursos.map((curso: CursoDocente) => (
+                    <tr
+                      key={curso.id}
+                      className="border-b border-zinc-100 last:border-b-0 hover:bg-zinc-50/50 transition-colors"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-medium text-zinc-900">{curso.nombreCurso}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{curso.horasSemanal}h semanales</p>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="text-sm text-zinc-600 font-mono">{curso.ciclo}</span>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="text-sm text-zinc-600 font-mono">{curso.creditos}</span>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <span className="text-sm text-zinc-900 font-medium tabular-nums">{curso.totalEstudiantes}</span>
+                      </td>
+                      <td className="px-5 py-4 text-center">
+                        <StatusBadge value={curso.promedioGeneral} type="grade" />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -279,7 +335,7 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!puedeEnviar) return;
 
     setIsSubmitting(true);
@@ -296,8 +352,8 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div 
-        ref={modalRef} 
+      <div
+        ref={modalRef}
         className="bg-white rounded-2xl shadow-2xl border border-zinc-200 max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Header con gradiente sutil */}
@@ -313,8 +369,8 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
               <p className="text-xs text-zinc-500">Actualiza tu contraseña de acceso</p>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="absolute right-4 top-4 p-2 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-all"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -336,9 +392,9 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
                            transition-all placeholder:text-zinc-400"
                 placeholder="Ingresa tu contraseña actual"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarActual(!mostrarActual)} 
+              <button
+                type="button"
+                onClick={() => setMostrarActual(!mostrarActual)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
                 {mostrarActual ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -369,9 +425,9 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
                            transition-all placeholder:text-zinc-400"
                 placeholder="Ingresa tu nueva contraseña"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarNueva(!mostrarNueva)} 
+              <button
+                type="button"
+                onClick={() => setMostrarNueva(!mostrarNueva)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
                 {mostrarNueva ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -389,18 +445,17 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
                 onChange={(e) => setConfirmarContrasena(e.target.value)}
                 className={`w-full h-11 px-4 pr-11 text-sm border rounded-xl bg-zinc-50 
                            focus:bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900/10 
-                           transition-all placeholder:text-zinc-400 ${
-                             confirmarContrasena.length > 0
-                               ? validaciones.passwordsMatch
-                                 ? 'border-emerald-300 focus:border-emerald-400'
-                                 : 'border-red-300 focus:border-red-400'
-                               : 'border-zinc-200 focus:border-zinc-400'
-                           }`}
+                           transition-all placeholder:text-zinc-400 ${confirmarContrasena.length > 0
+                    ? validaciones.passwordsMatch
+                      ? 'border-emerald-300 focus:border-emerald-400'
+                      : 'border-red-300 focus:border-red-400'
+                    : 'border-zinc-200 focus:border-zinc-400'
+                  }`}
                 placeholder="Confirma tu nueva contraseña"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarConfirmar(!mostrarConfirmar)} 
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-600 rounded transition-colors"
               >
                 {mostrarConfirmar ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
@@ -411,33 +466,29 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
           {/* Validaciones visuales */}
           {contrasenaNueva && (
             <div className="flex flex-wrap gap-2">
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                validaciones.minLength 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
-              }`}>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${validaciones.minLength
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+                }`}>
                 {validaciones.minLength ? '✓' : '○'} 6+ caracteres
               </span>
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                validaciones.hasUppercase 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
-              }`}>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${validaciones.hasUppercase
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+                }`}>
                 {validaciones.hasUppercase ? '✓' : '○'} Mayúscula
               </span>
-              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                validaciones.hasNumber 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                  : 'bg-zinc-50 text-zinc-500 border-zinc-200'
-              }`}>
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${validaciones.hasNumber
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+                }`}>
                 {validaciones.hasNumber ? '✓' : '○'} Número
               </span>
               {confirmarContrasena && (
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                  validaciones.passwordsMatch 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                    : 'bg-red-50 text-red-600 border-red-200'
-                }`}>
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${validaciones.passwordsMatch
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-red-50 text-red-600 border-red-200'
+                  }`}>
                   {validaciones.passwordsMatch ? '✓' : '✗'} Coinciden
                 </span>
               )}
@@ -447,8 +498,8 @@ const ModalCambiarContrasena = ({ onClose }: { onClose: () => void }) => {
           {/* Botones */}
           <div className="flex gap-3 pt-3">
             <button
-              type="button" 
-              onClick={onClose} 
+              type="button"
+              onClick={onClose}
               className="flex-1 h-11 px-4 border border-zinc-200 rounded-xl text-sm font-medium text-zinc-700 
                          hover:bg-zinc-50 hover:border-zinc-300 transition-all"
             >

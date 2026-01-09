@@ -36,10 +36,8 @@ const Layout: React.FC = () => {
         />
         
         {/* Page content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[95%] mx-auto">
-            <Outlet />
-          </div>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-5 sm:py-5 lg:px-5 lg:py-5">
+          <Outlet />
         </main>
       </div>
     </div>

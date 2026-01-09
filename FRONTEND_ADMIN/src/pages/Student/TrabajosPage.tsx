@@ -60,9 +60,11 @@ const TrabajosPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-200 rounded w-1/3"></div>
-          <div className="h-64 bg-zinc-200 rounded"></div>
+        <div className="min-h-[400px] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-zinc-500 text-sm">Cargando trabajos...</p>
+          </div>
         </div>
       </div>
     );

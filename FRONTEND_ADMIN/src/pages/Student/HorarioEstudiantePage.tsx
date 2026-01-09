@@ -33,7 +33,10 @@ export const HorarioEstudiantePage = () => {
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando horario...</div>
+        <div className="text-center">
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-zinc-500 text-sm">Cargando horario...</p>
+        </div>
       </div>
     );
   }

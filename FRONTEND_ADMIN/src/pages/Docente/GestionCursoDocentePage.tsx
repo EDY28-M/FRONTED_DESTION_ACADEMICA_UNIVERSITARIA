@@ -954,11 +954,10 @@ export const GestionCursoDocentePage = () => {
             idCurso={cursoId} 
             onCalificacionGuardada={() => {
               // Recargar estudiantes cuando se califica un trabajo para actualizar el registro de notas
-              if (activeTab === 'notas' || true) { // Siempre recargar por si el usuario cambia de pestaña
-                setTimeout(() => {
-                  cargarEstudiantes();
-                }, 500);
-              }
+              // Siempre recargar por si el usuario cambia de pestaña
+              setTimeout(() => {
+                cargarEstudiantes();
+              }, 500);
             }}
           />
         )}

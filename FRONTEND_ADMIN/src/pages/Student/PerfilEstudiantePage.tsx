@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { 
-  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard
+import {
+  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard, Fingerprint, ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useWebAuthnRegister } from '../../hooks/useWebAuthnRegister';
 
 const PerfilEstudiantePage: React.FC = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editandoContacto, setEditandoContacto] = useState(false);
   const queryClient = useQueryClient();
+  const { register: registerPasskey, loading: isRegisterLoading } = useWebAuthnRegister();
 
   const { data: perfil, isLoading } = useQuery({
     queryKey: ['estudiante-perfil'],
     queryFn: estudiantesApi.getPerfil,
   });
+
+  const handleRegisterPasskey = async () => {
+    if (!perfil?.email) {
+      toast.error('No se pudo obtener el correo del usuario');
+      return;
+    }
+    const result = await registerPasskey(perfil.email);
+    if (result.success) {
+      toast.success('Huella/FaceID registrada exitosamente');
+    } else if (result.errorMessage) {
+      toast.error(result.errorMessage);
+    }
+  };
 
   const { data: periodoActivo } = useQuery({
     queryKey: ['periodo-activo'],
@@ -64,7 +79,7 @@ const PerfilEstudiantePage: React.FC = () => {
 
       {/* Grid principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Columna izquierda - Card principal */}
         <div className="lg:col-span-1 space-y-6">
           {/* Tarjeta de identidad */}
@@ -133,12 +148,47 @@ const PerfilEstudiantePage: React.FC = () => {
           </div>
 
           {/* Información de contacto editable */}
-          <SeccionContacto 
-            perfil={perfil} 
+          <SeccionContacto
+            perfil={perfil}
             editando={editandoContacto}
             setEditando={setEditandoContacto}
-            onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })} 
+            onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })}
           />
+
+          {/* Seguridad Card */}
+          <div className="bg-white border border-zinc-200 rounded-xl">
+            <div className="px-6 py-4 border-b border-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900">Seguridad</h3>
+            </div>
+            <div className="p-6">
+              <div className="bg-zinc-50 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-zinc-500 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-zinc-900">Autenticación Biométrica</h4>
+                    <p className="text-xs text-zinc-500 mt-1">
+                      Vincula tu huella o reconocimiento facial para iniciar sesión de forma rápida y segura.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleRegisterPasskey}
+                disabled={isRegisterLoading}
+                className="w-full h-10 bg-white border border-zinc-300 text-zinc-700 rounded-md text-sm font-medium
+                           hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-center gap-2"
+              >
+                {isRegisterLoading ? (
+                  'Registrando...'
+                ) : (
+                  <>
+                    <Fingerprint className="h-4 w-4" />
+                    Registrar Huella / FaceID
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -307,8 +357,8 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
               <h2 className="text-lg font-semibold text-zinc-900">Cambiar contraseña</h2>
               <p className="text-sm text-zinc-500 mt-0.5">Actualiza tu contraseña de acceso</p>
             </div>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
             >
               <X className="w-5 h-5" />
@@ -328,9 +378,9 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
                 className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
                 placeholder="Ingresa tu contraseña actual"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarActual(!mostrarActual)} 
+              <button
+                type="button"
+                onClick={() => setMostrarActual(!mostrarActual)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
               >
                 {mostrarActual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -359,9 +409,9 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
                 className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
                 placeholder="Mínimo 6 caracteres"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarNueva(!mostrarNueva)} 
+              <button
+                type="button"
+                onClick={() => setMostrarNueva(!mostrarNueva)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
               >
                 {mostrarNueva ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -380,9 +430,9 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
                 className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
                 placeholder="Repite la nueva contraseña"
               />
-              <button 
-                type="button" 
-                onClick={() => setMostrarConfirmar(!mostrarConfirmar)} 
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
               >
                 {mostrarConfirmar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -394,13 +444,12 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
           {(contrasenaNueva || confirmarContrasena) && (
             <div className="flex flex-wrap gap-2">
               {validaciones.map((v, i) => (
-                <span 
+                <span
                   key={i}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    v.ok 
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                      : 'bg-zinc-100 text-zinc-500 border border-zinc-200'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${v.ok
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-zinc-100 text-zinc-500 border border-zinc-200'
+                    }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${v.ok ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
                   {v.texto}
@@ -411,15 +460,15 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
 
           {/* Botones */}
           <div className="flex gap-3 pt-2">
-            <button 
-              type="button" 
-              onClick={onClose} 
+            <button
+              type="button"
+              onClick={onClose}
               className="flex-1 h-11 text-sm font-medium text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={cambiarContrasenaMutation.isPending || !contrasenaActual || contrasenaNueva.length < 6 || contrasenaNueva !== confirmarContrasena}
               className="flex-1 h-11 text-sm font-medium text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
@@ -438,4 +487,3 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
 };
 
 export default PerfilEstudiantePage;
-
