@@ -163,9 +163,22 @@ const LoginEstudiantePage: React.FC = () => {
       }
     } catch (error: any) {
       console.error("Passkey error", error);
-      // Mostrar mensaje específico si viene del backend (validación de rol)
-      const errorMessage = error?.message || "Error iniciando con huella/passkey";
-      toast.error(errorMessage);
+
+      // Detectar errores comunes de WebAuthn y mostrar mensajes amigables
+      const errorMsg = error?.message?.toLowerCase() || '';
+
+      if (errorMsg.includes('not allowed') || errorMsg.includes('cancelled') || errorMsg.includes('canceled') || errorMsg.includes('aborted')) {
+        toast.info('Autenticación cancelada. Intenta de nuevo cuando estés listo.');
+      } else if (errorMsg.includes('pending') || errorMsg.includes('already')) {
+        toast.warning('Ya hay una solicitud en proceso. Espera un momento.');
+      } else if (errorMsg.includes('timed out') || errorMsg.includes('timeout')) {
+        toast.warning('Tiempo de espera agotado. Intenta de nuevo.');
+      } else if (errorMsg.includes('no tienes permiso') || errorMsg.includes('rol')) {
+        // Error de validación de rol del backend
+        toast.error(error.message);
+      } else {
+        toast.error(error?.message || 'Error al iniciar sesión con huella/FaceID');
+      }
     }
   }
 
