@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
 
   const handlePasskeyLogin = async () => {
     try {
-      const response = await loginWithPasskey(email); // Pass email if typed, or undefined
+      const response = await loginWithPasskey(email, 'admin'); // Pass email if typed, or undefined
       if (response && response.token) {
         // Manual session storage to match AuthService
         localStorage.setItem('auth_token', response.token);
@@ -210,8 +210,8 @@ const LoginPage: React.FC = () => {
               type="submit"
               disabled={isLoading || isPasskeyLoading}
               className={`w-full py-4 px-6 rounded-full font-semibold text-white transition-all duration-300 ${isLoading
-                  ? 'bg-purple-600/50 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 hover:shadow-lg hover:shadow-purple-500/25'
+                ? 'bg-purple-600/50 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 hover:shadow-lg hover:shadow-purple-500/25'
                 }`}
             >
               {isLoading ? (

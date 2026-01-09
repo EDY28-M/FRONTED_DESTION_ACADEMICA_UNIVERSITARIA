@@ -101,7 +101,7 @@ export const LoginDocentePage: React.FC = () => {
     const handlePasskeyLogin = async () => {
         try {
             // Pasamos el email (que puede venir del autocompletado) para ir directo
-            const response = await loginWithPasskey(correo);
+            const response = await loginWithPasskey(correo, 'docente');
             if (response && response.token) {
                 // Mapear respuesta de WebAuthn a estructura de AuthDocenteResponse
                 // Asumiendo que response.usuario tiene los campos necesarios

@@ -133,7 +133,7 @@ const LoginEstudiantePage: React.FC = () => {
   const handlePasskeyLogin = async () => {
     try {
       // Pasamos el email para login directo si existe
-      const response = await loginWithPasskey(email);
+      const response = await loginWithPasskey(email, 'estudiante');
       if (response && response.token) {
         // Guardar tokens y usuario en localStorage (claves de authService)
         localStorage.setItem('auth_token', response.token);

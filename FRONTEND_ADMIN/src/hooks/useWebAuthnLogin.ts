@@ -8,7 +8,8 @@ export const useWebAuthnLogin = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const login = async (email?: string) => {
+    // expectedRole: 'admin' | 'docente' | 'estudiante' - valida que el usuario tenga este rol
+    const login = async (email?: string, expectedRole?: string) => {
         setLoading(true);
         setError(null);
         try {
@@ -46,12 +47,12 @@ export const useWebAuthnLogin = () => {
                 }
             };
 
-            // 3. Verify
-            console.log('[WebAuthn Login] Step 3: Verifying with backend');
+            // 3. Verify (with expectedRole for role validation)
+            console.log('[WebAuthn Login] Step 3: Verifying with backend, expectedRole:', expectedRole);
             const resVerify = await fetch(`${API_BASE_URL}/webauthn/login/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ flowKey: challengeKey, assertionResponse })
+                body: JSON.stringify({ flowKey: challengeKey, assertionResponse, expectedRole })
             });
 
             if (!resVerify.ok) {

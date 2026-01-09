@@ -133,7 +133,7 @@ const LoginAdminPage: React.FC = () => {
   const handlePasskeyLogin = async () => {
     try {
       // Pasamos el email (que puede venir del autocompletado) para ir directo
-      const response = await loginWithPasskey(email);
+      const response = await loginWithPasskey(email, 'admin');
       if (response && response.token) {
         // Manual session storage to match AuthService
         localStorage.setItem('auth_token', response.token);
