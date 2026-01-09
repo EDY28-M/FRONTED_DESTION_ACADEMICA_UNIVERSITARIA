@@ -226,9 +226,7 @@ const LoginEstudiantePage: React.FC = () => {
             />
           </div>
 
-          <h1 className="text-xl font-bold tracking-wider text-zinc-800 mb-2">
-            UNIVERSIDAD ACADEMICA
-          </h1>
+
 
           <h2 className="text-2xl font-bold text-zinc-800">
             Portal Estudiante
