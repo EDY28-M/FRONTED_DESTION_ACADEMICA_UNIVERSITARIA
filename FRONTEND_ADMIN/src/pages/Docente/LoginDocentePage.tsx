@@ -140,7 +140,7 @@ export const LoginDocentePage: React.FC = () => {
                 {/* Logo y Marca */}
                 <div className="text-center mb-8">
                     <div className="mx-auto w-20 h-24 relative mb-4">
-                        <img src="/src/image/fondouni.svg" alt="Escudo Universitario" className="w-full h-full object-contain" />
+                        <img src="/images/fondouni.svg" alt="Escudo Universitario" className="w-full h-full object-contain" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-zinc-800">

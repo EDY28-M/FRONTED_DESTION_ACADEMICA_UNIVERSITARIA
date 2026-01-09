@@ -154,7 +154,7 @@ export const DocenteLayout = () => {
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
               <img
-                src="/src/image/fondouni.svg"
+                src="/images/fondouni.svg"
                 alt="Logo Universidad"
                 className="h-8 w-8 object-contain"
               />

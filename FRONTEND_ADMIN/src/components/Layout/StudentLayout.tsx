@@ -118,7 +118,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
                 <img
-                  src="/src/image/fondouni.svg"
+                  src="/images/fondouni.svg"
                   alt="Logo Universidad"
                   className="h-8 w-8 object-contain"
                 />
@@ -223,7 +223,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <div className="flex items-center h-16 px-4 border-b border-zinc-200">
             <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
               <img
-                src="/src/image/fondouni.svg"
+                src="/images/fondouni.svg"
                 alt="Logo Universidad"
                 className="h-8 w-8 object-contain"
               />

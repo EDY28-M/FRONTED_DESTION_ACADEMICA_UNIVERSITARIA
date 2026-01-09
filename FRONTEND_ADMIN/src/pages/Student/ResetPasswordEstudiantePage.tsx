@@ -371,7 +371,7 @@ const ResetPasswordEstudiantePage = () => {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 flex items-center justify-center">
                     <img
-                      src="/src/image/fondouni.svg"
+                      src="/images/fondouni.svg"
                       alt="Logo Universidad"
                       className="h-10 w-10 object-contain"
                     />
