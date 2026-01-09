@@ -70,7 +70,8 @@ export const useWebAuthnLogin = () => {
         } catch (err: any) {
             console.error('[WebAuthn Login] Error:', err);
             setError(err.message);
-            return null;
+            // Re-lanzar el error para que lo capture el componente que llama
+            throw err;
         } finally {
             setLoading(false);
         }
