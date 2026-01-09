@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { preformatMakeCredReq, bufferToBase64url } from '../utils/webauthn';
 
-// Configure this to match your backend URL if different
-// const API_BASE_URL = 'http://localhost:5173/api/webauthn'; 
+// En producción usa VITE_API_URL, en desarrollo usa ruta relativa (proxy de Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const useWebAuthnRegister = () => {
     const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export const useWebAuthnRegister = () => {
         try {
             // 1. Get Options
             console.log('[WebAuthn] Step 1: Getting registration options for', email);
-            const resOptions = await fetch(`/api/webauthn/register/options`, {
+            const resOptions = await fetch(`${API_BASE_URL}/webauthn/register/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, nickname })
@@ -60,7 +60,7 @@ export const useWebAuthnRegister = () => {
 
             // 3. Verify
             console.log('[WebAuthn] Step 3: Verifying with backend');
-            const resVerify = await fetch(`/api/webauthn/register/verify`, {
+            const resVerify = await fetch(`${API_BASE_URL}/webauthn/register/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ flowKey: challengeKey, attestationResponse })

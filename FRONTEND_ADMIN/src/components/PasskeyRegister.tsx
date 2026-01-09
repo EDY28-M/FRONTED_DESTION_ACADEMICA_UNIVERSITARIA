@@ -3,6 +3,9 @@ import { bufferToBase64Url, convertBase64UrlToArrayBuffer, isWebAuthnSupported, 
 import { Fingerprint, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// En producción usa VITE_API_URL, en desarrollo usa ruta relativa (proxy de Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 interface PasskeyRegisterProps {
   email: string;
   displayName: string;
@@ -34,7 +37,7 @@ export const PasskeyRegister: React.FC<PasskeyRegisterProps> = ({ email, display
 
     try {
       // Paso 1: Solicitar opciones de registro
-      const optionsResponse = await fetch('/api/webauthn/register/options', {
+      const optionsResponse = await fetch(`${API_BASE_URL}/webauthn/register/options`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +84,7 @@ export const PasskeyRegister: React.FC<PasskeyRegisterProps> = ({ email, display
       };
 
       // Paso 5: Verificar con el servidor
-      const verifyResponse = await fetch('/api/webauthn/register/verify', {
+      const verifyResponse = await fetch(`${API_BASE_URL}/webauthn/register/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

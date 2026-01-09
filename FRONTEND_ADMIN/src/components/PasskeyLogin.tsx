@@ -4,6 +4,9 @@ import { Fingerprint, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+// En producción usa VITE_API_URL, en desarrollo usa ruta relativa (proxy de Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 interface PasskeyLoginProps {
   email?: string;
   onSuccess?: () => void;
@@ -24,7 +27,7 @@ export const PasskeyLogin: React.FC<PasskeyLoginProps> = ({ email, onSuccess }) 
 
     try {
       // Paso 1: Solicitar opciones de login
-      const optionsResponse = await fetch('/api/webauthn/login/options', {
+      const optionsResponse = await fetch(`${API_BASE_URL}/webauthn/login/options`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +73,7 @@ export const PasskeyLogin: React.FC<PasskeyLoginProps> = ({ email, onSuccess }) 
       };
 
       // Paso 5: Verificar con el servidor
-      const verifyResponse = await fetch('/api/webauthn/login/verify', {
+      const verifyResponse = await fetch(`${API_BASE_URL}/webauthn/login/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +96,7 @@ export const PasskeyLogin: React.FC<PasskeyLoginProps> = ({ email, onSuccess }) 
       if (result.success && result.user) {
         toast.success(`Bienvenido, ${result.user.nombres}!`);
         onSuccess?.();
-        
+
         // Redirigir según rol
         if (result.user.rol.toLowerCase() === 'administrador') {
           navigate('/admin/dashboard');

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { preformatGetAssertionReq, bufferToBase64url } from '../utils/webauthn';
 
+// En producción usa VITE_API_URL, en desarrollo usa ruta relativa (proxy de Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+
 export const useWebAuthnLogin = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -11,7 +14,7 @@ export const useWebAuthnLogin = () => {
         try {
             // 1. Get Options
             console.log('[WebAuthn Login] Step 1: Getting login options');
-            const resOptions = await fetch(`/api/webauthn/login/options`, {
+            const resOptions = await fetch(`${API_BASE_URL}/webauthn/login/options`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -45,7 +48,7 @@ export const useWebAuthnLogin = () => {
 
             // 3. Verify
             console.log('[WebAuthn Login] Step 3: Verifying with backend');
-            const resVerify = await fetch(`/api/webauthn/login/verify`, {
+            const resVerify = await fetch(`${API_BASE_URL}/webauthn/login/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ flowKey: challengeKey, assertionResponse })
