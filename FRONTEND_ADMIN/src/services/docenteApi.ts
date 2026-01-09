@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Horario } from '../types/horario';
 
-const API_URL = '/api';
+// En desarrollo usa proxy de Vite (/api), en producción usa VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Interfaces que coinciden con los DTOs del backend
 export interface LoginDocenteDto {
