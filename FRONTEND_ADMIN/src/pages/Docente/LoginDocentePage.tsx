@@ -125,7 +125,9 @@ export const LoginDocentePage: React.FC = () => {
             }
         } catch (error: any) {
             console.error("Passkey error", error);
-            toast.error("Error iniciando con huella/passkey");
+            // Mostrar mensaje específico si viene del backend (validación de rol)
+            const errorMessage = error?.message || "Error iniciando con huella/passkey";
+            toast.error(errorMessage);
         }
     }
 
