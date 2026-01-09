@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base64UrlToBuffer, bufferToBase64Url, convertBase64UrlToArrayBuffer, isWebAuthnSupported, getWebAuthnErrorMessage } from '../lib/webauthn';
+import { bufferToBase64Url, convertBase64UrlToArrayBuffer, isWebAuthnSupported, getWebAuthnErrorMessage } from '../lib/webauthn';
 import { Fingerprint, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +50,7 @@ export const PasskeyLogin: React.FC<PasskeyLoginProps> = ({ email, onSuccess }) 
 
       // Paso 3: Obtener credencial del navegador
       const credential = await navigator.credentials.get({
-        publicKey: publicKeyCredentialRequestOptions,
+        publicKey: publicKeyCredentialRequestOptions as PublicKeyCredentialRequestOptions,
       }) as PublicKeyCredential | null;
 
       if (!credential || !(credential instanceof PublicKeyCredential)) {
