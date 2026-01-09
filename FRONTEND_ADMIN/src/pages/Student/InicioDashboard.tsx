@@ -2,10 +2,10 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import { asistenciasApi } from '../../services/asistenciasApi';
-import { 
-  BookOpen, 
-  GraduationCap, 
-  Clock, 
+import {
+  BookOpen,
+  GraduationCap,
+  Clock,
   TrendingUp,
   ArrowRight,
   Plus,
@@ -26,7 +26,7 @@ const getGreeting = () => {
 // Helper to find next class
 const getNextClass = (horarios: Horario[] = []) => {
   if (!horarios.length) return null;
-  
+
   const now = new Date();
   const currentDay = now.getDay() || 7; // 1 (Mon) - 7 (Sun)
   const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -89,13 +89,13 @@ const InicioDashboard: React.FC = () => {
     if (!asistenciasPorCurso || asistenciasPorCurso.length === 0) {
       return { promedioAsistencia: 0, cursosConAlerta: 0, cursosBloqueados: 0 };
     }
-    
+
     const totalCursos = asistenciasPorCurso.length;
     const sumaAsistencias = asistenciasPorCurso.reduce((sum, c) => sum + c.porcentajeAsistencia, 0);
     const promedioAsistencia = sumaAsistencias / totalCursos;
     const cursosConAlerta = asistenciasPorCurso.filter(c => c.alertaBajaAsistencia).length;
     const cursosBloqueados = asistenciasPorCurso.filter(c => (100 - c.porcentajeAsistencia) >= 30).length;
-    
+
     return { promedioAsistencia, cursosConAlerta, cursosBloqueados };
   }, [asistenciasPorCurso]);
 
@@ -107,15 +107,15 @@ const InicioDashboard: React.FC = () => {
   });
 
   // Filtrar solo cursos disponibles (no matriculados)
-  const cursosParaMatricular = useMemo(() => 
-    cursosDisponibles?.filter(c => c.disponible && !c.yaMatriculado) || [], 
+  const cursosParaMatricular = useMemo(() =>
+    cursosDisponibles?.filter(c => c.disponible && !c.yaMatriculado) || [],
     [cursosDisponibles]
   );
   const promedioGeneral = estadisticas?.promedioGeneral || perfil?.promedioAcumulado || 0;
   const nextClass = useMemo(() => getNextClass(horarios), [horarios]);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -140,7 +140,7 @@ const InicioDashboard: React.FC = () => {
           <div className="absolute top-0 right-0 p-3 opacity-10">
             <Clock className="w-20 h-20" />
           </div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Próxima Clase</span>
@@ -155,7 +155,7 @@ const InicioDashboard: React.FC = () => {
               <>
                 <h3 className="text-lg font-semibold mb-1 line-clamp-2">{nextClass.nombreCurso}</h3>
                 <p className="text-zinc-400 text-xs mb-4">{nextClass.aula ? `Aula ${nextClass.aula}` : 'Aula por asignar'}</p>
-                
+
                 <div className="flex items-center justify-between text-sm font-mono text-zinc-300 bg-white/5 p-2.5 rounded-lg border border-white/5">
                   <span>{nextClass.horaInicio}</span>
                   <div className="h-px w-6 bg-zinc-600" />
@@ -218,7 +218,7 @@ const InicioDashboard: React.FC = () => {
       {/* MÓVIL: Tarjeta de Asistencias */}
       {asistenciasPorCurso && asistenciasPorCurso.length > 0 && (
         <div className="md:hidden">
-          <Link 
+          <Link
             to="/estudiante/asistencias"
             className="block bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden hover:border-zinc-300 transition-colors"
           >
@@ -349,9 +349,9 @@ const InicioDashboard: React.FC = () => {
             <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-semibold text-zinc-900">Cursos Disponibles </h3>
-              
+
               </div>
-        
+
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -415,7 +415,7 @@ const InicioDashboard: React.FC = () => {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <Clock className="w-24 h-24" />
             </div>
-            
+
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Próxima Clase</span>
@@ -430,7 +430,7 @@ const InicioDashboard: React.FC = () => {
                 <>
                   <h3 className="text-xl font-semibold mb-1 line-clamp-2">{nextClass.nombreCurso}</h3>
                   <p className="text-zinc-400 text-sm mb-6">{nextClass.aula ? `Aula ${nextClass.aula}` : 'Aula por asignar'}</p>
-                  
+
                   <div className="flex items-center justify-between text-sm font-mono text-zinc-300 bg-white/5 p-3 rounded-lg border border-white/5">
                     <span>{nextClass.horaInicio}</span>
                     <div className="h-px w-8 bg-zinc-600" />
@@ -447,7 +447,7 @@ const InicioDashboard: React.FC = () => {
 
           {/* Asistencias Card */}
           {asistenciasPorCurso && asistenciasPorCurso.length > 0 && (
-            <Link 
+            <Link
               to="/estudiante/asistencias"
               className="block bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden hover:border-zinc-300 transition-colors"
             >

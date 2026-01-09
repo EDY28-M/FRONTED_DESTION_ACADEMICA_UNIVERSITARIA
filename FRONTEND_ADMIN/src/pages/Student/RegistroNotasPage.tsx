@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import { SemestreRegistro } from '../../types/estudiante';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  BookOpen, 
+import {
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
   Calendar,
   Award,
   TrendingUp,
@@ -62,7 +62,7 @@ export default function RegistroNotasPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -95,8 +95,8 @@ export default function RegistroNotasPage() {
       {/* Lista de Semestres */}
       <div className="space-y-4">
         {registroNotas.semestres.map((semestre: SemestreRegistro) => (
-          <div 
-            key={semestre.idPeriodo} 
+          <div
+            key={semestre.idPeriodo}
             className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden"
           >
             {/* Cabecera del Semestre */}
@@ -117,11 +117,10 @@ export default function RegistroNotasPage() {
                       <Calendar className="w-3.5 h-3.5" />
                       {semestre.anio} - Ciclo {semestre.cicloAcademico}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                      semestre.estado === 'Cerrado' 
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${semestre.estado === 'Cerrado'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
+                      }`}>
                       {semestre.estado}
                     </span>
                   </div>
@@ -190,11 +189,11 @@ export default function RegistroNotasPage() {
                         <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                           Hrs
                         </th>
-                        
+
                         {/* Columnas dinámicas de evaluaciones */}
                         {semestre.cursos[0]?.evaluaciones.map((evaluacion, i) => (
-                          <th 
-                            key={i} 
+                          <th
+                            key={i}
                             className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-100/50"
                           >
                             <div>{evaluacion.nombre}</div>
@@ -228,12 +227,12 @@ export default function RegistroNotasPage() {
                             {curso.nombreCurso}
                           </td>
                           <td className="px-4 py-3 text-xs text-center text-zinc-500 tabular-nums">
-                            {curso.fechaExamen 
+                            {curso.fechaExamen
                               ? new Date(curso.fechaExamen).toLocaleDateString('es-PE', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric'
-                                })
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })
                               : '-'}
                           </td>
                           <td className="px-4 py-3 text-center">
@@ -252,29 +251,27 @@ export default function RegistroNotasPage() {
 
                           {/* Nota Final */}
                           <td className="px-4 py-3 text-center bg-emerald-50/30">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-semibold border tabular-nums ${
-                              curso.notaFinal >= 11
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-semibold border tabular-nums ${curso.notaFinal >= 11
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : 'bg-red-50 text-red-700 border-red-200'
-                            }`}>
+                              }`}>
                               {curso.notaFinal}
                             </span>
                           </td>
 
                           {/* Estado */}
                           <td className="px-4 py-3 text-center">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
-                              curso.estadoCurso === 'Aprobado'
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${curso.estadoCurso === 'Aprobado'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : 'bg-red-50 text-red-700 border-red-200'
-                            }`}>
+                              }`}>
                               {curso.estadoCurso === 'Aprobado' ? 'Aprob' : 'Desap'}
                             </span>
                           </td>
                           {/* PSem - Solo en la primera fila */}
                           {semestre.cursos.indexOf(curso) === 0 && (
-                            <td 
-                              rowSpan={semestre.cursos.length} 
+                            <td
+                              rowSpan={semestre.cursos.length}
                               className="px-4 py-3 text-center bg-emerald-50/50 border-l border-zinc-200"
                             >
                               <div className="flex flex-col items-center gap-1">
@@ -288,8 +285,8 @@ export default function RegistroNotasPage() {
                           )}
                           {/* PAc - Solo en la primera fila */}
                           {semestre.cursos.indexOf(curso) === 0 && (
-                            <td 
-                              rowSpan={semestre.cursos.length} 
+                            <td
+                              rowSpan={semestre.cursos.length}
                               className="px-4 py-3 text-center bg-zinc-50/50 border-l border-zinc-200"
                             >
                               <div className="flex flex-col items-center gap-1">
@@ -319,8 +316,8 @@ export default function RegistroNotasPage() {
                             {semestre.totales.totalHoras}
                           </span>
                         </td>
-                        <td 
-                          colSpan={semestre.cursos[0]?.evaluaciones.length || 0} 
+                        <td
+                          colSpan={semestre.cursos[0]?.evaluaciones.length || 0}
                           className="px-4 py-3"
                         />
                         <td className="px-4 py-3 text-center text-zinc-400">-</td>

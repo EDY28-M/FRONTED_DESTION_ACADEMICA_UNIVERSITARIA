@@ -100,8 +100,8 @@ const MisCursosPage: React.FC = () => {
   const cursosMatriculados = misCursos?.filter(c => c.estado === 'Matriculado') || [];
   const cursosRetirados = misCursos?.filter(c => c.estado === 'Retirado') || [];
 
-  const periodoMostrar = periodoSeleccionado 
-    ? periodos?.find(p => p.id === periodoSeleccionado) 
+  const periodoMostrar = periodoSeleccionado
+    ? periodos?.find(p => p.id === periodoSeleccionado)
     : periodoActivo;
 
   const filterComponent = (
@@ -121,7 +121,7 @@ const MisCursosPage: React.FC = () => {
           ))}
         </select>
       </div>
-      
+
       {cursosSeleccionados.length > 0 && (
         <button
           onClick={handleRetirarSeleccionados}
@@ -135,7 +135,7 @@ const MisCursosPage: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Mis Cursos"
         subtitle="Gestiona tus matrículas y revisa tu historial académico"
@@ -193,11 +193,10 @@ const MisCursosPage: React.FC = () => {
                       <span className="text-sm text-zinc-600">{curso.nombreDocente || 'Por asignar'}</span>
                     </td>
                     <td className="px-6 py-3 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                        curso.estado === 'Matriculado'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${curso.estado === 'Matriculado'
                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           : 'bg-red-50 text-red-700 border-red-200'
-                      }`}>
+                        }`}>
                         {curso.estado}
                       </span>
                     </td>

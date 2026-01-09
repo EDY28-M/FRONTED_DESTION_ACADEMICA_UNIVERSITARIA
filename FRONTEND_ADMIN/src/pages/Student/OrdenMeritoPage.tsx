@@ -12,7 +12,7 @@ export default function OrdenMeritoPage() {
     queryFn: estudiantesApi.getPromociones,
     retry: false,
   });
-  
+
   const { data: miPosicion } = useQuery({
     queryKey: ['mi-posicion-merito'],
     queryFn: estudiantesApi.getMiPosicionMerito,
@@ -76,7 +76,7 @@ export default function OrdenMeritoPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       <PageHeader
         title="Orden de Mérito"
         subtitle={ordenMerito.length > 0 && ordenMerito[0].periodoNombre ? `Período: ${ordenMerito[0].periodoNombre}` : undefined}
@@ -89,7 +89,7 @@ export default function OrdenMeritoPage() {
           <div className="absolute top-0 right-0 p-6 opacity-5">
             <Trophy className="w-32 h-32" />
           </div>
-          
+
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
@@ -265,7 +265,7 @@ export default function OrdenMeritoPage() {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <h4 className="text-sm font-semibold text-amber-900 mb-2">Importante</h4>
             <p className="text-xs text-amber-700 leading-relaxed">
-              Las constancias de <strong>Medio Superior</strong> solo son emitidas para PRONABEC. 
+              Las constancias de <strong>Medio Superior</strong> solo son emitidas para PRONABEC.
               El orden de mérito se actualiza al finalizar cada período académico.
             </p>
           </div>
