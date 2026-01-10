@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, forwardRef } from 'react';
 import { Horario } from '../../types/horario';
 
 interface HorarioSemanalViewProps {
   horarios: Horario[];
+  /** Si true, muestra solo la vista desktop (para PDF export) */
+  forceDesktop?: boolean;
 }
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -29,7 +31,7 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
   const today = new Date().getDay();
   const [selectedDay, setSelectedDay] = useState(today >= 1 && today <= 6 ? today : 1);
 
-  const horariosDelDia = useMemo(() => 
+  const horariosDelDia = useMemo(() =>
     horarios
       .filter(h => h.diaSemana === selectedDay)
       .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio)),
@@ -64,15 +66,15 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
           const dayNum = idx + 1;
           const isSelected = selectedDay === dayNum;
           const hasClasses = clasesPorDia[dayNum] > 0;
-          
+
           return (
             <button
               key={day}
               onClick={() => setSelectedDay(dayNum)}
               className={`
                 flex-1 min-w-[50px] flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all
-                ${isSelected 
-                  ? 'bg-zinc-900 text-white' 
+                ${isSelected
+                  ? 'bg-zinc-900 text-white'
                   : hasClasses
                     ? 'bg-zinc-100 text-zinc-700'
                     : 'bg-zinc-50 text-zinc-400'
@@ -97,9 +99,9 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
             const colorIndex = horario.idCurso % COURSE_COLORS.length;
             const colors = COURSE_COLORS[colorIndex];
             const duracion = getDuracionHoras(horario);
-            
+
             return Array.from({ length: duracion }, (_, i) => (
-              <div 
+              <div
                 key={`${horario.id}-${i}`}
                 className="flex border-b border-zinc-200 last:border-b-0"
               >
@@ -107,11 +109,11 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                 <div className="w-20 flex-shrink-0 p-3 text-xs text-zinc-500 border-r border-zinc-200 bg-white">
                   {getHoraBloque(horario, i)}
                 </div>
-                
+
                 {/* Contenido del curso */}
-                <div 
+                <div
                   className="flex-2 p-2"
-                  style={{ 
+                  style={{
                     backgroundColor: colors.bg,
                     borderLeft: `3px solid ${colors.border}`
                   }}
@@ -156,11 +158,11 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
   // Crear estructura de datos para la grilla
   const gridData = useMemo(() => {
     const grid: Record<string, { horario: Horario; isFirst: boolean }> = {};
-    
+
     horarios.forEach(h => {
       const [startH] = h.horaInicio.split(':').map(Number);
       const [endH] = h.horaFin.split(':').map(Number);
-      
+
       for (let hora = startH; hora < endH; hora++) {
         const key = `${h.diaSemana}-${hora}`;
         grid[key] = {
@@ -169,7 +171,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
         };
       }
     });
-    
+
     return grid;
   }, [horarios]);
 
@@ -184,18 +186,18 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
 
   return (
     <div className="overflow-auto">
-      <table className="w-full border-collapse min-w-[100px]" style={{ tableLayout: 'fixed' }}>
+      <table className="w-full border-collapse min-w-[1400px]" style={{ tableLayout: 'fixed' }}>
         {/* Header */}
         <thead>
           <tr>
-            <th 
+            <th
               className="p-2 text-xs font-semibold text-zinc-600 bg-white border-b-2 border-zinc-200 text-center"
               style={{ width: '100px' }}
             >
               HORA
             </th>
             {DAYS.map((day) => (
-              <th 
+              <th
                 key={day}
                 className="p-2 text-sm font-semibold text-zinc-700 bg-white border-b-2 border-zinc-200 text-center"
               >
@@ -204,71 +206,85 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
             ))}
           </tr>
         </thead>
-        
+
         {/* Body */}
         <tbody>
-          {timeSlots.map((hora) => (
-            <tr key={hora} style={{ height: '100px' }}>
-              {/* Columna de hora */}
-              <td 
-                className="p-2 text-[10px] text-zinc-500 bg-white border-b border-zinc-200 text-center whitespace-nowrap align-top"
-                style={{ width: '80px' }}
+          {timeSlots.map((hora) => {
+            // Verificar si esta hora está completamente vacía (sin cursos en ningún día)
+            const isEmptyRow = DAYS.every((_, dayIdx) => {
+              const dia = dayIdx + 1;
+              const key = `${dia}-${hora}`;
+              return !gridData[key];
+            });
+
+            return (
+              <tr
+                key={hora}
+                className="hour-row"
+                data-empty={isEmptyRow ? "1" : "0"}
+                style={{ height: isEmptyRow ? '40px' : '100px' }}
               >
-                {formatHora(hora)}
-              </td>
-              
-              {/* Celdas para cada día */}
-              {DAYS.map((_, dayIdx) => {
-                const dia = dayIdx + 1;
-                const key = `${dia}-${hora}`;
-                const cellData = gridData[key];
-                
-                if (cellData) {
-                  const { horario } = cellData;
-                  const colorIndex = horario.idCurso % COURSE_COLORS.length;
-                  const colors = COURSE_COLORS[colorIndex];
-                  
-                  return (
-                    <td 
-                      key={key}
-                      className="border-b border-zinc-200 p-2 align-top"
-                    >
-                      <div 
-                        className="p-4 rounded-md"
-                        style={{ 
-                          backgroundColor: colors.bg,
-                          borderLeft: `3px solid ${colors.border}`,
-                          minHeight: '80px'
-                        }}
+                {/* Columna de hora */}
+                <td
+                  className="p-2 text-[10px] text-zinc-500 bg-white border-b border-zinc-200 text-center whitespace-nowrap align-top"
+                  style={{ width: '80px' }}
+                >
+                  {formatHora(hora)}
+                </td>
+
+                {/* Celdas para cada día */}
+                {DAYS.map((_, dayIdx) => {
+                  const dia = dayIdx + 1;
+                  const key = `${dia}-${hora}`;
+                  const cellData = gridData[key];
+
+                  if (cellData) {
+                    const { horario } = cellData;
+                    const colorIndex = horario.idCurso % COURSE_COLORS.length;
+                    const colors = COURSE_COLORS[colorIndex];
+
+                    return (
+                      <td
+                        key={key}
+                        className="border-b border-zinc-200 p-2 align-top"
                       >
-                        {/* Nombre del curso */}
-                        <p className="text-[10px] font-bold text-zinc-800 uppercase leading-tight">
-                          {horario.nombreCurso?.toUpperCase() || 'SIN NOMBRE'}
-                        </p>
-                        {/* Docente */}
-                        <p className="text-[9px] text-zinc-600 mt-1 leading-tight">
-                          {horario.nombreDocente || 'Sin docente'}
-                        </p>
-                        {/* Aula */}
-                        <p className="text-[9px] text-zinc-600 leading-tight">
-                          {horario.aula || 'Sin aula'}
-                        </p>
-                      </div>
-                    </td>
+                        <div
+                          className="course-card p-5 rounded-md"
+                          style={{
+                            backgroundColor: colors.bg,
+                            borderLeft: `4px solid ${colors.border}`,
+                            minHeight: '85px'
+                          }}
+                        >
+                          {/* Nombre del curso */}
+                          <p className="text-[10px] font-bold text-zinc-800 uppercase leading-tight">
+                            {horario.nombreCurso?.toUpperCase() || 'SIN NOMBRE'}
+                          </p>
+                          {/* Docente */}
+                          <p className="text-[9px] text-zinc-600 mt-1 leading-tight">
+                            {horario.nombreDocente || 'Sin docente'}
+                          </p>
+                          {/* Aula */}
+                          <p className="text-[9px] text-zinc-600 leading-tight">
+                            {horario.aula || 'Sin aula'}
+                          </p>
+                        </div>
+                      </td>
+                    );
+                  }
+
+                  // Celda vacía
+                  return (
+                    <td
+                      key={key}
+                      className="border-b border-zinc-200 bg-white p-2"
+                      style={{ height: '100px' }}
+                    />
                   );
-                }
-                
-                // Celda vacía
-                return (
-                  <td 
-                    key={key}
-                    className="border-b border-zinc-200 bg-white p-2"
-                    style={{ height: '100px' }}
-                  />
-                );
-              })}
-            </tr>
-          ))}
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -278,18 +294,24 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
 // ==========================================
 // COMPONENTE PRINCIPAL
 // ==========================================
-export const HorarioSemanalView: React.FC<HorarioSemanalViewProps> = ({ horarios }) => {
-  return (
-    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
-      {/* Mobile */}
-      <div className="lg:hidden">
-        <MobileView horarios={horarios} />
+export const HorarioSemanalView = forwardRef<HTMLDivElement, HorarioSemanalViewProps>(
+  ({ horarios, forceDesktop = false }, ref) => {
+    return (
+      <div ref={ref} className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        {/* Mobile - Oculto cuando forceDesktop está activo */}
+        {!forceDesktop && (
+          <div className="lg:hidden">
+            <MobileView horarios={horarios} />
+          </div>
+        )}
+
+        {/* Desktop */}
+        <div className={forceDesktop ? 'block' : 'hidden lg:block'}>
+          <DesktopView horarios={horarios} />
+        </div>
       </div>
-      
-      {/* Desktop */}
-      <div className="hidden lg:block">
-        <DesktopView horarios={horarios} />
-      </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+HorarioSemanalView.displayName = 'HorarioSemanalView';
