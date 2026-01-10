@@ -298,7 +298,7 @@ function addPDFHeader(pdf: jsPDF, config: PDFExportOptions, pageWidthMm: number,
     // Título principal en barra verde
     pdf.setFontSize(11);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(config.title ?? 'HORARIO DE CLASES SEMESTRE 2025-II', marginMm + textOffset, y + 14);
+    pdf.text(config.title ?? 'HORARIO DE CLASES SEMESTRE ', marginMm + textOffset, y + 14);
 
     // Fecha y sistema (superior derecha)
     const now = new Date();

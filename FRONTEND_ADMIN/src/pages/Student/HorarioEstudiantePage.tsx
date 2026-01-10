@@ -5,6 +5,7 @@ import { HorarioSemanalView } from '../../components/Horario/HorarioSemanalView'
 import { Clock, Download, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Horario } from '../../types/horario';
+import { Periodo } from '../../types/estudiante';
 import PageHeader from '../../components/Student/PageHeader';
 import { exportToPDF } from '../../utils/pdfExport';
 import { useAuth } from '../../contexts/AuthContext';
@@ -66,6 +67,13 @@ export const HorarioEstudiantePage = () => {
     refetchOnWindowFocus: true
   });
 
+  // Obtener periodo activo para el título del PDF
+  const { data: periodoActivo } = useQuery<Periodo>({
+    queryKey: ['periodo-activo'],
+    queryFn: estudiantesApi.getPeriodoActivo,
+    staleTime: 300000, // 5 minutos
+  });
+
   // Función para exportar a PDF
   const handleDownloadPDF = async () => {
     if (!horarioRef.current || horarios.length === 0) {
@@ -78,14 +86,19 @@ export const HorarioEstudiantePage = () => {
     try {
       await exportToPDF(horarioRef.current, {
         filename: `horario-${user?.nombreCompleto?.replace(/\s+/g, '-') || 'estudiante'}-${new Date().toISOString().split('T')[0]}.pdf`,
-        title: 'HORARIO DE CLASES SEMESTRE 2025-II',
+
+        // Usar periodo dinámico o fallback
+        title: `HORARIO DE CLASES SEMESTRE ${periodoActivo?.nombre || '2025-II'}`,
+
         subtitle: 'Sistema de Gestión Académica Universitaria',
         orientation: 'landscape',
         quality: 3,
         showHeader: true,
         headerInfo: {
           studentName: user?.nombreCompleto || 'Estudiante',
-          faculty: user?.email?.includes('@') ? 'INGENIERÍA EN INFORMÁTICA Y SISTEMAS' : 'No especificada',
+          faculty: 'INGENIERÍA Y ARQUITECTURA',
+          school: 'INGENIERÍA EN INFORMÁTICA Y SISTEMAS',
+          studentCode: user?.id?.toString() || '0020190328' // Fallback a un código de ejemplo si no hay ID
         }
       });
 
