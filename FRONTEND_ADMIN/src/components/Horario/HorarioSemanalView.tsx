@@ -29,12 +29,17 @@ const COURSE_COLORS = [
 // ==========================================
 const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
   const today = new Date().getDay();
+  // Default to Monday (1) if today is Sunday (0)
   const [selectedDay, setSelectedDay] = useState(today >= 1 && today <= 6 ? today : 1);
 
   const horariosDelDia = useMemo(() =>
     horarios
       .filter(h => h.diaSemana === selectedDay)
-      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio)),
+      .sort((a, b) => {
+        const [hA] = a.horaInicio.split(':').map(Number);
+        const [hB] = b.horaInicio.split(':').map(Number);
+        return hA - hB;
+      }),
     [horarios, selectedDay]
   );
 
@@ -46,44 +51,32 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
     return counts;
   }, [horarios]);
 
-  const getDuracionHoras = (horario: Horario): number => {
-    const [startH] = horario.horaInicio.split(':').map(Number);
-    const [endH] = horario.horaFin.split(':').map(Number);
-    return Math.max(1, endH - startH);
-  };
-
-  const getHoraBloque = (horario: Horario, index: number): string => {
-    const [startH] = horario.horaInicio.split(':').map(Number);
-    const hora = startH + index;
-    return `${hora.toString().padStart(2, '0')}:00 - ${(hora + 1).toString().padStart(2, '0')}:00`;
-  };
-
   return (
     <div className="p-4">
-      {/* Selector de día */}
-      <div className="flex items-center justify-between gap-1 mb-4 overflow-x-auto pb-2">
-        {DAYS.map((day, idx) => {
+      {/* Selector de día - Grid layout for perfect alignment */}
+      <div className="grid grid-cols-6 gap-2 mb-6">
+        {DAYS_SHORT.map((dayShort, idx) => {
           const dayNum = idx + 1;
           const isSelected = selectedDay === dayNum;
           const hasClasses = clasesPorDia[dayNum] > 0;
 
           return (
             <button
-              key={day}
+              key={dayShort}
               onClick={() => setSelectedDay(dayNum)}
               className={`
-                flex-1 min-w-[50px] flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all
+                flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-200 border
                 ${isSelected
-                  ? 'bg-zinc-900 text-white'
+                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-md ring-2 ring-zinc-200 ring-offset-1'
                   : hasClasses
-                    ? 'bg-zinc-100 text-zinc-700'
-                    : 'bg-zinc-50 text-zinc-400'
+                    ? 'bg-white text-zinc-900 border-zinc-200 hover:border-zinc-300'
+                    : 'bg-zinc-50 text-zinc-400 border-transparent opacity-60'
                 }
               `}
             >
-              <span className="text-[10px] font-medium">{DAYS_SHORT[idx]}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">{dayShort}</span>
               {hasClasses && (
-                <span className={`text-[9px] mt-0.5 ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                <span className={`text-[10px] mt-1 font-bold ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
                   {clasesPorDia[dayNum]}
                 </span>
               )}
@@ -93,200 +86,183 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
       </div>
 
       {/* Lista de clases */}
-      {horariosDelDia.length > 0 ? (
-        <div className="space-y-0 border border-zinc-200 rounded-lg overflow-hidden">
-          {horariosDelDia.map((horario) => {
+      <div className="space-y-3">
+        {horariosDelDia.length > 0 ? (
+          horariosDelDia.map((horario) => {
             const colorIndex = horario.idCurso % COURSE_COLORS.length;
             const colors = COURSE_COLORS[colorIndex];
-            const duracion = getDuracionHoras(horario);
 
-            return Array.from({ length: duracion }, (_, i) => (
+            // Format times clearly
+            const startTime = horario.horaInicio.slice(0, 5);
+            const endTime = horario.horaFin.slice(0, 5);
+
+            return (
               <div
-                key={`${horario.id}-${i}`}
-                className="flex border-b border-zinc-200 last:border-b-0"
+                key={`${horario.id}-${horario.diaSemana}`}
+                className="flex items-stretch rounded-xl overflow-hidden bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                {/* Columna hora */}
-                <div className="w-20 flex-shrink-0 p-3 text-xs text-zinc-500 border-r border-zinc-200 bg-white">
-                  {getHoraBloque(horario, i)}
+                {/* Time Column - Fixed width for alignment */}
+                <div className="w-20 bg-zinc-50 flex flex-col items-center justify-center p-2 border-r border-zinc-100 shrink-0">
+                  <span className="text-sm font-bold text-zinc-900">{startTime}</span>
+                  <div className="w-0.5 h-3 bg-zinc-200 my-1 rounded-full"></div>
+                  <span className="text-xs font-medium text-zinc-500">{endTime}</span>
                 </div>
 
-                {/* Contenido del curso */}
-                <div
-                  className="flex-2 p-2"
-                  style={{
-                    backgroundColor: colors.bg,
-                    borderLeft: `3px solid ${colors.border}`
-                  }}
-                >
-                  {/* Nombre */}
-                  <p className="text-xs font-bold text-zinc-800 uppercase">
-                    {horario.nombreCurso?.toUpperCase() || 'SIN NOMBRE'}
-                  </p>
-                  {/* Docente */}
-                  <p className="text-[10px] text-zinc-600 mt-0.5">
-                    {horario.nombreDocente || 'Sin docente'}
-                  </p>
-                  {/* Aula */}
-                  <p className="text-[10px] text-zinc-600">
-                    {horario.aula || 'Sin aula'}
-                  </p>
+                {/* Vertical Color Strip */}
+                <div className="w-1.5" style={{ backgroundColor: colors.border }}></div>
+
+                {/* Content */}
+                <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
+                  <h3 className="text-sm font-bold text-zinc-900 leading-tight mb-2 uppercase truncate">
+                    {horario.nombreCurso}
+                  </h3>
+
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 text-xs text-zinc-600">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="truncate">{horario.nombreDocente || 'Docente no asignado'}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-zinc-600">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                      <span className="font-medium bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700">
+                        {horario.aula || 'G.204'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ));
-          })}
-        </div>
-      ) : (
-        <div className="py-12 text-center border border-zinc-200 rounded-lg">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-zinc-100 flex items-center justify-center">
-            <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
+            );
+          })
+        ) : (
+          <div className="py-12 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-200 rounded-2xl bg-zinc-50/50">
+            <div className="w-12 h-12 mb-3 rounded-full bg-white shadow-sm flex items-center justify-center ring-1 ring-zinc-200">
+              <svg className="w-6 h-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-zinc-900">Sin clases</p>
+            <p className="text-xs text-zinc-500">No hay horario para el {DAYS[selectedDay - 1].toLowerCase()}</p>
           </div>
-          <p className="text-sm text-zinc-500">Sin clases este día</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
 
 // ==========================================
-// VISTA DESKTOP - Exactamente como la imagen
+// VISTA DESKTOP - Modern Column View (Kanban Style)
 // ==========================================
 const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
-  const timeSlots = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
+  // Organizar horarios por día
+  const horariosPorDia = useMemo(() => {
+    const grouped: Record<number, Horario[]> = {};
+    // Inicializar días 1-6
+    for (let i = 1; i <= 6; i++) {
+      grouped[i] = [];
+    }
 
-  // Crear estructura de datos para la grilla
-  const gridData = useMemo(() => {
-    const grid: Record<string, { horario: Horario; isFirst: boolean }> = {};
-
+    // Agrupar
     horarios.forEach(h => {
-      const [startH] = h.horaInicio.split(':').map(Number);
-      const [endH] = h.horaFin.split(':').map(Number);
-
-      for (let hora = startH; hora < endH; hora++) {
-        const key = `${h.diaSemana}-${hora}`;
-        grid[key] = {
-          horario: h,
-          isFirst: hora === startH
-        };
+      if (grouped[h.diaSemana]) {
+        grouped[h.diaSemana].push(h);
       }
     });
 
-    return grid;
+    // Ordenar por hora cada día
+    Object.keys(grouped).forEach(k => {
+      const key = Number(k);
+      grouped[key].sort((a, b) => {
+        const [hA] = a.horaInicio.split(':').map(Number);
+        const [hB] = b.horaInicio.split(':').map(Number);
+        return hA - hB;
+      });
+    });
+
+    return grouped;
   }, [horarios]);
 
-  const formatHora = (hora: number): string => {
-    if (hora >= 12) {
-      const h = hora > 12 ? hora - 12 : hora;
-      const nextH = hora + 1 > 12 ? hora + 1 - 12 : hora + 1;
-      return `${h.toString().padStart(2, '0')} - ${nextH.toString().padStart(2, '0')} PM`;
-    }
-    return `${hora.toString().padStart(2, '0')}:00 - ${(hora + 1).toString().padStart(2, '0')}:00`;
-  };
-
   return (
-    <div className="overflow-auto">
-      <table className="w-full border-collapse min-w-[100px]" style={{ tableLayout: 'fixed' }}>
-        {/* Header */}
-        <thead>
-          <tr>
-            <th
-              className="p-2 text-xs font-semibold text-zinc-600 bg-white border-b-2 border-zinc-200 text-center"
-              style={{ width: '100px' }}
-            >
-              HORA
-            </th>
-            {DAYS.map((day) => (
-              <th
-                key={day}
-                className="p-2 text-sm font-semibold text-zinc-700 bg-white border-b-2 border-zinc-200 text-center"
-              >
-                {day}
-              </th>
-            ))}
-          </tr>
-        </thead>
+    <div className="p-6 bg-zinc-50/30 overflow-x-auto">
+      <div className="min-w-[1024px]"> {/* Asegurar ancho mínimo para evitar colapso de columnas */}
+        <div className="grid grid-cols-6 gap-4">
+          {/* Headers de Días */}
+          {DAYS.map((day) => (
+            <div key={day} className="text-center pb-3 border-b-2 border-zinc-100 mb-2">
+              <h3 className="text-sm font-bold text-zinc-600 uppercase tracking-wide">{day}</h3>
+            </div>
+          ))}
 
-        {/* Body */}
-        <tbody>
-          {timeSlots.map((hora) => {
-            // Verificar si esta hora está completamente vacía (sin cursos en ningún día)
-            const isEmptyRow = DAYS.every((_, dayIdx) => {
-              const dia = dayIdx + 1;
-              const key = `${dia}-${hora}`;
-              return !gridData[key];
-            });
+          {/* Columnas de Contenido */}
+          {DAYS.map((_, idx) => {
+            const dayNum = idx + 1;
+            const courses = horariosPorDia[dayNum];
 
             return (
-              <tr
-                key={hora}
-                className="hour-row"
-                data-empty={isEmptyRow ? "1" : "0"}
-                style={{ height: '100px' }}
-              >
-                {/* Columna de hora */}
-                <td
-                  className="p-2 text-[10px] text-zinc-500 bg-white border-b border-zinc-200 text-center whitespace-nowrap align-top"
-                  style={{ width: '80px' }}
-                >
-                  {formatHora(hora)}
-                </td>
-
-                {/* Celdas para cada día */}
-                {DAYS.map((_, dayIdx) => {
-                  const dia = dayIdx + 1;
-                  const key = `${dia}-${hora}`;
-                  const cellData = gridData[key];
-
-                  if (cellData) {
-                    const { horario } = cellData;
+              <div key={dayNum} className="space-y-3 min-h-[300px]">
+                {courses.length > 0 ? (
+                  courses.map(horario => {
                     const colorIndex = horario.idCurso % COURSE_COLORS.length;
                     const colors = COURSE_COLORS[colorIndex];
+                    // Formato HH:MM
+                    const startTime = horario.horaInicio.slice(0, 5);
+                    const endTime = horario.horaFin.slice(0, 5);
 
                     return (
-                      <td
-                        key={key}
-                        className="border-b border-zinc-200 p-2 align-top"
+                      <div
+                        key={`${horario.id}-${dayNum}`}
+                        className="group relative bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1 overflow-hidden flex flex-col"
                       >
-                        <div
-                          className="p-4 rounded-md"
-                          style={{
-                            backgroundColor: colors.bg,
-                            borderLeft: `3px solid ${colors.border}`,
-                            minHeight: '80px'
-                          }}
-                        >
-                          {/* Nombre del curso */}
-                          <p className="text-[10px] font-bold text-zinc-800 uppercase leading-tight">
-                            {horario.nombreCurso?.toUpperCase() || 'SIN NOMBRE'}
-                          </p>
-                          {/* Docente */}
-                          <p className="text-[9px] text-zinc-600 mt-1 leading-tight">
-                            {horario.nombreDocente || 'Sin docente'}
-                          </p>
-                          {/* Aula */}
-                          <p className="text-[9px] text-zinc-600 leading-tight">
-                            {horario.aula || 'Sin aula'}
-                          </p>
-                        </div>
-                      </td>
-                    );
-                  }
+                        {/* Indicador de Color (Borde izquierdo grueso) */}
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: colors.border }} />
 
-                  // Celda vacía
-                  return (
-                    <td
-                      key={key}
-                      className="border-b border-zinc-200 bg-white p-2"
-                      style={{ height: '100px' }}
-                    />
-                  );
-                })}
-              </tr>
+                        <div className="pl-5 p-3.5 flex flex-col gap-2">
+                          {/* Time Badge */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-zinc-700 bg-zinc-100/80 px-2 py-0.5 rounded-full border border-zinc-100">
+                              {startTime} - {endTime}
+                            </span>
+                          </div>
+
+                          {/* Course Name */}
+                          <h4 className="text-[13px] font-bold text-zinc-800 uppercase leading-snug">
+                            {horario.nombreCurso}
+                          </h4>
+
+                          {/* Metadata Check */}
+                          <div className="pt-2 mt-auto border-t border-dashed border-zinc-100 flex flex-col gap-1.5">
+                            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                              <svg className="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                              <span className="truncate" title={horario.nombreDocente}>{horario.nombreDocente || 'Docente no asignado'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                              <svg className="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                              </svg>
+                              <span className="font-medium">{horario.aula || 'Aula G.204'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  // Empty Column State
+                  <div className="h-full rounded-xl border border-dashed border-zinc-100 bg-zinc-50/50 flex flex-col items-center justify-center text-center p-4">
+                    <span className="text-[10px] text-zinc-300 font-medium uppercase tracking-widest">Libre</span>
+                  </div>
+                )}
+              </div>
             );
           })}
-        </tbody>
-      </table>
+        </div>
+      </div>
     </div>
   );
 };
