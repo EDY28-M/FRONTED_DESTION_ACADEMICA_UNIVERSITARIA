@@ -182,30 +182,18 @@ body.estudiante-square .table-container,
    PDF EXPORT MODE - Compactar filas vacías
    ========================================== */
 
-/* Compactación básica en vista normal */
-.hour-row[data-empty="1"] {
-  height: 40px !important;
-  min-height: 40px !important;
-}
-
-.hour-row[data-empty="1"] td {
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  opacity: 0.7;
-}
-
-/* Compactación agresiva SOLO en PDF export mode */
+/* Activo solo cuando el contenedor tenga la clase pdf-export-mode */
 .pdf-export-mode .hour-row[data-empty="1"] {
-  height: 10px !important;
-  min-height: 10px !important;
+  height: 20px !important;
+  min-height: 20px !important;
 }
 
 .pdf-export-mode .hour-row[data-empty="1"] td {
   padding-top: 2px !important;
   padding-bottom: 2px !important;
-  font-size: 7px !important;
+  font-size: 8px !important;
   opacity: 0.5;
-  height: 10px !important;
+  height: 20px !important;
 }
 
 .pdf-export-mode .hour-row[data-empty="1"] .cell {

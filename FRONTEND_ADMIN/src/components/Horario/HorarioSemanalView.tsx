@@ -186,7 +186,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
 
   return (
     <div className="overflow-auto">
-      <table className="w-full border-collapse min-w-[1400px]" style={{ tableLayout: 'fixed' }}>
+      <table className="w-full border-collapse min-w-[100px]" style={{ tableLayout: 'fixed' }}>
         {/* Header */}
         <thead>
           <tr>
@@ -222,7 +222,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                 key={hora}
                 className="hour-row"
                 data-empty={isEmptyRow ? "1" : "0"}
-                style={{ height: isEmptyRow ? '40px' : '100px' }}
+                style={{ height: '100px' }}
               >
                 {/* Columna de hora */}
                 <td
@@ -249,11 +249,11 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                         className="border-b border-zinc-200 p-2 align-top"
                       >
                         <div
-                          className="course-card p-5 rounded-md"
+                          className="p-4 rounded-md"
                           style={{
                             backgroundColor: colors.bg,
-                            borderLeft: `4px solid ${colors.border}`,
-                            minHeight: '85px'
+                            borderLeft: `3px solid ${colors.border}`,
+                            minHeight: '80px'
                           }}
                         >
                           {/* Nombre del curso */}

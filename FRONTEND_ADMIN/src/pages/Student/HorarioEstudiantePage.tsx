@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { Horario } from '../../types/horario';
 import PageHeader from '../../components/Student/PageHeader';
 import { exportToPDF } from '../../utils/pdfExport';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Empty State Component
 const EmptyState = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
@@ -56,6 +57,7 @@ const DownloadPDFButton = ({
 export const HorarioEstudiantePage = () => {
   const horarioRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const { user } = useAuth(); // Obtener info del estudiante logueado
 
   const { data: horarios = [], isLoading } = useQuery<Horario[]>({
     queryKey: ['mi-horario-estudiante'],
@@ -75,12 +77,16 @@ export const HorarioEstudiantePage = () => {
 
     try {
       await exportToPDF(horarioRef.current, {
-        filename: `mi-horario-${new Date().toISOString().split('T')[0]}.pdf`,
-        title: 'Mi Horario Académico Semanal',
+        filename: `horario-${user?.nombreCompleto?.replace(/\s+/g, '-') || 'estudiante'}-${new Date().toISOString().split('T')[0]}.pdf`,
+        title: 'HORARIO DE CLASES SEMESTRE 2025-II',
         subtitle: 'Sistema de Gestión Académica Universitaria',
         orientation: 'landscape',
-        quality: 2,
+        quality: 3,
         showHeader: true,
+        headerInfo: {
+          studentName: user?.nombreCompleto || 'Estudiante',
+          faculty: user?.email?.includes('@') ? 'INGENIERÍA EN INFORMÁTICA Y SISTEMAS' : 'No especificada',
+        }
       });
 
       toast.success('¡Horario descargado correctamente!');

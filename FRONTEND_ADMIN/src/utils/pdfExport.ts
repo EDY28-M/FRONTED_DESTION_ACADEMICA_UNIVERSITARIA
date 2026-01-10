@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { LOGO_BASE64 } from './logoConstants';
 
 /**
  * Exportación a PDF robusta para horarios:
@@ -12,7 +13,7 @@ import html2canvas from 'html2canvas';
 // Ajusta estos selectores a tu DOM real (si no coinciden, la compactación no aplicará)
 const SELECTORS = {
     hourRow: '.hour-row',
-    course: '.course-card',  // Clase agregada a los divs de curso
+    course: '.course-card',
 };
 
 export interface PDFExportOptions {
@@ -32,6 +33,8 @@ export interface PDFExportOptions {
         studentName?: string;
         period?: string;
         faculty?: string;
+        school?: string;
+        studentCode?: string;
     };
     /**
      * Qué tan “grande” se verá en página: 0.99 ocupa casi todo el ancho útil.
@@ -166,9 +169,9 @@ ${scope} *{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         let pageNumber = 1;
 
         while (offsetYpx < canvas.height) {
-            // Header
+            // Header SOLO en la primera página
             let yMm = marginMm;
-            if (config.showHeader) {
+            if (config.showHeader && pageNumber === 1) {
                 yMm = addPDFHeader(pdf, config, pageWidthMm, marginMm);
             }
 
@@ -271,43 +274,94 @@ function clamp(n: number, min: number, max: number): number {
 function addPDFHeader(pdf: jsPDF, config: PDFExportOptions, pageWidthMm: number, marginMm: number): number {
     let y = marginMm;
 
-    pdf.setFontSize(16);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(30, 41, 59);
-    pdf.text(config.title ?? 'Horario Académico Semanal', pageWidthMm / 2, y + 8, { align: 'center' });
+    // Fondo gris claro para la sección superior
+    pdf.setFillColor(245, 245, 245);
+    pdf.rect(marginMm, y, pageWidthMm - (marginMm * 2), 18, 'F');
 
-    pdf.setFontSize(10);
+    // Universidad y Dirección (superior izquierda)
+    // Logo (12x12 mm)
+    if (LOGO_BASE64) {
+        pdf.addImage(LOGO_BASE64, 'PNG', marginMm + 2, y + 2, 12, 12);
+    }
+
+    const textOffset = 16; // Desplazamiento para el texto para dejar espacio al logo
+
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(40, 40, 40);
+    pdf.text('Universidad de Harvard', marginMm + textOffset, y + 5);
+
+    pdf.setFontSize(8);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(100, 116, 139);
-    pdf.text(
-        config.subtitle ?? 'Sistema de Gestión Académica Universitaria',
-        pageWidthMm / 2,
-        y + 14,
-        { align: 'center' }
-    );
+    pdf.text('Dirección de Asuntos Internos', marginMm + textOffset, y + 9);
+
+    // Título principal en barra verde
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(config.title ?? 'HORARIO DE CLASES SEMESTRE 2025-II', marginMm + textOffset, y + 14);
+
+    // Fecha y sistema (superior derecha)
+    const now = new Date();
+    const fecha = `${now.toLocaleDateString('es-PE')} ${now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}`;
+
+    pdf.setFontSize(7);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(80, 80, 80);
+    pdf.text('DIAA / UNAS', pageWidthMm - marginMm - 3, y + 5, { align: 'right' });
+    pdf.text(fecha, pageWidthMm - marginMm - 3, y + 9, { align: 'right' });
+    pdf.text('Sistema de Gestión Académica', pageWidthMm - marginMm - 3, y + 13, { align: 'right' });
 
     y += 20;
 
+    // Barra verde decorativa
+    pdf.setFillColor(0, 128, 128); // Color turquesa/verde
+    pdf.rect(marginMm, y, pageWidthMm - (marginMm * 2), 0.8, 'F');
+
+    y += 3;
+
+    // Información del estudiante (si está disponible)
     if (config.headerInfo) {
-        pdf.setFontSize(9);
-        pdf.setTextColor(100, 116, 139);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(50, 50, 50);
 
-        const parts: string[] = [];
-        if (config.headerInfo.studentName) parts.push(`Estudiante: ${config.headerInfo.studentName}`);
-        if (config.headerInfo.period) parts.push(`Periodo: ${config.headerInfo.period}`);
-        if (config.headerInfo.faculty) parts.push(`Facultad: ${config.headerInfo.faculty}`);
+        // Fila 1: Facultad y Escuela
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Facultad:', marginMm + 3, y + 4);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(config.headerInfo.faculty ?? 'INGENIERÍA Y ARQUITECTURA', marginMm + 20, y + 4);
 
-        if (parts.length) {
-            pdf.text(parts.join('  |  '), pageWidthMm / 2, y, { align: 'center' });
-            y += 6;
-        }
+        // Fila 2: Escuela Profesional
+        y += 5;
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Escuela Profesional:', marginMm + 3, y + 4);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(config.headerInfo.school ?? 'INGENIERÍA EN INFORMÁTICA Y SISTEMAS', marginMm + 35, y + 4);
+
+        // Fila 3: Apellidos y Nombre + Código
+        y += 5;
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Apellidos y Nombre:', marginMm + 3, y + 4);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(config.headerInfo.studentName ?? 'ESTUDIANTE', marginMm + 35, y + 4);
+
+        // Código Universitario (derecha)
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Código Universitario:', pageWidthMm / 2 + 20, y + 4);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(config.headerInfo.studentCode ?? '00000000', pageWidthMm - marginMm - 20, y + 4);
+
+        y += 7;
+    } else {
+        y += 2;
     }
 
-    pdf.setDrawColor(226, 232, 240);
-    pdf.setLineWidth(0.5);
-    pdf.line(marginMm, y + 2, pageWidthMm - marginMm, y + 2);
+    // Línea separadora
+    pdf.setDrawColor(200, 200, 200);
+    pdf.setLineWidth(0.3);
+    pdf.line(marginMm, y, pageWidthMm - marginMm, y);
 
-    return y + 8;
+    return y + 5;
 }
 
 function addPDFFooter(
@@ -318,25 +372,25 @@ function addPDFFooter(
     page: number,
     total: number
 ): void {
-    const footerY = pageHeightMm - marginMm;
+    const footerY = pageHeightMm - marginMm - 5;
 
-    pdf.setDrawColor(226, 232, 240);
+    // Línea separadora superior
+    pdf.setDrawColor(200, 200, 200);
     pdf.setLineWidth(0.3);
-    pdf.line(marginMm, footerY - 6, pageWidthMm - marginMm, footerY - 6);
+    pdf.line(marginMm, footerY - 2, pageWidthMm - marginMm, footerY - 2);
 
     pdf.setFontSize(8);
-    pdf.setTextColor(148, 163, 184);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(80, 80, 80);
 
-    const fecha = new Date().toLocaleString('es-PE', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    // Dirección de Asuntos Académicos (izquierda)
+    pdf.text('Dirección de Asuntos Internos', marginMm + 3, footerY + 2);
 
-    pdf.text(`Generado: ${fecha}`, marginMm, footerY - 1);
-    pdf.text(`Pag. ${page}${total ? ` / ${total}` : ''}`, pageWidthMm - marginMm, footerY - 1, { align: 'right' });
+    // URL del sitio web (centro)
+    pdf.text('https://academico.harvard.com', pageWidthMm / 2, footerY + 2, { align: 'center' });
+
+    // Número de página (derecha)
+    pdf.text(`Pag. ${page}`, pageWidthMm - marginMm - 3, footerY + 2, { align: 'right' });
 }
 
 /**
