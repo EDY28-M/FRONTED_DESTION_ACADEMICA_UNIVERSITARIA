@@ -113,7 +113,7 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
 
                 {/* Content */}
                 <div className="flex-1 p-4 flex flex-col justify-center min-w-0">
-                  <h3 className="text-sm font-bold text-zinc-900 leading-tight mb-2 uppercase truncate">
+                  <h3 className="text-sm font-bold text-zinc-900 leading-tight mb-2">
                     {horario.nombreCurso}
                   </h3>
 
@@ -122,7 +122,7 @@ const MobileView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                       <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      <span className="truncate">{horario.nombreDocente || 'Docente no asignado'}</span>
+                      <span className="leading-tight">{horario.nombreDocente || 'Docente no asignado'}</span>
                     </div>
 
                     <div className="flex items-center gap-2 text-xs text-zinc-600">
@@ -229,7 +229,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                           </div>
 
                           {/* Course Name */}
-                          <h4 className="text-[13px] font-bold text-zinc-800 uppercase leading-snug">
+                          <h4 className="text-[13px] font-bold text-zinc-800 leading-snug">
                             {horario.nombreCurso}
                           </h4>
 
@@ -239,7 +239,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                               <svg className="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
-                              <span className="truncate" title={horario.nombreDocente}>{horario.nombreDocente || 'Docente no asignado'}</span>
+                              <span className="leading-tight text-left" title={horario.nombreDocente}>{horario.nombreDocente || 'Docente no asignado'}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
                               <svg className="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
