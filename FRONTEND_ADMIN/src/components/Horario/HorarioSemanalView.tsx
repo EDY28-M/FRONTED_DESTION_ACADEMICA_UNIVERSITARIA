@@ -215,12 +215,12 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                     return (
                       <div
                         key={`${horario.id}-${dayNum}`}
-                        className="group relative bg-white rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1 overflow-hidden flex flex-col"
+                        className="group relative bg-white rounded-xl border border-zinc-200 shadow-sm transition-all duration-200 flex flex-col min-h-min"
                       >
                         {/* Indicador de Color (Borde izquierdo grueso) */}
-                        <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: colors.border }} />
+                        <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-xl" style={{ backgroundColor: colors.border }} />
 
-                        <div className="pl-5 p-3.5 flex flex-col gap-2">
+                        <div className="pl-5 p-3.5 flex flex-col gap-2 h-full">
                           {/* Time Badge */}
                           <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold text-zinc-700 bg-zinc-100/80 px-2 py-0.5 rounded-full border border-zinc-100">
@@ -234,7 +234,7 @@ const DesktopView: React.FC<{ horarios: Horario[] }> = ({ horarios }) => {
                           </h4>
 
                           {/* Metadata Check */}
-                          <div className="pt-2 mt-auto border-t border-dashed border-zinc-100 flex flex-col gap-1.5">
+                          <div className="pt-2 mt-2 border-t border-dashed border-zinc-100 flex flex-col gap-1.5">
                             <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
                               <svg className="w-3.5 h-3.5 text-zinc-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

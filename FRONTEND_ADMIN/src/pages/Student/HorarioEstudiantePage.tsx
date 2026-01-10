@@ -162,7 +162,7 @@ export const HorarioEstudiantePage = () => {
         Forzamos forceDesktop={true} para que siempre genere la grilla bonita 
         incluso si el usuario está en móvil.
       */}
-      <div className="fixed left-[-9999px] top-0 w-[1100px] opacity-0 pointer-events-none">
+      <div className="fixed left-[-9999px] top-0 w-[1400px] opacity-0 pointer-events-none">
         <HorarioSemanalView
           ref={pdfRef}
           horarios={horarios}
