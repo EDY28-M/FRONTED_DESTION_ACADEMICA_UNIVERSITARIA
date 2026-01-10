@@ -57,6 +57,7 @@ const DownloadPDFButton = ({
 
 export const HorarioEstudiantePage = () => {
   const horarioRef = useRef<HTMLDivElement>(null);
+  const pdfRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const { user } = useAuth(); // Obtener info del estudiante logueado
 
@@ -76,7 +77,10 @@ export const HorarioEstudiantePage = () => {
 
   // Función para exportar a PDF
   const handleDownloadPDF = async () => {
-    if (!horarioRef.current || horarios.length === 0) {
+    // Usamos pdfRef en lugar de horarioRef para capturar siempre la versión de escritorio
+    const elementToExport = pdfRef.current || horarioRef.current;
+
+    if (!elementToExport || horarios.length === 0) {
       toast.error('No hay horarios disponibles para descargar');
       return;
     }
@@ -84,7 +88,7 @@ export const HorarioEstudiantePage = () => {
     setIsExporting(true);
 
     try {
-      await exportToPDF(horarioRef.current, {
+      await exportToPDF(elementToExport, {
         filename: `horario-${user?.nombreCompleto?.replace(/\s+/g, '-') || 'estudiante'}-${new Date().toISOString().split('T')[0]}.pdf`,
 
         // Usar periodo dinámico o fallback
@@ -142,7 +146,7 @@ export const HorarioEstudiantePage = () => {
         }
       />
 
-      {/* Horario */}
+      {/* Horario Visible (Responsive: lista en móvil, columnas en desktop) */}
       {horarios.length > 0 ? (
         <HorarioSemanalView ref={horarioRef} horarios={horarios} />
       ) : (
@@ -152,6 +156,19 @@ export const HorarioEstudiantePage = () => {
           description="No se encontraron cursos con horarios programados para este periodo."
         />
       )}
+
+      {/* 
+        Container Oculto para Exportación PDF 
+        Forzamos forceDesktop={true} para que siempre genere la grilla bonita 
+        incluso si el usuario está en móvil.
+      */}
+      <div className="fixed left-[-9999px] top-0 w-[1100px] opacity-0 pointer-events-none">
+        <HorarioSemanalView
+          ref={pdfRef}
+          horarios={horarios}
+          forceDesktop={true}
+        />
+      </div>
     </div>
   );
 };
