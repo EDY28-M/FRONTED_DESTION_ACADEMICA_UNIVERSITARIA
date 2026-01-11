@@ -1,10 +1,11 @@
 import axios from '../lib/axios';
-import { 
-  Estudiante, 
-  CursoDisponible, 
-  Matricula, 
-  NotaDetalle, 
-  Periodo, 
+import paymentApi from '../lib/paymentApi';
+import {
+  Estudiante,
+  CursoDisponible,
+  Matricula,
+  NotaDetalle,
+  Periodo,
   MatricularRequest,
   RegistroNotas,
   SemestreRegistro

@@ -21,7 +21,8 @@ import {
   Clock,
   Plus,
   Minus,
-  Building2
+  Building2,
+  CreditCard
 } from 'lucide-react';
 import { MegaphoneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
@@ -86,6 +87,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { name: 'Mi Horario', href: '/estudiante/horario', icon: Clock },
     { name: 'Registro de Notas', href: '/estudiante/registro-notas', icon: Award },
     { name: 'Orden de Mérito', href: '/estudiante/orden-merito', icon: GraduationCap },
+    { name: 'Pagos', href: '/estudiante/pago-matricula-inicial', icon: CreditCard },
     { name: 'Perfil', href: '/estudiante/perfil', icon: User },
   ];
 

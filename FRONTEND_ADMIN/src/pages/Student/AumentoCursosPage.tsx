@@ -49,7 +49,7 @@ const AumentoCursosPage: React.FC = () => {
   const cursosNoDisponibles = cursosDisponibles?.filter(c => !c.disponible && !c.yaMatriculado) || [];
 
   const handleToggleCurso = (idCurso: number) => {
-    setCursosSeleccionados(prev => 
+    setCursosSeleccionados(prev =>
       prev.includes(idCurso) ? prev.filter(id => id !== idCurso) : [...prev, idCurso]
     );
   };
@@ -118,7 +118,7 @@ const AumentoCursosPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-zinc-900 mb-1">Aumento de Cursos</h2>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <span className="flex items-center gap-1.5">
-                
+
                 <span>Ciclo</span>
                 <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs font-medium font-mono">{perfil?.cicloActual}</span>
               </span>
@@ -139,10 +139,28 @@ const AumentoCursosPage: React.FC = () => {
       </div>
 
       {/* Tabla de cursos disponibles */}
+      {!isLoadingPago && !matriculaPagada && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4">
+          <CreditCard className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h3 className="font-medium text-amber-900">Pago de matrícula requerido</h3>
+            <p className="text-sm text-amber-700 mt-1">
+              Debes realizar el pago de matrícula antes de poder inscribirte en cursos para este período.
+            </p>
+            <button
+              onClick={() => navigate('/estudiante/pago-matricula-inicial')}
+              className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              <CreditCard className="h-4 w-4" />
+              Ir a Pagos
+            </button>
+          </div>
+        </div>
+      )}
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-200 bg-emerald-50/30 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            
+
             <h3 className="text-sm font-medium text-zinc-900">Cursos Disponibles para Matrícula</h3>
           </div>
           {cursosSeleccionados.length > 0 && (
@@ -164,8 +182,8 @@ const AumentoCursosPage: React.FC = () => {
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50/50">
                     <th className="w-10 px-4 py-3 text-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="rounded border-zinc-300 text-emerald-600"
                         checked={cursosSeleccionados.length === cursosParaMatricular.length && cursosParaMatricular.length > 0}
                         onChange={(e) => {
@@ -190,14 +208,14 @@ const AumentoCursosPage: React.FC = () => {
                     const vacantes = (curso.capacidadMaxima || 30) - curso.estudiantesMatriculados;
                     const isSelected = cursosSeleccionados.includes(curso.id);
                     return (
-                      <tr 
-                        key={curso.id} 
+                      <tr
+                        key={curso.id}
                         className={`hover:bg-emerald-50/50 transition-colors cursor-pointer ${isSelected ? 'bg-emerald-50' : ''}`}
                         onClick={() => handleToggleCurso(curso.id)}
                       >
                         <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
                             checked={isSelected}
                             onChange={() => handleToggleCurso(curso.id)}
@@ -247,7 +265,7 @@ const AumentoCursosPage: React.FC = () => {
                 onClick={handleMatricularSeleccionados}
                 disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending || !matriculaPagada}
               >
-               
+
                 {matricularMutation.isPending ? 'Matriculando...' : `Matricular (${cursosSeleccionados.length})`}
               </button>
             </div>
