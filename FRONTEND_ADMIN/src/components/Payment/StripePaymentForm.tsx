@@ -9,7 +9,7 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-import { CreditCard, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { CreditCard, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
@@ -19,6 +19,7 @@ interface StripePaymentFormProps {
   paymentIntentId: string;
   onSuccess: (paymentIntentId: string) => void;
   onError: (error: string) => void;
+  buttonText?: string;
 }
 
 const PaymentForm: React.FC<StripePaymentFormProps> = ({
@@ -26,6 +27,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
   paymentIntentId,
   onSuccess,
   onError,
+  buttonText = "Pagar y Matricular",
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -127,7 +129,7 @@ const PaymentForm: React.FC<StripePaymentFormProps> = ({
         ) : (
           <>
             <CreditCard className="w-5 h-5" />
-            <span>Pagar y Matricular</span>
+            <span>{buttonText}</span>
           </>
         )}
       </button>
@@ -144,6 +146,7 @@ interface StripePaymentFormWrapperProps {
   paymentIntentId: string;
   onSuccess: (paymentIntentId: string) => void;
   onError: (error: string) => void;
+  buttonText?: string;
 }
 
 export const StripePaymentForm: React.FC<StripePaymentFormWrapperProps> = ({
@@ -151,6 +154,7 @@ export const StripePaymentForm: React.FC<StripePaymentFormWrapperProps> = ({
   paymentIntentId,
   onSuccess,
   onError,
+  buttonText,
 }) => {
   const [stripe, setStripe] = useState<Stripe | null>(null);
 
@@ -184,6 +188,7 @@ export const StripePaymentForm: React.FC<StripePaymentFormWrapperProps> = ({
         paymentIntentId={paymentIntentId}
         onSuccess={onSuccess}
         onError={onError}
+        buttonText={buttonText}
       />
     </Elements>
   );

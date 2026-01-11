@@ -52,6 +52,7 @@ import InicioDashboard from './pages/Student/InicioDashboard'
 import MisCursosPage from './pages/Student/MisCursosPage'
 import MatriculaPage from './pages/Student/MatriculaPage'
 import PagoMatriculaPage from './pages/Student/PagoMatriculaPage'
+import PagoMatriculaInicialPage from './pages/Student/PagoMatriculaInicialPage'
 import AumentoCursosPage from './pages/Student/AumentoCursosPage'
 import RetiroCursosPage from './pages/Student/RetiroCursosPage'
 import NotasPage from './pages/Student/NotasPage'
@@ -186,6 +187,7 @@ function App() {
         <Route path="materiales" element={<MaterialesPage />} />
         <Route path="matricula" element={<MatriculaPage />} />
         <Route path="pago-matricula" element={<PagoMatriculaPage />} />
+        <Route path="pago-matricula-inicial" element={<PagoMatriculaInicialPage />} />
         <Route path="aumento-cursos" element={<AumentoCursosPage />} />
         <Route path="retiro-cursos" element={<RetiroCursosPage />} />
         <Route path="notas" element={<NotasPage />} />

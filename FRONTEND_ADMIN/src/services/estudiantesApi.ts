@@ -44,6 +44,16 @@ export const estudiantesApi = {
     return response.data;
   },
 
+  // Verificar si el estudiante ha pagado la matrícula
+  verificarMatriculaPagada: async (idPeriodo: number): Promise<boolean> => {
+    try {
+      const response = await paymentApi.get(`/payments/verificar-matricula-pagada/${idPeriodo}`);
+      return response.data.pagado || false;
+    } catch {
+      return false;
+    }
+  },
+
   // Retirarse de un curso
   retirar: async (idMatricula: number): Promise<void> => {
     await axios.delete(`/estudiantes/retirar/${idMatricula}`);

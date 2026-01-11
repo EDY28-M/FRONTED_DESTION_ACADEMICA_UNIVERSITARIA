@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { Plus, AlertCircle, Check, GraduationCap, Clock } from 'lucide-react';
+import { Plus, AlertCircle, Check, GraduationCap, Clock, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -25,6 +25,13 @@ const AumentoCursosPage: React.FC = () => {
   const { data: cursosDisponibles, isLoading } = useQuery({
     queryKey: ['cursos-disponibles'],
     queryFn: () => estudiantesApi.getCursosDisponibles(),
+  });
+
+  // Verificar si el estudiante ha pagado la matrícula
+  const { data: matriculaPagada, isLoading: isLoadingPago } = useQuery({
+    queryKey: ['matricula-pagada', periodoActivo?.id],
+    queryFn: () => estudiantesApi.verificarMatriculaPagada(periodoActivo!.id),
+    enabled: !!periodoActivo?.id,
   });
 
   const matricularMutation = useMutation({
@@ -56,6 +63,13 @@ const AumentoCursosPage: React.FC = () => {
     const idPeriodo = periodoActivo?.id;
     if (!idPeriodo) {
       toast.error('No hay período activo');
+      return;
+    }
+
+    // Validar que el estudiante haya pagado la matrícula
+    if (!matriculaPagada) {
+      toast.error('Debes pagar la matrícula antes de poder matricular cursos');
+      navigate('/estudiante/pago-matricula-inicial');
       return;
     }
 
@@ -231,7 +245,7 @@ const AumentoCursosPage: React.FC = () => {
               <button
                 className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleMatricularSeleccionados}
-                disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending}
+                disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending || !matriculaPagada}
               >
                
                 {matricularMutation.isPending ? 'Matriculando...' : `Matricular (${cursosSeleccionados.length})`}
