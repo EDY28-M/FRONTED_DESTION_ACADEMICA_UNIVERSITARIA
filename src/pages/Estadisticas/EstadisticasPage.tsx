@@ -1,461 +1,292 @@
-import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Cell } from 'recharts'
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+} from 'recharts'
+import { Users, BookOpen, GraduationCap, Award } from 'lucide-react'
+import { estadisticasApi } from '../../services/estadisticasApi'
 import { docentesApi } from '../../services/docentesService'
 import { cursosApi } from '../../services/cursosService'
 
 const EstadisticasPage = () => {
-  const { data: docentes, isLoading: loadingDocentes } = useQuery({
+  const { data: estadisticasGenerales, isLoading: loadingGenerales } = useQuery({
+    queryKey: ['estadisticas-generales'],
+    queryFn: estadisticasApi.getEstadisticasGenerales,
+  })
+
+  const { data: estudiantesPorCiclo, isLoading: loadingCiclos } = useQuery({
+    queryKey: ['estudiantes-por-ciclo'],
+    queryFn: estadisticasApi.getEstudiantesPorCiclo,
+  })
+
+  const { data: distribucionPromedios, isLoading: loadingPromedios } = useQuery({
+    queryKey: ['distribucion-promedios'],
+    queryFn: estadisticasApi.getDistribucionPromedios,
+  })
+
+  const { data: cargaDocentes, isLoading: loadingDocentes } = useQuery({
+    queryKey: ['carga-docentes'],
+    queryFn: estadisticasApi.getCargaDocentes,
+  })
+
+  const { data: docentes } = useQuery({
     queryKey: ['docentes'],
     queryFn: docentesApi.getAll,
   })
 
-  const { data: cursos, isLoading: loadingCursos } = useQuery({
+  const { data: cursos } = useQuery({
     queryKey: ['cursos'],
     queryFn: cursosApi.getAll,
   })
 
-  // Estadísticas de cursos por ciclo
-  const cursosPorCiclo = Array.from({ length: 10 }, (_, i) => {
-    const ciclo = i + 1
-    const count = cursos?.filter(curso => curso.ciclo === ciclo).length || 0
-    return {
-      ciclo: `Ciclo ${ciclo}`,
-      cantidad: count,
-      creditos: cursos?.filter(curso => curso.ciclo === ciclo).reduce((sum, curso) => sum + curso.creditos, 0) || 0,
-    }
-  }).filter(item => item.cantidad > 0)
+  const cursosConDocente = cursos?.filter(curso => curso.idDocente).length || 0
+  const cursosSinDocente = (cursos?.length || 0) - cursosConDocente
+  const porcentajeAsignacion = cursos?.length ? Math.round((cursosConDocente / cursos.length) * 100) : 0
 
-  // Estadísticas de asignación de docentes
-  const cursosConDocente = cursos?.filter(curso => curso.idDocente).length || 0;
-  const cursosSinDocente = (cursos?.length || 0) - cursosConDocente;
-  
-  const asignacionDocentesData = [
-    {
-      estado: 'Con Docente',
-      cantidad: cursosConDocente,
-      porcentaje: cursos?.length ? ((cursosConDocente / cursos.length) * 100).toFixed(1) : 0
-    },
-    {
-      estado: 'Sin Docente',
-      cantidad: cursosSinDocente,
-      porcentaje: cursos?.length ? ((cursosSinDocente / cursos.length) * 100).toFixed(1) : 0
-    }
-  ];
-
-  // Distribución de créditos
-  const creditosDistribution = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(credito => ({
-    creditos: credito,
-    cantidad: cursos?.filter(curso => curso.creditos === credito).length || 0,
-  })).filter(item => item.cantidad > 0)
-
-  // Carga horaria por ciclo
-  const cargaHoraria = cursosPorCiclo.map(item => ({
-    ciclo: item.ciclo,
-    horas: cursos?.filter(curso => curso.ciclo === parseInt(item.ciclo.split(' ')[1]))
-      .reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0,
-  }))
-
-  const isLoading = loadingDocentes || loadingCursos
+  const isLoading = loadingGenerales || loadingCiclos || loadingPromedios || loadingDocentes
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-zinc-900 border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-zinc-500">Cargando estadísticas...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="md:flex md:items-center md:justify-between"
-      >
-        <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-            Estadísticas y Reportes
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Análisis detallado del sistema académico
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Resumen General */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
-        <div className="card p-6 text-center bg-gradient-to-br from-primary-50 to-primary-100 border-2 border-primary-200">
-          <div className="text-5xl text-primary-700 mb-2">{docentes?.length || 0}</div>
-          <div className="text-base text-gray-700">Total Docentes</div>
-        </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
-          <div className="text-5xl text-green-600 mb-2">{cursos?.length || 0}</div>
-          <div className="text-base text-gray-700">Total Cursos</div>
-        </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
-          <div className="text-5xl text-purple-600 mb-2">
-            {cursos?.reduce((sum, curso) => sum + curso.creditos, 0) || 0}
-          </div>
-          <div className="text-base text-gray-700">Total Créditos</div>
-        </div>
-        <div className="card p-6 text-center bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200">
-          <div className="text-5xl text-orange-600 mb-2">
-            {cursos?.reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0}
-          </div>
-          <div className="text-base text-gray-700">Horas Semanales</div>
-        </div>
-      </motion.div>
-
-      {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Cursos por Ciclo */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="card p-6"
-        >
-          <h3 className="text-xl text-gray-900 mb-6">Cursos por Ciclo</h3>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cursosPorCiclo} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="ciclo" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Ciclo Académico', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '2px solid #003366',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                  }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number) => [`${value} cursos`, 'Cantidad']}
-                />
-                <Bar 
-                  dataKey="cantidad" 
-                  fill="#003366" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={80}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 16, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        {/* Asignación de Docentes */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="card p-6"
-        >
-          <h3 className="text-xl text-gray-900 mb-6">Estado de Asignación de Docentes</h3>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={asignacionDocentesData} margin={{ top: 20, right: 30, left: 30, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="estado" 
-                  fontSize={18}
-                  tick={{ fontSize: 16, fontWeight: 700 }}
-                  stroke="#374151"
-                />
-                <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '2px solid #8B5CF6',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                  }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number, _name: string, props: any) => {
-                    return [`${value} cursos (${props.payload.porcentaje}%)`, 'Cantidad'];
-                  }}
-                />
-                <Bar 
-                  dataKey="cantidad" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={150}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 18, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
-                >
-                  <Cell fill="#10B981" /> {/* Verde para "Con Docente" */}
-                  <Cell fill="#EF4444" /> {/* Rojo para "Sin Docente" */}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        {/* Distribución de Créditos */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="card p-6"
-        >
-          <h3 className="text-xl text-gray-900 mb-6">Distribución de Créditos</h3>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={creditosDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="creditos" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Número de Créditos', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Cantidad de Cursos', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '2px solid #10B981',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                  }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number, name: string) => [`${value} cursos`, name === 'cantidad' ? 'Cantidad' : name]}
-                />
-                <Bar 
-                  dataKey="cantidad" 
-                  fill="#10B981" 
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={80}
-                  label={{ 
-                    position: 'top', 
-                    fontSize: 16, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937'
-                  }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        {/* Carga Horaria por Ciclo */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="card p-6"
-        >
-          <h3 className="text-xl text-gray-900 mb-6">Carga Horaria por Ciclo</h3>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={cargaHoraria} margin={{ top: 40, right: 30, left: 20, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="ciclo" 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Ciclo Académico', 
-                    position: 'insideBottom', 
-                    offset: -10,
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <YAxis 
-                  fontSize={16}
-                  tick={{ fontSize: 14, fontWeight: 600 }}
-                  label={{ 
-                    value: 'Horas Semanales', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    fontSize: 16,
-                    fontWeight: 'bold'
-                  }}
-                  stroke="#374151"
-                />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '2px solid #8B5CF6',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    padding: '12px 16px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-                  }}
-                  labelStyle={{ 
-                    fontSize: '18px', 
-                    fontWeight: 'bold',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}
-                  formatter={(value: number) => [`${value} horas`, 'Carga Horaria']}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="horas" 
-                  stroke="#8B5CF6" 
-                  strokeWidth={4}
-                  dot={{ fill: '#8B5CF6', stroke: '#fff', strokeWidth: 3, r: 10 }}
-                  activeDot={{ r: 12, strokeWidth: 3 }}
-                  label={{ 
-                    position: 'top', 
-                    offset: 15,
-                    fontSize: 18, 
-                    fontWeight: 'bold',
-                    fill: '#1F2937',
-                    formatter: (value: number) => value
-                  }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-900">Estadísticas</h1>
+        <p className="text-zinc-500 text-sm">Resumen general del sistema académico</p>
       </div>
 
-      {/* Tabla de Detalles */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="card"
-      >
-        <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-purple-50">
-          <h3 className="text-xl text-gray-900">Resumen Detallado por Ciclo</h3>
+      {/* Stats Cards - 4 columnas iguales */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <Users className="h-5 w-5 text-zinc-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-zinc-900">{estadisticasGenerales?.totalEstudiantes || 0}</p>
+              <p className="text-zinc-500 text-sm">Estudiantes</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <GraduationCap className="h-5 w-5 text-zinc-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-zinc-900">{estadisticasGenerales?.totalDocentes || docentes?.length || 0}</p>
+              <p className="text-zinc-500 text-sm">Docentes</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <BookOpen className="h-5 w-5 text-zinc-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-zinc-900">{estadisticasGenerales?.totalCursos || cursos?.length || 0}</p>
+              <p className="text-zinc-500 text-sm">Cursos</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-zinc-100 rounded-lg">
+              <Award className="h-5 w-5 text-zinc-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-zinc-900">{estadisticasGenerales?.promedioInstitucional?.toFixed(1) || '0.0'}</p>
+              <p className="text-zinc-500 text-sm">Promedio General</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Gráficas principales */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Estudiantes por Ciclo */}
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <h3 className="text-base font-semibold text-zinc-900 mb-4">Estudiantes por Ciclo</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={estudiantesPorCiclo} margin={{ top: 5, right: 5, left: -15, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                <XAxis 
+                  dataKey="ciclo" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#71717a', fontSize: 12 }}
+                  tickFormatter={(value) => `${value}°`}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#71717a', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#18181b',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px'
+                  }}
+                  formatter={(value: number) => [`${value} estudiantes`, '']}
+                  labelFormatter={(label) => `Ciclo ${label}`}
+                />
+                <Bar dataKey="cantidad" fill="#3f3f46" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Asignación de Cursos */}
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <h3 className="text-base font-semibold text-zinc-900 mb-4">Asignación de Docentes</h3>
+          <div className="flex flex-col items-center justify-center h-52">
+            <div className="relative w-32 h-32">
+              {/* Círculo de fondo */}
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#e4e4e7" strokeWidth="12" />
+                <circle 
+                  cx="50" cy="50" r="40" 
+                  fill="none" 
+                  stroke="#18181b" 
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={`${porcentajeAsignacion * 2.51} 251`}
+                  transform="rotate(-90 50 50)"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-2xl font-bold text-zinc-900">{porcentajeAsignacion}%</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-900"></div>
+                <span className="text-xs text-zinc-600">{cursosConDocente} asignados</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-zinc-300"></div>
+                <span className="text-xs text-zinc-600">{cursosSinDocente} pendientes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Segunda fila de gráficas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Distribución de Promedios - Gráfica de barras verticales simple */}
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <h3 className="text-base font-semibold text-zinc-900 mb-4">Rendimiento Académico</h3>
+          <div className="h-52">
+            {(!distribucionPromedios || distribucionPromedios.length === 0) ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-zinc-400">No hay datos de rendimiento disponibles</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={distribucionPromedios} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
+                  <XAxis 
+                    dataKey="rango" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#71717a', fontSize: 10 }}
+                  />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '6px', color: '#fff', fontSize: '12px' }}
+                    formatter={(value: number) => [`${value}`, 'Estudiantes']}
+                  />
+                  <Bar dataKey="cantidad" radius={[3, 3, 0, 0]}>
+                    {distribucionPromedios.map((entry, index) => {
+                      const val = parseFloat(entry.rango.split('-')[0])
+                      return <Cell key={index} fill={val >= 14 ? '#22c55e' : val >= 11 ? '#f59e0b' : '#ef4444'} />
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Carga Docente - Barras de progreso */}
+        <div className="bg-white border border-zinc-200 rounded-xl p-5">
+          <h3 className="text-base font-semibold text-zinc-900 mb-4">Carga Docente</h3>
+          <div className="space-y-3">
+            {cargaDocentes?.slice(0, 5).map((docente) => {
+              const porcentaje = Math.min(Math.round((docente.horasSemanales / 20) * 100), 100)
+              const color = porcentaje > 80 ? 'bg-red-500' : porcentaje > 50 ? 'bg-amber-500' : 'bg-emerald-500'
+              return (
+                <div key={docente.id}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-zinc-700 truncate">{docente.nombre.split(' ').slice(0, 2).join(' ')}</span>
+                    <span className="text-zinc-900 font-medium">{porcentaje}%</span>
+                  </div>
+                  <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${porcentaje}%` }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          {(!cargaDocentes || cargaDocentes.length === 0) && (
+            <p className="text-center text-zinc-400 py-4 text-sm">Sin datos</p>
+          )}
+        </div>
+      </div>
+
+      {/* Tabla Resumen por Ciclo */}
+      <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+        <div className="p-5 border-b border-zinc-100">
+          <h3 className="text-base font-semibold text-zinc-900">Resumen por Ciclo</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="table">
-            <thead className="table-header bg-gradient-to-r from-gray-100 to-gray-200">
-              <tr>
-                <th className="table-header-cell text-base">Ciclo</th>
-                <th className="table-header-cell text-base">Cursos</th>
-                <th className="table-header-cell text-base">Créditos Totales</th>
-                <th className="table-header-cell text-base">Horas Semanales</th>
-                <th className="table-header-cell text-base">Promedio Créditos</th>
-                <th className="table-header-cell text-base">Promedio Horas</th>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-zinc-50">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase">Ciclo</th>
+                <th className="text-center px-5 py-3 text-xs font-semibold text-zinc-500 uppercase">Estudiantes</th>
+                <th className="text-center px-5 py-3 text-xs font-semibold text-zinc-500 uppercase">Promedio</th>
               </tr>
             </thead>
-            <tbody className="table-body">
-              {cursosPorCiclo.map((item, index) => {
-                const cicloNum = parseInt(item.ciclo.split(' ')[1])
-                const cursosDelCiclo = cursos?.filter(curso => curso.ciclo === cicloNum) || []
-                const horasSemanales = cursosDelCiclo.reduce((sum, curso) => sum + curso.horasSemanal, 0)
-                const promedioCreditos = cursosDelCiclo.length > 0 ? (item.creditos / cursosDelCiclo.length).toFixed(1) : '0'
-                const promedioHoras = cursosDelCiclo.length > 0 ? (horasSemanales / cursosDelCiclo.length).toFixed(1) : '0'
-
-                return (
-                  <motion.tr
-                    key={item.ciclo}
-                    className="table-row hover:bg-gradient-to-r hover:from-primary-50 hover:to-purple-50 transition-all"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <td className="table-cell text-base text-gray-900">{item.ciclo}</td>
-                    <td className="table-cell text-base text-primary-700">{item.cantidad}</td>
-                    <td className="table-cell text-base text-purple-600">{item.creditos}</td>
-                    <td className="table-cell text-base text-orange-600">{horasSemanales}</td>
-                    <td className="table-cell text-base text-green-600">{promedioCreditos}</td>
-                    <td className="table-cell text-base text-primary-700">{promedioHoras}</td>
-                  </motion.tr>
-                )
-              })}
+            <tbody className="divide-y divide-zinc-100">
+              {estudiantesPorCiclo?.map((ciclo) => (
+                <tr key={ciclo.ciclo} className="hover:bg-zinc-50/50">
+                  <td className="px-5 py-3">
+                    <span className="font-medium text-zinc-900">Ciclo {ciclo.ciclo}</span>
+                  </td>
+                  <td className="px-5 py-3 text-center text-zinc-700">{ciclo.cantidad}</td>
+                  <td className="px-5 py-3 text-center">
+                    <span className={`inline-block px-2 py-1 rounded text-sm font-medium ${
+                      ciclo.promedio >= 14 ? 'bg-emerald-100 text-emerald-700' :
+                      ciclo.promedio >= 10.5 ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {ciclo.promedio.toFixed(2)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

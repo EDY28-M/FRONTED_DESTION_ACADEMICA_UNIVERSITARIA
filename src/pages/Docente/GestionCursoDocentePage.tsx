@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { docenteCursosApi, docenteAsistenciaApi, docenteTiposEvaluacionApi, EstudianteCurso, EstudiantesResponse } from '../../services/docenteApi';
 import { toast } from 'react-hot-toast';
 import {
@@ -14,8 +15,10 @@ import {
   TrashIcon,
   PencilIcon,
 } from '@heroicons/react/24/outline';
+import { FileText } from 'lucide-react';
+import TrabajosDocentePage from './TrabajosDocentePage';
 
-type TabType = 'estudiantes' | 'notas' | 'asistencia';
+type TabType = 'estudiantes' | 'notas' | 'asistencia' | 'trabajos';
 
 interface AsistenciaItem {
   idEstudiante: number;
@@ -27,9 +30,25 @@ interface AsistenciaItem {
 export const GestionCursoDocentePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const cursoId = parseInt(id || '0');
 
-  const [activeTab, setActiveTab] = useState<TabType>('estudiantes');
+  // Leer el tab de los query params, si existe
+  const tabParam = searchParams.get('tab') as TabType | null;
+  const initialTab: TabType = (tabParam && ['estudiantes', 'notas', 'asistencia', 'trabajos'].includes(tabParam)) 
+    ? tabParam 
+    : 'estudiantes';
+  
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  // Actualizar activeTab cuando cambia el query param
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as TabType | null;
+    if (tabParam && ['estudiantes', 'notas', 'asistencia', 'trabajos'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
   const [estudiantes, setEstudiantes] = useState<EstudianteCurso[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,7 +70,7 @@ export const GestionCursoDocentePage = () => {
   const [asistenciasMarcadas, setAsistenciasMarcadas] = useState<Map<string, AsistenciaItem[]>>(new Map());
   const [asistenciasRegistradas, setAsistenciasRegistradas] = useState<any[]>([]);
   const [isLoadingAsistenciasRegistradas, setIsLoadingAsistenciasRegistradas] = useState(false);
-  
+
   // Estado para editar asistencia
   const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
   const [asistenciaEditando, setAsistenciaEditando] = useState<any>(null);
@@ -60,6 +79,10 @@ export const GestionCursoDocentePage = () => {
   const [estadoEditar, setEstadoEditar] = useState(true);
   const [observacionesEditar, setObservacionesEditar] = useState('');
   const [isSubmittingEdicion, setIsSubmittingEdicion] = useState(false);
+
+  // Estado para modal de notas individual
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<EstudianteCurso | null>(null);
+  const [mostrarModalNotas, setMostrarModalNotas] = useState(false);
 
   useEffect(() => {
     cargarEstudiantes();
@@ -76,14 +99,41 @@ export const GestionCursoDocentePage = () => {
   useEffect(() => {
     if (activeTab === 'notas') {
       cargarTiposEvaluacion();
+      // Recargar estudiantes cuando se entra a la pestaña de notas
+      cargarEstudiantes();
     }
   }, [activeTab]);
+
+  // Escuchar cambios en las queries de trabajos para recargar estudiantes cuando se califica
+  useEffect(() => {
+    if (activeTab !== 'notas') return;
+
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      // Si se invalidó una query relacionada con trabajos y estamos en la pestaña de notas, recargar estudiantes
+      if (event?.type === 'updated') {
+        const queryKey = event.query.queryKey;
+        if (Array.isArray(queryKey) && (
+          queryKey.includes('entregas-trabajo') || 
+          queryKey.includes('trabajos-pendientes')
+        )) {
+          // Esperar un momento para que el backend termine de procesar
+          setTimeout(() => {
+            cargarEstudiantes();
+            // Limpiar ediciones después de recargar para mostrar los valores del backend
+            setNotasEditadas(new Map());
+          }, 1000);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeTab, queryClient]);
 
   const cargarEstudiantes = async () => {
     try {
       setIsLoading(true);
       const response = await docenteCursosApi.getEstudiantesCurso(cursoId);
-      
+
       // Verificar si la respuesta tiene el formato con mensaje informativo
       if (response && typeof response === 'object' && 'estudiantes' in response) {
         const respuestaConMensaje = response as EstudiantesResponse;
@@ -167,10 +217,15 @@ export const GestionCursoDocentePage = () => {
     });
   };
 
+  const handleAbrirModalNotas = (estudiante: EstudianteCurso) => {
+    setEstudianteSeleccionado(estudiante);
+    setMostrarModalNotas(true);
+  };
+
   // Guardar notas de un estudiante individual
   const handleGuardarNotasEstudiante = async (estudiante: EstudianteCurso) => {
     const notasEditadasEstudiante = notasEditadas.get(estudiante.idMatricula);
-    
+
     // Si no hay cambios pendientes, usar las notas existentes
     const notasActuales = notasEditadasEstudiante || {};
 
@@ -189,11 +244,11 @@ export const GestionCursoDocentePage = () => {
           // Usar el nombre real del tipo de evaluación como clave
           const nombreTipo = tipo.nombre;
           const campoNotaMapeado = mapearNombreACampo(tipo.nombre);
-          
+
           const valorEditado = notasActuales[campoNotaMapeado];
           // Buscar el valor existente usando el nombre EXACTO (como viene del backend)
           const valorExistente = (estudiante.notas as any)?.[nombreTipo];
-          
+
           // Usar valor editado si existe, sino usar el existente
           if (valorEditado !== undefined && valorEditado !== '') {
             request[nombreTipo] = parseFloat(valorEditado);
@@ -208,7 +263,12 @@ export const GestionCursoDocentePage = () => {
       // Recargar estudiantes para reflejar las notas guardadas
       await cargarEstudiantes();
 
-      // NO limpiar las ediciones - mantener los valores en los inputs
+      // Limpiar las ediciones de este estudiante después de guardar exitosamente
+      setNotasEditadas(prev => {
+        const nuevas = new Map(prev);
+        nuevas.delete(estudiante.idMatricula);
+        return nuevas;
+      });
     } catch (error: any) {
       console.error('Error al guardar notas:', error);
       toast.error(error.response?.data?.message || 'Error al guardar notas');
@@ -245,11 +305,11 @@ export const GestionCursoDocentePage = () => {
             .forEach(tipo => {
               const nombreTipo = tipo.nombre; // Nombre exacto de la base de datos
               const campoNotaMapeado = mapearNombreACampo(tipo.nombre); // Para buscar en notasEditadas
-              
+
               const valorEditado = notasEditadasEstudiante[campoNotaMapeado];
               // Buscar el valor existente usando el nombre EXACTO (como viene del backend)
               const valorExistente = (estudiante.notas as any)?.[nombreTipo];
-              
+
               // Usar valor editado si existe, sino usar el existente
               if (valorEditado !== undefined && valorEditado !== '') {
                 request[nombreTipo] = parseFloat(valorEditado);
@@ -276,7 +336,8 @@ export const GestionCursoDocentePage = () => {
       // Recargar estudiantes para reflejar los cambios
       await cargarEstudiantes();
 
-      // NO limpiar las ediciones - mantener los valores en los inputs
+      // Limpiar todas las ediciones después de guardar exitosamente
+      setNotasEditadas(new Map());
     } catch (error: any) {
       console.error('Error al guardar todas las notas:', error);
       toast.error('Error al guardar las notas');
@@ -306,7 +367,7 @@ export const GestionCursoDocentePage = () => {
       const pesoTotal = tiposEvaluacion
         .filter(t => t.activo)
         .reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0);
-      
+
       if (Math.abs(pesoTotal - 100) > 0.01) {
         toast.error(`Los pesos deben sumar 100%. Suma actual: ${pesoTotal}%`);
         return;
@@ -325,10 +386,10 @@ export const GestionCursoDocentePage = () => {
 
       toast.success('Configuración guardada correctamente');
       setMostrarModalConfig(false);
-      
+
       // Recargar tipos de evaluación para actualizar el estado local con los nombres nuevos
       await cargarTiposEvaluacion();
-      
+
       // Recargar estudiantes para actualizar las notas
       await cargarEstudiantes();
     } catch (error: any) {
@@ -361,7 +422,7 @@ export const GestionCursoDocentePage = () => {
   // Actualizar tipo de evaluación
   const handleActualizarTipo = (index: number, campo: string, valor: any) => {
     setTiposEvaluacion(
-      tiposEvaluacion.map((t, i) => 
+      tiposEvaluacion.map((t, i) =>
         i === index ? { ...t, [campo]: valor } : t
       )
     );
@@ -370,7 +431,7 @@ export const GestionCursoDocentePage = () => {
   // Mapear nombre de tipo de evaluación a propiedad del objeto notas
   const mapearNombreACampo = (nombreTipo: string): string => {
     const nombreLower = nombreTipo.toLowerCase().trim();
-    
+
     // Mapeo de nombres comunes a campos del backend
     const mapeos: { [key: string]: string } = {
       'parcial 1': 'parcial1',
@@ -447,7 +508,7 @@ export const GestionCursoDocentePage = () => {
     try {
       // Verificar que al menos un estudiante tenga asistencia marcada
       const asistenciasMarcadasValidas = asistencias.filter(a => a.presente !== null);
-      
+
       if (asistenciasMarcadasValidas.length === 0) {
         toast.error('Debe marcar al menos un estudiante como presente o ausente');
         return;
@@ -459,7 +520,7 @@ export const GestionCursoDocentePage = () => {
         idCurso: cursoId,
         fecha: fechaAsistencia,
         tipoClase: tipoClaseAsistencia, // Agregar tipo de clase
-        asistencias: asistenciasMarcadasValidas.map(a => ({
+        estudiantes: asistenciasMarcadasValidas.map(a => ({
           idEstudiante: a.idEstudiante,
           presente: a.presente as boolean, // Ya filtramos los null
           observaciones: a.observaciones || undefined,
@@ -511,7 +572,7 @@ export const GestionCursoDocentePage = () => {
 
     try {
       setIsSubmittingEdicion(true);
-      
+
       await docenteAsistenciaApi.actualizarAsistencia(asistenciaEditando.id, {
         fecha: fechaEditar,
         tipoClase: tipoClaseEditar,
@@ -546,7 +607,7 @@ export const GestionCursoDocentePage = () => {
       // Recargar asistencias registradas y estudiantes
       await cargarAsistenciasRegistradas();
       await cargarEstudiantes();
-      
+
       // Resetear asistencias del día actual
       cargarAsistenciaDelDia(fechaAsistencia);
     } catch (error: any) {
@@ -575,7 +636,7 @@ export const GestionCursoDocentePage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-1xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
               <button
@@ -591,51 +652,58 @@ export const GestionCursoDocentePage = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mt-4">
+          <div className="flex gap-1 mt-0  overflow-x-auto pb-1">
             <button
-              onClick={() => setActiveTab('estudiantes')}
-              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
-                activeTab === 'estudiantes'
-                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                setActiveTab('estudiantes');
+                setSearchParams({});
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'estudiantes'
+                ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
               <UsersIcon className="w-5 h-5" />
               Estudiantes
             </button>
             <button
-              onClick={() => setActiveTab('notas')}
-              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
-                activeTab === 'notas'
-                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                setActiveTab('notas');
+                setSearchParams({ tab: 'notas' });
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'notas'
+                ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
               <PencilSquareIcon className="w-5 h-5" />
               Registro de Notas
             </button>
             <button
-              onClick={() => setActiveTab('asistencia')}
-              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition ${
-                activeTab === 'asistencia'
-                  ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              onClick={() => {
+                setActiveTab('trabajos');
+                setSearchParams({ tab: 'trabajos' });
+              }}
+              className={`flex items-center gap-2 px-4 py-2 font-medium rounded-t-lg transition whitespace-nowrap ${activeTab === 'trabajos'
+                ? 'bg-white text-primary-700 border-t-2 border-l border-r border-primary-700'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
             >
-              <CalendarDaysIcon className="w-5 h-5" />
-              Asistencia
+              <FileText className="w-5 h-5" />
+              Trabajos
             </button>
+
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-1xl mx-auto px-1 sm:px-1 lg:px-0 py-5">
         {/* Tab: Estudiantes */}
         {activeTab === 'estudiantes' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <h2 className="text-lg font-bold text-gray-900">
                   Lista de Estudiantes ({estudiantes.length})
                 </h2>
@@ -644,7 +712,7 @@ export const GestionCursoDocentePage = () => {
                   placeholder="Buscar por nombre o código..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
                 />
               </div>
             </div>
@@ -655,7 +723,7 @@ export const GestionCursoDocentePage = () => {
                   <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No hay estudiantes</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    {estudiantes.length === 0 
+                    {estudiantes.length === 0
                       ? 'No hay estudiantes matriculados en este curso para el período activo.'
                       : 'No se encontraron estudiantes con ese criterio de búsqueda.'}
                   </p>
@@ -667,55 +735,58 @@ export const GestionCursoDocentePage = () => {
                 </div>
               ) : (
                 <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Código
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nombre Completo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Correo
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Promedio
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Asistencia
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {estudiantesFiltrados.map((estudiante) => (
-                    <tr key={estudiante.idEstudiante} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {estudiante.codigo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {estudiante.nombreCompleto}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {estudiante.correo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                          (estudiante.promedioFinal || 0) >= 11
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Código
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nombre Completo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Correo
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Promedio
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {estudiantesFiltrados.map((estudiante) => (
+                      <tr key={estudiante.idEstudiante} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {estudiante.codigo}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {estudiante.nombreCompleto}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {estudiante.correo}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${(estudiante.promedioFinal || 0) >= 11
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
-                        }`}>
-                          {Math.round(estudiante.promedioFinal || 0)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        <span className="text-sm font-medium text-gray-900">
-                          {(estudiante.porcentajeAsistencia || 0).toFixed(1)}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            }`}>
+                            {Math.round(estudiante.promedioFinal || 0)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <button
+                            onClick={() => handleAbrirModalNotas(estudiante)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-700 text-white text-xs font-medium rounded-md hover:bg-primary-800 transition"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                            Calificar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
@@ -724,17 +795,17 @@ export const GestionCursoDocentePage = () => {
         {/* Tab: Registro de Notas */}
         {activeTab === 'notas' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-lg font-bold text-gray-900">
                 Registro de Notas ({estudiantes.length} estudiantes)
               </h2>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => {
                     cargarTiposEvaluacion();
                     setMostrarModalConfig(true);
                   }}
-                  className="px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
+                  className="px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2"
                 >
                   <Cog6ToothIcon className="w-5 h-5" />
                   Configurar Evaluaciones
@@ -742,7 +813,7 @@ export const GestionCursoDocentePage = () => {
                 <button
                   onClick={handleGuardarTodasLasNotas}
                   disabled={isSubmittingNotas || notasEditadas.size === 0}
-                  className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center gap-2"
+                  className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
                 >
                   {isSubmittingNotas ? 'Guardando...' : `Guardar Todas las Notas ${notasEditadas.size > 0 ? `(${notasEditadas.size})` : ''}`}
                 </button>
@@ -771,7 +842,7 @@ export const GestionCursoDocentePage = () => {
                         .sort((a, b) => a.orden - b.orden)
                         .map((tipo) => (
                           <th key={tipo.id || tipo.nombre} className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            {tipo.nombre}<br/>
+                            {tipo.nombre}<br />
                             <span className="text-gray-400 font-normal">({tipo.peso}%)</span>
                           </th>
                         ))}
@@ -787,7 +858,7 @@ export const GestionCursoDocentePage = () => {
                     {estudiantes.map((estudiante) => {
                       const notasEditadasEstudiante = notasEditadas.get(estudiante.idMatricula) || {};
                       const tieneEdiciones = notasEditadas.has(estudiante.idMatricula);
-                      
+
                       return (
                         <tr key={estudiante.idMatricula} className={`hover:bg-gray-50 ${tieneEdiciones ? 'bg-yellow-50' : ''}`}>
                           <td className="px-4 py-3 whitespace-nowrap sticky left-0 bg-white z-10">
@@ -796,19 +867,44 @@ export const GestionCursoDocentePage = () => {
                               <span className="text-xs text-gray-500">{estudiante.codigo}</span>
                             </div>
                           </td>
-                          
+
                           {/* Generar inputs dinámicamente para cada tipo de evaluación */}
                           {tiposEvaluacion
                             .filter(tipo => tipo.activo)
                             .sort((a, b) => a.orden - b.orden)
                             .map((tipo) => {
                               const campoNota = mapearNombreACampo(tipo.nombre); // Para guardar en notasEditadas
-                              const nombreTipo = tipo.nombre; // Nombre exacto para leer del backend
+                              const nombreTipo = tipo.nombre.trim(); // Nombre exacto para leer del backend (con trim)
+
+                              // Buscar valor existente del backend (nombre exacto, case-insensitive)
+                              const notasBackend = estudiante.notas as any;
+                              let valorBackend: number | string | undefined = undefined;
                               
-                              // Buscar valor editado en notasEditadas (camelCase) o valor existente del backend (nombre exacto)
-                              const valorActual = notasEditadasEstudiante[campoNota] ?? 
-                                                 (estudiante.notas as any)?.[nombreTipo] ?? '';
-                              
+                              // Buscar el valor en las notas del backend usando el nombre exacto (case-insensitive)
+                              if (notasBackend) {
+                                // Intentar con el nombre exacto
+                                valorBackend = notasBackend[nombreTipo];
+                                
+                                // Si no se encuentra, buscar case-insensitive
+                                if (valorBackend === undefined) {
+                                  const keys = Object.keys(notasBackend);
+                                  const keyEncontrada = keys.find(k => 
+                                    k.trim().toLowerCase() === nombreTipo.toLowerCase()
+                                  );
+                                  if (keyEncontrada) {
+                                    valorBackend = notasBackend[keyEncontrada];
+                                  }
+                                }
+                              }
+
+                              // Priorizar valor editado si existe y no está vacío, sino usar valor del backend
+                              const valorEditado = notasEditadasEstudiante[campoNota];
+                              const valorActual = (valorEditado !== undefined && valorEditado !== '') 
+                                ? valorEditado 
+                                : (valorBackend !== undefined && valorBackend !== null)
+                                  ? valorBackend.toString()
+                                  : '';
+
                               return (
                                 <td key={tipo.id || tipo.nombre} className="px-3 py-3">
                                   <input
@@ -821,18 +917,17 @@ export const GestionCursoDocentePage = () => {
                                 </td>
                               );
                             })}
-                          
+
                           {/* Promedio */}
                           <td className="px-4 py-3 text-center bg-primary-50">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-                              Math.round(estudiante.promedioFinal || 0) >= 11
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${Math.round(estudiante.promedioFinal || 0) >= 11
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                              }`}>
                               {Math.round(estudiante.promedioFinal || 0)}
                             </span>
                           </td>
-                          
+
                           {/* Acciones */}
                           <td className="px-4 py-3 text-center">
                             <button
@@ -853,8 +948,22 @@ export const GestionCursoDocentePage = () => {
           </div>
         )}
 
+        {/* Tab: Trabajos */}
+        {activeTab === 'trabajos' && (
+          <TrabajosDocentePage 
+            idCurso={cursoId} 
+            onCalificacionGuardada={() => {
+              // Recargar estudiantes cuando se califica un trabajo para actualizar el registro de notas
+              // Siempre recargar por si el usuario cambia de pestaña
+              setTimeout(() => {
+                cargarEstudiantes();
+              }, 500);
+            }}
+          />
+        )}
+
         {/* Tab: Asistencia */}
-        {activeTab === 'asistencia' && (
+        {false && activeTab === 'asistencia' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
@@ -904,7 +1013,7 @@ export const GestionCursoDocentePage = () => {
                       Estudiante
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Asistencia
+                      Estado
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Observaciones
@@ -922,13 +1031,12 @@ export const GestionCursoDocentePage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-center">
                         <button
                           onClick={() => handleToggleAsistencia(asistencia.idEstudiante)}
-                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
-                            asistencia.presente === null
-                              ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-300'
-                              : asistencia.presente
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${asistencia.presente === null
+                            ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-300'
+                            : asistencia.presente
                               ? 'bg-green-100 text-green-800 hover:bg-green-200'
                               : 'bg-red-100 text-red-800 hover:bg-red-200'
-                          }`}
+                            }`}
                         >
                           {asistencia.presente === null ? (
                             <>
@@ -990,7 +1098,7 @@ export const GestionCursoDocentePage = () => {
                 <h3 className="text-lg font-bold text-gray-900">Asistencias Registradas</h3>
                 <p className="text-sm text-gray-600 mt-1">Historial de todas las asistencias registradas en este curso</p>
               </div>
-              
+
               {isLoadingAsistenciasRegistradas ? (
                 <div className="px-6 py-12 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-700 mx-auto"></div>
@@ -1033,18 +1141,17 @@ export const GestionCursoDocentePage = () => {
                       {asistenciasRegistradas.map((asist, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(asist.fecha).toLocaleDateString('es-PE', { 
-                              year: 'numeric', 
-                              month: 'short', 
-                              day: 'numeric' 
+                            {new Date(asist.fecha).toLocaleDateString('es-PE', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
                             })}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              asist.tipoClase === 'Teoría'
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-primary-100 text-primary-800'
-                            }`}>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${asist.tipoClase === 'Teoría'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-primary-100 text-primary-800'
+                              }`}>
                               {asist.tipoClase}
                             </span>
                           </td>
@@ -1203,11 +1310,10 @@ export const GestionCursoDocentePage = () => {
                             TOTAL (solo activos):
                           </td>
                           <td className="px-4 py-3 text-center font-bold">
-                            <span className={`text-lg ${
-                              Math.abs(tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0) - 100) < 0.01
-                                ? 'text-green-600'
-                                : 'text-red-600'
-                            }`}>
+                            <span className={`text-lg ${Math.abs(tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0) - 100) < 0.01
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                              }`}>
                               {tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0).toFixed(2)}%
                             </span>
                           </td>
@@ -1250,7 +1356,7 @@ export const GestionCursoDocentePage = () => {
       )}
 
       {/* Modal de Editar Asistencia */}
-      {mostrarModalEditar && asistenciaEditando && (
+      {false && mostrarModalEditar && asistenciaEditando && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             {/* Header del Modal */}
@@ -1334,6 +1440,85 @@ export const GestionCursoDocentePage = () => {
                 className="px-6 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
                 {isSubmittingEdicion ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Calificar Estudiante */}
+      {mostrarModalNotas && estudianteSeleccionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-900">Calificar Estudiante</h3>
+              <button
+                onClick={() => setMostrarModalNotas(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircleIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="px-6 py-4">
+              <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Estudiante</p>
+                <p className="text-lg font-bold text-gray-900">{estudianteSeleccionado.nombreCompleto}</p>
+                <p className="text-sm text-gray-600 font-medium">{estudianteSeleccionado.codigo}</p>
+              </div>
+
+              <div className="space-y-4">
+                {tiposEvaluacion.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">
+                    No hay evaluaciones configuradas.
+                  </div>
+                ) : (
+                  tiposEvaluacion
+                    .filter(tipo => tipo.activo)
+                    .sort((a, b) => a.orden - b.orden)
+                    .map((tipo) => {
+                      const campoNota = mapearNombreACampo(tipo.nombre);
+                      const nombreTipo = tipo.nombre;
+                      const notasEditadasEstudiante = notasEditadas.get(estudianteSeleccionado.idMatricula) || {};
+
+                      const valorActual = notasEditadasEstudiante[campoNota] ??
+                        (estudianteSeleccionado.notas as any)?.[nombreTipo] ?? '';
+
+                      return (
+                        <div key={tipo.id || tipo.nombre}>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {tipo.nombre} <span className="text-gray-500 text-xs">({tipo.peso}%)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={valorActual}
+                            onChange={(e) => handleNotaChange(estudianteSeleccionado.idMatricula, campoNota, e.target.value)}
+                            placeholder="0-20"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                          />
+                        </div>
+                      );
+                    })
+                )}
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 sticky bottom-0 bg-white z-10">
+              <button
+                onClick={() => setMostrarModalNotas(false)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  await handleGuardarNotasEstudiante(estudianteSeleccionado);
+                  setMostrarModalNotas(false);
+                }}
+                disabled={isSubmittingNotas}
+                className="px-6 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+              >
+                {isSubmittingNotas ? 'Guardando...' : 'Guardar Notas'}
               </button>
             </div>
           </div>

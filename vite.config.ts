@@ -4,22 +4,27 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Usar localhost en desarrollo para que Vite proxyee las peticiones al backend
-    // que corre localmente sin Docker.
     host: 'localhost',
     port: 3000,
+    // Permitir acceso desde ngrok y render
+    allowedHosts: [
+      'kiara-unascendant-trustingly.ngrok-free.dev',
+      '.ngrok-free.dev',
+      '.onrender.com'
+    ],
     proxy: {
       '/api': {
-        target: 'http://localhost:5251',
+        target: 'https://gestion-academica-api.onrender.com',
         changeOrigin: true,
-        secure: false
+        secure: true
       },
       '/hub': {
-        target: 'ws://localhost:5251',
+        target: 'wss://gestion-academica-api.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         ws: true // Habilitar WebSocket para SignalR
       }
     }
   }
 })
+

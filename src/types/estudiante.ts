@@ -92,7 +92,8 @@ export interface SemestreRegistro {
   idPeriodo: number;
   periodo: string;
   anio: number;
-  ciclo: string;
+  ciclo: string;  // 'I' o 'II' - Semestre del período
+  cicloAcademico: number;  // 1, 2, 3... 10 - Ciclo académico del estudiante
   fechaInicio?: string;
   fechaFin?: string;
   estado: string;

@@ -1,247 +1,215 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  User, Mail, Calendar, Award, TrendingUp, BookOpen, GraduationCap, 
-  Lock, Eye, EyeOff, X, KeyRound, Edit2, Save, Phone, MapPin, 
-  CreditCard, Shield, CheckCircle2
+import {
+  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard, Fingerprint, ShieldCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useWebAuthnRegister } from '../../hooks/useWebAuthnRegister';
 
 const PerfilEstudiantePage: React.FC = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [seccionActiva, setSeccionActiva] = useState<'info' | 'contacto' | 'academico'>('info');
+  const [editandoContacto, setEditandoContacto] = useState(false);
   const queryClient = useQueryClient();
+  const { register: registerPasskey, loading: isRegisterLoading } = useWebAuthnRegister();
 
   const { data: perfil, isLoading } = useQuery({
     queryKey: ['estudiante-perfil'],
     queryFn: estudiantesApi.getPerfil,
   });
 
-  const { data: misCursos } = useQuery({
-    queryKey: ['mis-cursos-total'],
-    queryFn: () => estudiantesApi.getMisCursos(),
+  const handleRegisterPasskey = async () => {
+    if (!perfil?.email) {
+      toast.error('No se pudo obtener el correo del usuario');
+      return;
+    }
+    const result = await registerPasskey(perfil.email);
+    if (result.success) {
+      toast.success('Huella/FaceID registrada exitosamente');
+    } else if (result.errorMessage) {
+      toast.error(result.errorMessage);
+    }
+  };
+
+  const { data: periodoActivo } = useQuery({
+    queryKey: ['periodo-activo'],
+    queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const cursosAprobados = misCursos?.filter(c => c.estado === 'Aprobado').length || 0;
-  const cursosActivos = misCursos?.filter(c => c.estado === 'Matriculado').length || 0;
+  // Cursos del período actual
+  const { data: misCursosCicloActual } = useQuery({
+    queryKey: ['mis-cursos-ciclo', periodoActivo?.id],
+    queryFn: () => estudiantesApi.getMisCursos(periodoActivo?.id),
+    enabled: !!periodoActivo?.id,
+  });
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
-  };
+  // Calcular créditos matriculados este ciclo
+  const creditosMatriculadosCiclo = misCursosCicloActual
+    ?.filter(c => c.estado === 'Matriculado')
+    ?.reduce((sum, c) => sum + (c.creditos || 0), 0) || 0;
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
-  };
+  // Calcular cursos aprobados este ciclo (promedioFinal >= 11)
+  const cursosAprobadosCiclo = misCursosCicloActual
+    ?.filter(c => c.promedioFinal !== undefined && c.promedioFinal !== null && c.promedioFinal >= 11)
+    ?.length || 0;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="animate-spin w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  const getInitials = (nombre?: string) => {
-    return nombre?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'ES';
-  };
-
   return (
-    <motion.div 
-      className="space-y-6"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      {/* Header del perfil */}
-      <motion.div 
-        variants={itemVariants}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-      >
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          {/* Avatar */}
-          <motion.div 
-            className="relative"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <div 
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg"
-              style={{
-                background: 'linear-gradient(135deg, #003366 0%, #004d99 100%)',
-                border: '3px solid #C7A740'
-              }}
-            >
-              {getInitials(perfil?.nombreCompleto)}
-            </div>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
-              className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-md border-2 border-white"
-            >
-              <CheckCircle2 className="w-4 h-4 text-white" />
-            </motion.div>
-          </motion.div>
+    <div className="space-y-6">
+      {/* Header simple */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Mi Perfil</h1>
+          <p className="text-zinc-500 text-sm mt-1">Información personal y académica</p>
+        </div>
+        <button
+          onClick={() => setModalAbierto(true)}
+          className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+        >
+          Cambiar contraseña
+        </button>
+      </div>
 
-          {/* Info */}
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {perfil?.nombreCompleto}
-            </h1>
-            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-3">
-              <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-lg text-sm font-medium">
-                {perfil?.codigo}
-              </span>
-              <span className="px-3 py-1 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium">
-                Ciclo {perfil?.cicloActual}
-              </span>
-              <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium">
-                {perfil?.estado}
-              </span>
+      {/* Grid principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Columna izquierda - Card principal */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Tarjeta de identidad */}
+          <div className="bg-white border border-zinc-200 rounded-xl p-6">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 mx-auto bg-zinc-900 rounded-full flex items-center justify-center text-white text-2xl font-semibold mb-4">
+                {perfil?.nombreCompleto?.split(' ').slice(0, 2).map((n: string) => n[0]).join('') || 'ES'}
+              </div>
+              <h2 className="text-lg font-semibold text-zinc-900">{perfil?.nombreCompleto}</h2>
+              <p className="text-sm text-zinc-500 mt-1">{perfil?.carrera}</p>
             </div>
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
-              <GraduationCap className="w-4 h-4 text-primary-700" />
-              <span className="text-sm">{perfil?.carrera}</span>
+
+            <div className="space-y-3 pt-4 border-t border-zinc-100">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Código</span>
+                <span className="text-sm font-mono text-zinc-900">{perfil?.codigo}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Ciclo</span>
+                <span className="text-sm font-medium text-zinc-900">{perfil?.cicloActual}°</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-zinc-500">Estado</span>
+                <span className="px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                  {perfil?.estado}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Botón */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setModalAbierto(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary-700 text-white rounded-lg font-medium hover:bg-primary-800 transition-colors shadow-sm"
-          >
-            <Shield className="w-4 h-4" />
-            Cambiar Contraseña
-          </motion.button>
-        </div>
-      </motion.div>
-
-      {/* Estadísticas */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: Award, label: 'Créditos Acumulados', value: perfil?.creditosAcumulados || 0, color: 'emerald' },
-          { icon: BookOpen, label: 'Cursos Activos', value: cursosActivos, color: 'primary' },
-          { icon: Award, label: 'Cursos Aprobados', value: cursosAprobados, color: 'amber' },
-          { icon: TrendingUp, label: 'Total Cursos', value: misCursos?.length || 0, color: 'indigo' },
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + index * 0.05 }}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className={`bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow`}
-          >
-            <div className={`w-10 h-10 bg-${stat.color}-100 rounded-lg flex items-center justify-center mb-3`}>
-              <stat.icon className={`w-5 h-5 text-${stat.color}-600`} />
+          {/* Stats compactos */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{perfil?.creditosAcumulados || 0}</p>
+              <p className="text-xs text-zinc-500 mt-1">Créditos totales</p>
             </div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{stat.label}</p>
-            <p className={`text-3xl font-bold text-${stat.color}-600`}>{stat.value}</p>
-          </motion.div>
-        ))}
-      </motion.div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{creditosMatriculadosCiclo}</p>
+              <p className="text-xs text-zinc-500 mt-1">Créditos este ciclo</p>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{cursosAprobadosCiclo}</p>
+              <p className="text-xs text-zinc-500 mt-1">Aprobados este ciclo</p>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-xl p-4 text-center">
+              <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{misCursosCicloActual?.filter(c => c.estado === 'Matriculado')?.length || 0}</p>
+              <p className="text-xs text-zinc-500 mt-1">Cursos matriculados</p>
+            </div>
+          </div>
+        </div>
 
-      {/* Tabs de navegación */}
-      <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
-          <div className="flex">
-            {[
-              { id: 'info', label: 'Información Personal', icon: User },
-              { id: 'contacto', label: 'Contacto', icon: Mail },
-              { id: 'academico', label: 'Estado Académico', icon: GraduationCap },
-            ].map((tab) => (
+        {/* Columna derecha - Detalles */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Información personal */}
+          <div className="bg-white border border-zinc-200 rounded-xl">
+            <div className="px-6 py-4 border-b border-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900">Información Personal</h3>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Campo icon={CreditCard} label="DNI" value={perfil?.dni} />
+                <Campo icon={Calendar} label="Fecha de Nacimiento" value={perfil?.fechaNacimiento?.split('T')[0]} />
+                <Campo icon={Mail} label="Correo Institucional" value={perfil?.email} className="sm:col-span-2" />
+              </div>
+            </div>
+          </div>
+
+          {/* Información de contacto editable */}
+          <SeccionContacto
+            perfil={perfil}
+            editando={editandoContacto}
+            setEditando={setEditandoContacto}
+            onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })}
+          />
+
+          {/* Seguridad Card */}
+          <div className="bg-white border border-zinc-200 rounded-xl">
+            <div className="px-6 py-4 border-b border-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900">Seguridad</h3>
+            </div>
+            <div className="p-6">
+              <div className="bg-zinc-50 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-zinc-500 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-zinc-900">Autenticación Biométrica</h4>
+                    <p className="text-xs text-zinc-500 mt-1">
+                      Vincula tu huella o reconocimiento facial para iniciar sesión de forma rápida y segura.
+                    </p>
+                  </div>
+                </div>
+              </div>
               <button
-                key={tab.id}
-                onClick={() => setSeccionActiva(tab.id as any)}
-                className={`relative flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-medium transition-colors ${
-                  seccionActiva === tab.id 
-                    ? 'text-primary-700' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
+                onClick={handleRegisterPasskey}
+                disabled={isRegisterLoading}
+                className="w-full h-10 bg-white border border-zinc-300 text-zinc-700 rounded-md text-sm font-medium
+                           hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-center gap-2"
               >
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-                {seccionActiva === tab.id && (
-                  <motion.div
-                    layoutId="activeTabIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
+                {isRegisterLoading ? (
+                  'Registrando...'
+                ) : (
+                  <>
+                    <Fingerprint className="h-4 w-4" />
+                    Registrar Huella / FaceID
+                  </>
                 )}
               </button>
-            ))}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Contenido de tabs */}
-        <div className="p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={seccionActiva}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              {seccionActiva === 'info' && <SeccionInformacion perfil={perfil} />}
-              {seccionActiva === 'contacto' && (
-                <SeccionContacto perfil={perfil} onUpdate={() => queryClient.invalidateQueries({ queryKey: ['estudiante-perfil'] })} />
-              )}
-              {seccionActiva === 'academico' && <SeccionAcademico perfil={perfil} />}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      {/* Modal Cambiar Contraseña */}
-      <AnimatePresence>
-        {modalAbierto && <ModalCambiarContrasena onClose={() => setModalAbierto(false)} />}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-// Sección Información Personal
-const SeccionInformacion: React.FC<{ perfil: any }> = ({ perfil }) => {
-  const campos = [
-    { icon: User, label: 'Nombre Completo', value: perfil?.nombreCompleto },
-    { icon: CreditCard, label: 'DNI', value: perfil?.dni },
-    { icon: Calendar, label: 'Fecha de Nacimiento', value: perfil?.fechaNacimiento?.split('T')[0] },
-    { icon: Mail, label: 'Correo Institucional', value: perfil?.email },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {campos.map((campo, index) => (
-        <motion.div
-          key={campo.label}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: index * 0.05 }}
-          className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-primary-200 hover:bg-gray-50/50 transition-all"
-        >
-          <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <campo.icon className="w-5 h-5 text-primary-700" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">{campo.label}</p>
-            <p className="text-sm font-medium text-gray-900 truncate">{campo.value || '—'}</p>
-          </div>
-        </motion.div>
-      ))}
+      {modalAbierto && <ModalCambiarContrasena onClose={() => setModalAbierto(false)} />}
     </div>
   );
 };
 
+// Campo de solo lectura
+const Campo: React.FC<{ icon: any; label: string; value?: string; className?: string }> = ({ icon: Icon, label, value, className }) => (
+  <div className={className}>
+    <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-1">{label}</label>
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-zinc-400" />
+      <span className="text-sm text-zinc-900">{value || '—'}</span>
+    </div>
+  </div>
+);
+
 // Sección Contacto Editable
-const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perfil, onUpdate }) => {
-  const [modoEdicion, setModoEdicion] = useState(false);
+const SeccionContacto: React.FC<{ perfil: any; editando: boolean; setEditando: (v: boolean) => void; onUpdate: () => void }> = ({ perfil, editando, setEditando, onUpdate }) => {
   const [formData, setFormData] = useState({
     apellidos: perfil?.apellidos || '',
     nombres: perfil?.nombres || '',
@@ -256,7 +224,7 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
     mutationFn: estudiantesApi.actualizarPerfil,
     onSuccess: () => {
       toast.success('Información actualizada');
-      setModoEdicion(false);
+      setEditando(false);
       onUpdate();
     },
     onError: (error: any) => {
@@ -264,7 +232,6 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
     },
   });
 
-  const handleSubmit = () => actualizarMutation.mutate(formData);
   const handleCancel = () => {
     setFormData({
       apellidos: perfil?.apellidos || '',
@@ -275,137 +242,68 @@ const SeccionContacto: React.FC<{ perfil: any; onUpdate: () => void }> = ({ perf
       telefono: perfil?.telefono || '',
       direccion: perfil?.direccion || '',
     });
-    setModoEdicion(false);
+    setEditando(false);
   };
 
-  const campos = [
-    { icon: User, label: 'Apellidos', field: 'apellidos', type: 'text' },
-    { icon: User, label: 'Nombres', field: 'nombres', type: 'text' },
-    { icon: Mail, label: 'Correo Personal', field: 'correo', type: 'email' },
-    { icon: Phone, label: 'Teléfono', field: 'telefono', type: 'tel' },
-    { icon: MapPin, label: 'Dirección', field: 'direccion', type: 'text', fullWidth: true },
-  ];
-
   return (
-    <div>
-      <div className="flex justify-end mb-4">
-        {!modoEdicion ? (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setModoEdicion(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg text-sm font-medium hover:bg-primary-800 transition-colors"
-          >
-            <Edit2 className="w-4 h-4" />
-            Editar
-          </motion.button>
+    <div className="bg-white border border-zinc-200 rounded-xl">
+      <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-900">Información de Contacto</h3>
+        {!editando ? (
+          <button onClick={() => setEditando(true)} className="text-sm text-zinc-500 hover:text-zinc-900 flex items-center gap-1.5 transition-colors">
+            <Edit2 className="w-3.5 h-3.5" /> Editar
+          </button>
         ) : (
           <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSubmit}
-              disabled={actualizarMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" />
-              {actualizarMutation.isPending ? 'Guardando...' : 'Guardar'}
-            </motion.button>
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
-            >
-              Cancelar
+            <button onClick={() => actualizarMutation.mutate(formData)} disabled={actualizarMutation.isPending} className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 disabled:opacity-50">
+              <Save className="w-3.5 h-3.5" /> {actualizarMutation.isPending ? 'Guardando...' : 'Guardar'}
             </button>
+            <button onClick={handleCancel} className="text-sm text-zinc-500 hover:text-zinc-700">Cancelar</button>
           </div>
         )}
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {campos.map((campo, index) => (
-          <motion.div
-            key={campo.field}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className={`flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-primary-200 transition-all ${campo.fullWidth ? 'md:col-span-2' : ''}`}
-          >
-            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <campo.icon className="w-5 h-5 text-primary-700" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{campo.label}</p>
-              {modoEdicion ? (
-                <input
-                  type={campo.type}
-                  value={formData[campo.field as keyof typeof formData]}
-                  onChange={(e) => setFormData(prev => ({ ...prev, [campo.field]: e.target.value }))}
-                  className="w-full text-sm font-medium text-gray-900 border-b border-gray-300 focus:border-primary-600 focus:outline-none py-1 bg-transparent"
-                  placeholder={`Ingresa tu ${campo.label.toLowerCase()}`}
-                />
-              ) : (
-                <p className={`text-sm font-medium truncate ${formData[campo.field as keyof typeof formData] ? 'text-gray-900' : 'text-gray-400 italic'}`}>
-                  {formData[campo.field as keyof typeof formData] || 'No registrado'}
-                </p>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Sección Académico
-const SeccionAcademico: React.FC<{ perfil: any }> = ({ perfil }) => {
-  return (
-    <div className="space-y-4">
-      {/* Estado principal */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between p-5 bg-emerald-50 border border-emerald-200 rounded-lg"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-            <Award className="w-6 h-6 text-emerald-600" />
-          </div>
-          <div>
-            <p className="font-semibold text-gray-900">Estado del Estudiante</p>
-            <p className="text-sm text-gray-600">Tu estado académico actual</p>
-          </div>
+      <div className="p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <CampoEditable icon={Mail} label="Correo Personal" field="correo" type="email" formData={formData} setFormData={setFormData} editando={editando} />
+          <CampoEditable icon={Phone} label="Teléfono" field="telefono" type="tel" formData={formData} setFormData={setFormData} editando={editando} />
+          <CampoEditable icon={MapPin} label="Dirección" field="direccion" type="text" formData={formData} setFormData={setFormData} editando={editando} className="sm:col-span-2" />
         </div>
-        <span className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-lg">
-          {perfil?.estado}
-        </span>
-      </motion.div>
-
-      {/* Info adicional */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {[
-          { label: 'Ciclo Actual', value: perfil?.cicloActual, icon: Calendar, color: 'primary' },
-          { label: 'Créditos Acumulados', value: perfil?.creditosAcumulados, icon: Award, color: 'amber' },
-        ].map((item, index) => (
-          <motion.div
-            key={item.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + index * 0.05 }}
-            className="flex items-center gap-4 p-4 rounded-lg border border-gray-200"
-          >
-            <div className={`w-10 h-10 bg-${item.color}-100 rounded-lg flex items-center justify-center`}>
-              <item.icon className={`w-5 h-5 text-${item.color}-600`} />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{item.label}</p>
-              <p className={`text-xl font-bold text-${item.color}-700`}>{item.value}</p>
-            </div>
-          </motion.div>
-        ))}
       </div>
     </div>
   );
 };
+
+// Campo editable
+const CampoEditable: React.FC<{
+  icon: any;
+  label: string;
+  field: string;
+  type: string;
+  formData: any;
+  setFormData: (v: any) => void;
+  editando: boolean;
+  className?: string;
+}> = ({ icon: Icon, label, field, type, formData, setFormData, editando, className }) => (
+  <div className={className}>
+    <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-1">{label}</label>
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+      {editando ? (
+        <input
+          type={type}
+          value={formData[field] || ''}
+          onChange={(e) => setFormData((prev: any) => ({ ...prev, [field]: e.target.value }))}
+          className="flex-1 text-sm text-zinc-900 border-b border-zinc-300 focus:border-zinc-900 outline-none py-1 bg-transparent"
+          placeholder={`Ingresa tu ${label.toLowerCase()}`}
+        />
+      ) : (
+        <span className={`text-sm ${formData[field] ? 'text-zinc-900' : 'text-zinc-400'}`}>
+          {formData[field] || 'No registrado'}
+        </span>
+      )}
+    </div>
+  </div>
+);
 
 // Modal Cambiar Contraseña
 const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -434,7 +332,7 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
       return;
     }
     if (contrasenaNueva.length < 6) {
-      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     if (contrasenaNueva !== confirmarContrasena) {
@@ -444,115 +342,148 @@ const ModalCambiarContrasena: React.FC<{ onClose: () => void }> = ({ onClose }) 
     cambiarContrasenaMutation.mutate({ contrasenaActual, contrasenaNueva });
   };
 
+  const validaciones = [
+    { ok: contrasenaNueva.length >= 6, texto: 'Mínimo 6 caracteres' },
+    { ok: contrasenaNueva === confirmarContrasena && confirmarContrasena.length > 0, texto: 'Las contraseñas coinciden' },
+  ];
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-              <KeyRound className="w-5 h-5 text-primary-700" />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        {/* Header con gradiente sutil */}
+        <div className="px-6 py-5 bg-gradient-to-b from-zinc-50 to-white border-b border-zinc-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-900">Cambiar contraseña</h2>
+              <p className="text-sm text-zinc-500 mt-0.5">Actualiza tu contraseña de acceso</p>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Cambiar Contraseña</h2>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Contraseña Actual */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Contraseña actual */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña Actual</label>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Contraseña actual</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={mostrarActual ? 'text' : 'password'}
                 value={contrasenaActual}
                 onChange={(e) => setContrasenaActual(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
                 placeholder="Ingresa tu contraseña actual"
               />
-              <button type="button" onClick={() => setMostrarActual(!mostrarActual)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {mostrarActual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              <button
+                type="button"
+                onClick={() => setMostrarActual(!mostrarActual)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarActual ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Nueva Contraseña */}
+          {/* Separador */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="px-3 bg-white text-xs text-zinc-400">Nueva contraseña</span>
+            </div>
+          </div>
+
+          {/* Nueva contraseña */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña</label>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Nueva contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={mostrarNueva ? 'text' : 'password'}
                 value={contrasenaNueva}
                 onChange={(e) => setContrasenaNueva(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
-                placeholder="Ingresa tu nueva contraseña"
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
+                placeholder="Mínimo 6 caracteres"
               />
-              <button type="button" onClick={() => setMostrarNueva(!mostrarNueva)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {mostrarNueva ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              <button
+                type="button"
+                onClick={() => setMostrarNueva(!mostrarNueva)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarNueva ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Confirmar Contraseña */}
+          {/* Confirmar contraseña */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+            <label className="text-sm font-medium text-zinc-700 block mb-2">Confirmar contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={mostrarConfirmar ? 'text' : 'password'}
                 value={confirmarContrasena}
                 onChange={(e) => setConfirmarContrasena(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-600 focus:border-transparent outline-none"
-                placeholder="Confirma tu nueva contraseña"
+                className="w-full h-11 px-4 pr-11 text-sm border border-zinc-200 rounded-xl bg-zinc-50 focus:bg-white focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-400 outline-none transition-all"
+                placeholder="Repite la nueva contraseña"
               />
-              <button type="button" onClick={() => setMostrarConfirmar(!mostrarConfirmar)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                {mostrarConfirmar ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                {mostrarConfirmar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {contrasenaNueva && (
-            <p className={`text-sm flex items-center gap-1 ${contrasenaNueva.length >= 6 ? 'text-emerald-600' : 'text-red-500'}`}>
-              {contrasenaNueva.length >= 6 ? '✓' : '✗'} Mínimo 6 caracteres
-            </p>
+          {/* Validaciones visuales */}
+          {(contrasenaNueva || confirmarContrasena) && (
+            <div className="flex flex-wrap gap-2">
+              {validaciones.map((v, i) => (
+                <span
+                  key={i}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${v.ok
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-zinc-100 text-zinc-500 border border-zinc-200'
+                    }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${v.ok ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
+                  {v.texto}
+                </span>
+              ))}
+            </div>
           )}
 
           {/* Botones */}
           <div className="flex gap-3 pt-2">
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              type="submit"
-              disabled={cambiarContrasenaMutation.isPending}
-              className="flex-1 py-2.5 bg-primary-700 text-white rounded-lg font-medium hover:bg-primary-800 disabled:opacity-50 transition-colors"
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 h-11 text-sm font-medium text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
             >
-              {cambiarContrasenaMutation.isPending ? 'Cambiando...' : 'Cambiar Contraseña'}
-            </motion.button>
-            <button type="button" onClick={onClose} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors">
               Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={cambiarContrasenaMutation.isPending || !contrasenaActual || contrasenaNueva.length < 6 || contrasenaNueva !== confirmarContrasena}
+              className="flex-1 h-11 text-sm font-medium text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {cambiarContrasenaMutation.isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Cambiando...
+                </span>
+              ) : 'Actualizar contraseña'}
             </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
 export default PerfilEstudiantePage;
-

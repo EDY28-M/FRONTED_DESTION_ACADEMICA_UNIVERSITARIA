@@ -119,6 +119,24 @@ export interface TendenciaAsistencia {
   porcentajeAsistencia: number;
 }
 
+export interface EstadisticasAsistenciaCompletas {
+  idEstudiante: number;
+  nombreEstudiante: string;
+  codigoEstudiante: string;
+  idCurso: number;
+  nombreCurso: string;
+  creditos: number;
+  sesionesPorSemana: number;
+  totalSesionesEsperadas: number;
+  totalAsistencias: number;
+  asistenciasPresente: number;
+  asistenciasFalta: number;
+  porcentajeAsistencia: number;
+  porcentajeInasistencia: number;
+  puedeDarExamenFinal: boolean;
+  mensajeBloqueo: string;
+}
+
 export interface HistorialAsistencias {
   asistencias: Asistencia[];
   totalRegistros: number;
@@ -363,6 +381,32 @@ export const asistenciasApi = {
     const response = await axios.get('/asistencias/porcentaje', {
       params: { idEstudiante, idCurso }
     });
+    return response.data;
+  },
+
+  /**
+   * Obtiene estadísticas completas con cálculo de sesiones y validación de examen final
+   */
+  getEstadisticasCompletas: async (
+    idEstudiante: number,
+    idCurso: number
+  ): Promise<EstadisticasAsistenciaCompletas> => {
+    const response = await axios.get(
+      `/asistencias/estudiante/${idEstudiante}/curso/${idCurso}/estadisticas-completas`
+    );
+    return response.data;
+  },
+
+  /**
+   * Verifica si el estudiante puede rendir examen final
+   */
+  puedeRendirExamenFinal: async (
+    idEstudiante: number,
+    idCurso: number
+  ): Promise<{ puedeRendirExamenFinal: boolean; porcentajeInasistencia: number; mensaje: string }> => {
+    const response = await axios.get(
+      `/asistencias/estudiante/${idEstudiante}/curso/${idCurso}/puede-examen-final`
+    );
     return response.data;
   },
 };

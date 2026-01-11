@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { Horario } from '../types/horario';
 
-const API_URL = 'http://localhost:5251/api';
+// En desarrollo usa proxy de Vite (/api), en producción usa VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Interfaces que coinciden con los DTOs del backend
 export interface LoginDocenteDto {
@@ -80,7 +82,7 @@ export interface RegistrarAsistenciasMasivasDto {
   idCurso: number;
   fecha: string;
   tipoClase: string; // "Teoría" o "Práctica"
-  asistencias: AsistenciaEstudiante[];
+  estudiantes: AsistenciaEstudiante[];
 }
 
 export interface Asistencia {
@@ -98,11 +100,13 @@ export interface Asistencia {
 export interface ResumenAsistencia {
   idEstudiante: number;
   nombreEstudiante: string;
-  totalClases: number;
-  asistenciasPresentes: number;
-  faltas: number;
+  idCurso: number;
+  nombreCurso: string;
+  totalAsistencias: number;
+  asistenciasPresente: number;
+  asistenciasFalta: number;
   porcentajeAsistencia: number;
-  detalleAsistencias: Asistencia[];
+  asistencias: Asistencia[];
 }
 
 // Respuesta cuando no hay estudiantes o hay mensaje informativo
@@ -271,9 +275,152 @@ export const docenteTiposEvaluacionApi = {
   },
 };
 
+// API de horarios del docente
+export const docenteHorariosApi = {
+  getMiHorario: async (): Promise<Horario[]> => {
+    const response = await apiClient.get('/horarios/mi-horario');
+    return response.data;
+  },
+};
+
+// Interfaces para Anuncios
+export interface Anuncio {
+  id: number;
+  idDocente: number;
+  nombreDocente: string;
+  idCurso: number | null;
+  nombreCurso: string | null;
+  titulo: string;
+  contenido: string;
+  prioridad: string;
+  fechaCreacion: string;
+  fechaActualizacion: string | null;
+  fechaPublicacion: string | null;
+  fechaExpiracion: string | null;
+  activo: boolean;
+}
+
+export interface CrearAnuncio {
+  idCurso?: number | null;
+  titulo: string;
+  contenido: string;
+  prioridad: 'normal' | 'importante' | 'urgente';
+  fechaPublicacion?: string | null;
+  fechaExpiracion?: string | null;
+  activo?: boolean;
+}
+
+export interface ActualizarAnuncio {
+  idCurso?: number | null;
+  titulo: string;
+  contenido: string;
+  prioridad: 'normal' | 'importante' | 'urgente';
+  fechaPublicacion?: string | null;
+  fechaExpiracion?: string | null;
+  activo: boolean;
+}
+
+// Interfaces para Materiales
+export interface MaterialCurso {
+  id: number;
+  idCurso: number;
+  nombreCurso: string;
+  idDocente: number;
+  nombre: string;
+  descripcion: string | null;
+  tipo: string;
+  categoria: string | null;
+  url: string | null;
+  rutaArchivo: string | null;
+  nombreArchivo: string | null;
+  tipoArchivo: string | null;
+  tamaño: number | null;
+  fechaCreacion: string;
+  fechaActualizacion: string | null;
+  fechaDisponibleDesde: string | null;
+  fechaDisponibleHasta: string | null;
+  activo: boolean;
+  orden: number;
+}
+
+export interface CrearMaterial {
+  nombre: string;
+  descripcion?: string;
+  tipo: 'archivo' | 'enlace' | 'video';
+  categoria?: string;
+  url?: string;
+  rutaArchivo?: string;
+  nombreArchivo?: string;
+  tipoArchivo?: string;
+  tamaño?: number;
+  fechaDisponibleDesde?: string | null;
+  fechaDisponibleHasta?: string | null;
+  orden?: number;
+  activo?: boolean;
+}
+
+export interface ActualizarMaterial {
+  nombre: string;
+  descripcion?: string;
+  categoria?: string;
+  url?: string;
+  fechaDisponibleDesde?: string | null;
+  fechaDisponibleHasta?: string | null;
+  orden?: number;
+  activo: boolean;
+}
+
+// API de Anuncios
+export const docenteAnunciosApi = {
+  getAnuncios: async (idCurso?: number): Promise<Anuncio[]> => {
+    const params = idCurso ? { idCurso } : {};
+    const response = await apiClient.get('/docentes/anuncios', { params });
+    return response.data;
+  },
+
+  crearAnuncio: async (anuncio: CrearAnuncio): Promise<Anuncio> => {
+    const response = await apiClient.post('/docentes/anuncios', anuncio);
+    return response.data;
+  },
+
+  actualizarAnuncio: async (id: number, anuncio: ActualizarAnuncio): Promise<Anuncio> => {
+    const response = await apiClient.put(`/docentes/anuncios/${id}`, anuncio);
+    return response.data;
+  },
+
+  eliminarAnuncio: async (id: number): Promise<void> => {
+    await apiClient.delete(`/docentes/anuncios/${id}`);
+  },
+};
+
+// API de Materiales
+export const docenteMaterialesApi = {
+  getMateriales: async (idCurso: number): Promise<MaterialCurso[]> => {
+    const response = await apiClient.get(`/docentes/cursos/${idCurso}/materiales`);
+    return response.data;
+  },
+
+  crearMaterial: async (idCurso: number, material: CrearMaterial): Promise<MaterialCurso> => {
+    const response = await apiClient.post(`/docentes/cursos/${idCurso}/materiales`, material);
+    return response.data;
+  },
+
+  actualizarMaterial: async (id: number, material: ActualizarMaterial): Promise<MaterialCurso> => {
+    const response = await apiClient.put(`/docentes/materiales/${id}`, material);
+    return response.data;
+  },
+
+  eliminarMaterial: async (id: number): Promise<void> => {
+    await apiClient.delete(`/docentes/materiales/${id}`);
+  },
+};
+
 export default {
   auth: docenteAuthApi,
   cursos: docenteCursosApi,
   asistencia: docenteAsistenciaApi,
   tiposEvaluacion: docenteTiposEvaluacionApi,
+  horarios: docenteHorariosApi,
+  anuncios: docenteAnunciosApi,
+  materiales: docenteMaterialesApi,
 };

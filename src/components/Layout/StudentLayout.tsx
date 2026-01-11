@@ -17,18 +17,34 @@ import {
   ChevronDown,
   Shield,
   Calendar,
-  MapPin
+  MapPin,
+  Clock,
+  Plus,
+  Minus,
+  Building2,
+  CreditCard
 } from 'lucide-react';
+import { MegaphoneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 
 const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [registroAcademicoOpen, setRegistroAcademicoOpen] = useState(true);
   const [clientIp, setClientIp] = useState<string>('Obteniendo...');
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { notifications, clearNotifications, markAsRead } = useNotifications();
+
+  // Marcar el <body> para que el "no rounded" aplique también a modales portaleados
+  // dentro del portal estudiante.
+  useEffect(() => {
+    document.body.classList.add('estudiante-square');
+    return () => {
+      document.body.classList.remove('estudiante-square');
+    };
+  }, []);
 
   // Obtener IP del cliente
   useEffect(() => {
@@ -56,74 +72,147 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/estudiante/login');
   };
 
   const navigation = [
     { name: 'Inicio', href: '/estudiante/inicio', icon: Home },
     { name: 'Mis Cursos', href: '/estudiante/mis-cursos', icon: BookOpen },
-    { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
+    { name: 'Anuncios', href: '/estudiante/anuncios', icon: MegaphoneIcon },
+    { name: 'Materiales', href: '/estudiante/materiales', icon: PaperClipIcon },
     { name: 'Notas', href: '/estudiante/notas', icon: FileText },
     { name: 'Asistencias', href: '/estudiante/asistencias', icon: Calendar },
+    { name: 'Mi Horario', href: '/estudiante/horario', icon: Clock },
     { name: 'Registro de Notas', href: '/estudiante/registro-notas', icon: Award },
     { name: 'Orden de Mérito', href: '/estudiante/orden-merito', icon: GraduationCap },
+    { name: 'Pagos', href: '/estudiante/pago-matricula-inicial', icon: CreditCard },
     { name: 'Perfil', href: '/estudiante/perfil', icon: User },
   ];
 
+  // Submenú de Registro Académico
+  const registroAcademicoSubMenu = [
+    { name: 'Matrícula', href: '/estudiante/matricula', icon: ClipboardList },
+    { name: 'Aumento de Cursos', href: '/estudiante/aumento-cursos', icon: Plus },
+    { name: 'Retiro de Cursos', href: '/estudiante/retiro-cursos', icon: Minus },
+  ];
+
+  // Verificar si alguna ruta del submenú está activa
+  const isRegistroAcademicoActive = location.pathname.includes('/estudiante/matricula') ||
+    location.pathname.includes('/estudiante/aumento-cursos') ||
+    location.pathname.includes('/estudiante/retiro-cursos');
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-50 estudiante-square">
       {/* Sidebar móvil */}
       <div className={`fixed inset-0 z-40 lg:hidden ${sidebarOpen ? '' : 'pointer-events-none'}`}>
         <div
-          className={`fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity ${
-            sidebarOpen ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-0 bg-zinc-900/60 backdrop-blur-sm transition-opacity ${sidebarOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setSidebarOpen(false)}
         />
         <div
-          className={`fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-gray-200 transform transition-transform ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 flex w-64 flex-col bg-white border-r border-zinc-200 transform transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-primary-700 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-white" />
+          <div className="flex items-center justify-between h-14 px-4 border-b border-zinc-200">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+                <img
+                  src="/images/fondouni.svg"
+                  alt="Logo Universidad"
+                  className="h-8 w-8 object-contain"
+                />
               </div>
-              <span className="text-lg font-semibold text-gray-900">Portal Estudiante</span>
+              <span className="text-sm font-semibold text-zinc-900">Portal Estudiante</span>
             </div>
-            <button onClick={() => setSidebarOpen(false)} className="text-gray-500 hover:text-gray-700">
-              <X className="h-6 w-6" />
+            <button onClick={() => setSidebarOpen(false)} className="text-zinc-400 hover:text-zinc-600 transition-colors">
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            {navigation.map((item) => {
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            {navigation.slice(0, 2).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-primary-50 text-primary-800 border-l-4 border-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50 border-l-4 border-transparent'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+
+            {/* Submenú Registro Académico */}
+            <div className="py-1">
+              <button
+                onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${isRegistroAcademicoActive
+                  ? 'bg-teal-50 text-teal-700'
+                  : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
+                  <span>Registro Académico</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {registroAcademicoOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
+                  {registroAcademicoSubMenu.map((subItem) => {
+                    const isSubActive = location.pathname === subItem.href;
+                    return (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${isSubActive
+                          ? 'bg-teal-100 text-teal-800'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                          }`}
+                      >
+                        <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
+                        {subItem.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {navigation.slice(2).map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
-          <div className="px-4 py-4 border-t border-gray-200">
+          <div className="px-3 py-3 border-t border-zinc-200">
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-zinc-500 rounded-md hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
             >
-              <LogOut className="mr-3 h-5 w-5" />
+              <LogOut className="h-4 w-4" />
               Cerrar Sesión
             </button>
           </div>
@@ -131,39 +220,97 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </div>
 
       {/* Sidebar desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="flex items-center h-16 px-6 border-b border-gray-200">
-            <div className="h-8 w-8 bg-primary-700 rounded-lg flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-white" />
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-60 lg:flex-col">
+        <div className="flex flex-col flex-grow bg-white border-r border-zinc-200 overflow-y-auto">
+          <div className="flex items-center h-16 px-4 border-b border-zinc-200">
+            <div className="flex h-10 w-10 items-center justify-start rounded-lg bg-white">
+              <img
+                src="/images/fondouni.svg"
+                alt="Logo Universidad"
+                className="h-8 w-8 object-contain"
+              />
             </div>
-            <span className="ml-2 text-lg font-semibold text-gray-900">Portal Estudiante</span>
+            <span className="ml-3 text-sm font-semibold text-zinc-900">Portal Estudiante</span>
           </div>
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            {navigation.map((item) => {
+          <nav className="flex-1 px-3 py-4 space-y-0.5">
+            {navigation.slice(0, 2).map((item) => {
               const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-primary-50 text-primary-800 border-l-4 border-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50 border-l-4 border-transparent'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+
+            {/* Submenú Registro Académico - Desktop */}
+            <div className="py-1">
+              <button
+                onClick={() => setRegistroAcademicoOpen(!registroAcademicoOpen)}
+                className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${isRegistroAcademicoActive
+                  ? 'bg-teal-50 text-teal-700'
+                  : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Building2 className={`h-4 w-4 ${isRegistroAcademicoActive ? 'text-teal-600' : ''}`} />
+                  <span>Registro Académico</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${registroAcademicoOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {registroAcademicoOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-teal-200 pl-3">
+                  {registroAcademicoSubMenu.map((subItem) => {
+                    const isSubActive = location.pathname === subItem.href;
+                    return (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${isSubActive
+                          ? 'bg-teal-100 text-teal-800'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                          }`}
+                      >
+                        <subItem.icon className={`h-3.5 w-3.5 ${isSubActive ? 'text-teal-600' : ''}`} />
+                        {subItem.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {navigation.slice(2).map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${isActive
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                    }`}
+                >
+                  <item.icon className={`h-4 w-4 ${isActive ? 'text-zinc-700' : ''}`} />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
-          <div className="px-4 py-4 border-t border-gray-200">
+          <div className="px-3 py-3 border-t border-zinc-200">
             <button
               onClick={handleLogout}
-              className="flex items-center w-full px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-zinc-500 rounded-md hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
             >
-              <LogOut className="mr-3 h-5 w-5" />
+              <LogOut className="h-4 w-4" />
               Cerrar Sesión
             </button>
           </div>
@@ -171,102 +318,90 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </div>
 
       {/* Contenido principal */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-60">
         {/* Header */}
-        <header className="bg-white shadow-sm">
-          <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center">
+        <header className="bg-white border-b border-zinc-200">
+          <div className="flex items-center justify-between h-14 px-4 sm:px-6">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden text-gray-500 hover:text-gray-700"
+                className="lg:hidden text-zinc-400 hover:text-zinc-600 transition-colors"
               >
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5" />
               </button>
-              <h1 className="ml-4 lg:ml-0 text-2xl font-semibold text-gray-900">
+              <h1 className="text-sm font-medium text-zinc-900">
                 {navigation.find((item) => item.href === location.pathname)?.name || 'Portal Estudiante'}
               </h1>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center gap-2">
               <Notifications
                 notifications={notifications}
                 onClear={clearNotifications}
                 onMarkAsRead={markAsRead}
               />
-              
+
               {/* Menú del Perfil con Dropdown */}
               <div className="relative" ref={profileMenuRef}>
                 {/* Botón Desktop */}
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="hidden sm:flex items-center space-x-2 hover:bg-gray-50 rounded-lg px-3 py-2 transition-colors"
+                  className="hidden sm:flex items-center gap-2 hover:bg-zinc-50 rounded-md px-2 py-1.5 transition-colors"
                 >
-                  <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                    <User className="h-6 w-6 text-primary-700" />
+                  <div className="h-7 w-7 rounded-full bg-zinc-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-zinc-600" />
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{user?.nombres} {user?.apellidos}</p>
-                    <p className="text-xs text-gray-500">Estudiante</p>
+                  <div className="text-left">
+                    <p className="text-xs font-medium text-zinc-900">{user?.nombres} {user?.apellidos}</p>
+                    <p className="text-[10px] text-zinc-500">Estudiante</p>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-3.5 w-3.5 text-zinc-400 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Botón Mobile - Solo Avatar */}
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex sm:hidden items-center justify-center hover:bg-gray-50 rounded-full p-1 transition-colors"
+                  className="flex sm:hidden items-center justify-center hover:bg-zinc-50 rounded-md p-1 transition-colors"
                 >
-                  <div className="h-9 w-9 rounded-full bg-primary-100 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary-700" />
+                  <div className="h-7 w-7 rounded-full bg-zinc-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-zinc-600" />
                   </div>
                 </button>
 
                 {/* Dropdown Menu */}
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-w-sm">
+                  <div className="absolute right-0 top-full mt-1 w-72 bg-white rounded-lg shadow-lg border border-zinc-200 py-1 z-50">
                     {/* Header del menú */}
-                    <div className="px-3 sm:px-4 py-3 border-b border-gray-200 bg-gray-50">
-                      <div className="flex items-center space-x-2 sm:space-x-3">
-                        <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center flex-shrink-0">
-                          <User className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+                    <div className="px-3 py-3 border-b border-zinc-100">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-full bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                          <User className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-bold text-gray-900 uppercase truncate">{user?.nombres} {user?.apellidos}</p>
-                          <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-700">
-                            Alumno {user?.email?.split('@')[0] || 'estudiante'}
-                          </div>
+                          <p className="text-sm font-medium text-zinc-900 truncate">{user?.nombres} {user?.apellidos}</p>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-zinc-100 text-zinc-600 mt-0.5">
+                            {user?.email?.split('@')[0] || 'estudiante'}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Último Acceso */}
-                    <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-                      <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1.5 sm:mb-2">Último Acceso:</p>
-                      <div className="space-y-1 sm:space-y-1.5">
-                        <div className="flex items-center text-[10px] sm:text-xs text-gray-700">
-                          <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2 text-gray-400 flex-shrink-0" />
-                          <span className="font-medium">Fecha:</span>
-                          <span className="ml-auto text-right">
-                            {user?.ultimoAcceso 
+                    <div className="px-3 py-2 border-b border-zinc-100">
+                      <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wide mb-1.5">Último Acceso</p>
+                      <div className="space-y-1">
+                        <div className="flex items-center text-xs text-zinc-600">
+                          <Calendar className="h-3 w-3 mr-1.5 text-zinc-400 flex-shrink-0" />
+                          <span className="font-mono tabular-nums">
+                            {user?.ultimoAcceso
                               ? new Date(user.ultimoAcceso).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new Date(user.ultimoAcceso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
                               : new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
                             }
                           </span>
                         </div>
-                        <div className="flex items-center text-[10px] sm:text-xs text-gray-700">
-                          <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1.5 sm:mr-2 text-gray-400 flex-shrink-0" />
-                          <span className="font-medium">Dirección IP:</span>
-                          <span className="ml-auto">{clientIp}</span>
+                        <div className="flex items-center text-xs text-zinc-600">
+                          <MapPin className="h-3 w-3 mr-1.5 text-zinc-400 flex-shrink-0" />
+                          <span className="font-mono tabular-nums">{clientIp}</span>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Roles */}
-                    <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-100">
-                      <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase mb-1.5 sm:mb-2">Roles Asignados:</p>
-                      <div className="flex items-center text-xs sm:text-sm text-gray-700">
-                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 text-primary-600 flex-shrink-0" />
-                        <span className="text-primary-700 font-medium">{user?.rol || 'Alumno'}</span>
-                        <span className="ml-auto text-[10px] sm:text-xs text-gray-500">{user?.email?.split('@')[0] || 'estudiante'}</span>
                       </div>
                     </div>
 
@@ -275,34 +410,33 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                       <Link
                         to="/estudiante/perfil"
                         onClick={() => setProfileMenuOpen(false)}
-                        className="flex items-center px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
                       >
-                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                        <User className="h-4 w-4 text-zinc-400" />
                         Información Personal
                       </Link>
                       <button
                         onClick={() => {
                           setProfileMenuOpen(false);
-                          // Aquí puedes abrir un modal para cambiar contraseña si lo deseas
                           navigate('/estudiante/perfil');
                         }}
-                        className="flex items-center w-full px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
                       >
-                        <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                        <Shield className="h-4 w-4 text-zinc-400" />
                         Cambiar Contraseña
                       </button>
                     </div>
 
                     {/* Cerrar Sesión */}
-                    <div className="border-t border-gray-100 pt-1">
+                    <div className="border-t border-zinc-100 pt-1">
                       <button
                         onClick={() => {
                           setProfileMenuOpen(false);
                           handleLogout();
                         }}
-                        className="flex items-center w-full px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2 sm:mr-3 flex-shrink-0" />
+                        <LogOut className="h-4 w-4" />
                         Cerrar Sesión
                       </button>
                     </div>
@@ -314,7 +448,7 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </header>
 
         {/* Contenido de la página */}
-        <main className="py-6 px-4 sm:px-6 lg:px-8">
+        <main className="p-6">
           {children}
         </main>
       </div>

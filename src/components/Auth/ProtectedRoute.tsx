@@ -8,23 +8,21 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles }) => {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, user } = useAuth()
 
-  // Mostrar loading mientras se verifica la autenticación
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verificando autenticación...</p>
-        </div>
-      </div>
-    )
-  }
+  // Ya no hay loading bloqueante - la autenticación es instantánea desde localStorage
 
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Redirigir según el rol requerido, o por defecto a admin
+    if (requiredRoles && requiredRoles.length > 0) {
+      if (requiredRoles.includes('Estudiante')) {
+        return <Navigate to="/estudiante/login" replace />
+      } else if (requiredRoles.includes('Administrador')) {
+        return <Navigate to="/admin/login" replace />
+      }
+    }
+    return <Navigate to="/admin/login" replace />
   }
 
   // Si se especifican roles requeridos, verificar que el usuario tenga uno de ellos

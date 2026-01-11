@@ -1,140 +1,120 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi, OrdenMerito } from '../../services/estudiantesApi';
-import { Users } from 'lucide-react';
+import { Users, Filter, Trophy, TrendingUp } from 'lucide-react';
+import PageHeader from '../../components/Student/PageHeader';
 
 export default function OrdenMeritoPage() {
   const [promocionSeleccionada, setPromocionSeleccionada] = useState<string>('');
 
-  // Query para obtener promociones
   const { data: promociones = [] } = useQuery({
     queryKey: ['promociones'],
     queryFn: estudiantesApi.getPromociones,
     retry: false,
   });
-  
-  // Query para obtener mi posición (ignorar errores 404)
+
   const { data: miPosicion } = useQuery({
     queryKey: ['mi-posicion-merito'],
     queryFn: estudiantesApi.getMiPosicionMerito,
     retry: false,
-    // Ignorar errores 404, solo mostrar cuando hay datos
   });
 
-  // Query para obtener orden de mérito
   const { data: ordenMerito = [], isLoading } = useQuery({
     queryKey: ['orden-merito', promocionSeleccionada],
     queryFn: () => estudiantesApi.getOrdenMerito(promocionSeleccionada || undefined),
     retry: false,
   });
 
-  // Función para obtener badge según la posición
   const getBadgePosicion = (posicion: number) => {
-    if (posicion === 1) return <span className="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded">1°</span>;
-    if (posicion === 2) return <span className="px-2 py-1 bg-slate-400 text-white text-xs font-bold rounded">2°</span>;
-    if (posicion === 3) return <span className="px-2 py-1 bg-amber-700 text-white text-xs font-bold rounded">3°</span>;
+    if (posicion === 1) return <span className="px-1.5 py-0.5 bg-amber-500 text-white text-xs font-semibold rounded">1°</span>;
+    if (posicion === 2) return <span className="px-1.5 py-0.5 bg-zinc-400 text-white text-xs font-semibold rounded">2°</span>;
+    if (posicion === 3) return <span className="px-1.5 py-0.5 bg-amber-700 text-white text-xs font-semibold rounded">3°</span>;
     return null;
   };
 
-  // Función para obtener el estilo según el rango
   const getEstiloRango = (rango: string) => {
     switch (rango) {
       case 'Décimo Superior':
-        return 'bg-amber-50 border-l-4 border-amber-500';
+        return 'bg-amber-50/50';
       case 'Quinto Superior':
-        return 'bg-primary-50 border-l-4 border-primary-600';
+        return 'bg-blue-50/50';
       case 'Tercio Superior':
-        return 'bg-emerald-50 border-l-4 border-emerald-500';
+        return 'bg-emerald-50/50';
       case 'Medio Superior':
-        return 'bg-violet-50 border-l-4 border-violet-500';
+        return 'bg-violet-50/50';
       default:
-        return 'hover:bg-gray-50';
+        return 'hover:bg-zinc-50/50';
     }
   };
 
   const getRangoBadge = (rango: string) => {
     const estilos: Record<string, string> = {
-      'Décimo Superior': 'bg-amber-100 text-amber-800 border-amber-300',
-      'Quinto Superior': 'bg-primary-100 text-primary-800 border-primary-300',
-      'Tercio Superior': 'bg-emerald-100 text-emerald-800 border-emerald-300',
-      'Medio Superior': 'bg-violet-100 text-violet-800 border-violet-300',
+      'Décimo Superior': 'bg-amber-50 text-amber-700 border-amber-200',
+      'Quinto Superior': 'bg-blue-50 text-blue-700 border-blue-200',
+      'Tercio Superior': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'Medio Superior': 'bg-violet-50 text-violet-700 border-violet-200',
     };
-    return estilos[rango] || 'bg-gray-100 text-gray-800 border-gray-300';
+    return estilos[rango] || 'bg-zinc-50 text-zinc-700 border-zinc-200';
   };
 
+  const filterComponent = (
+    <div className="relative">
+      <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+      <select
+        value={promocionSeleccionada}
+        onChange={(e) => setPromocionSeleccionada(e.target.value)}
+        className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
+      >
+        <option value="">Todas las promociones</option>
+        {promociones.map((promo) => (
+          <option key={promo} value={promo}>
+            Promoción {promo}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Orden de Mérito Académico</h1>
-        
-        {/* Info del periodo */}
-        {ordenMerito.length > 0 && ordenMerito[0].periodoNombre && (
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm text-gray-600">Periodo de Evaluación:</span>
-            <span className={`text-sm font-semibold ${ordenMerito[0].estadoPeriodo === 'CERRADO' ? 'text-green-700' : 'text-amber-700'}`}>
-              {ordenMerito[0].periodoNombre}
-            </span>
-            {ordenMerito[0].estadoPeriodo === 'CERRADO' && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
-                ✓ Periodo Cerrado
-              </span>
-            )}
-            {ordenMerito[0].estadoPeriodo === 'ACTIVO' && (
-              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded font-medium">
-                ⚠ Periodo en Curso (provisional)
-              </span>
-            )}
-          </div>
-        )}
+    <div className="space-y-6">
+      <PageHeader
+        title="Orden de Mérito"
+        subtitle={ordenMerito.length > 0 && ordenMerito[0].periodoNombre ? `Período: ${ordenMerito[0].periodoNombre}` : undefined}
+        filterComponent={filterComponent}
+      />
 
-        {/* Selector de promoción */}
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">Filtrar por Promoción:</label>
-          <select
-            value={promocionSeleccionada}
-            onChange={(e) => setPromocionSeleccionada(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-white"
-          >
-            <option value="">📊 Todas las promociones</option>
-            {promociones.map((promo) => (
-              <option key={promo} value={promo}>
-                Promoción {promo}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Mi Posición */}
+      {/* Mi Posición Card */}
       {miPosicion && (
-        <div className={`mb-6 border-l-4 ${getEstiloRango(miPosicion.rangoMerito)} bg-gradient-to-r from-primary-50 to-white rounded-lg shadow-sm overflow-hidden`}>
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-700 to-primary-800 text-white rounded-xl text-3xl font-bold shadow-lg">
-                  {miPosicion.posicion}°
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Tu Posición</p>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    {miPosicion.nombres} {miPosicion.apellidos}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Promoción {miPosicion.promocion} • De {miPosicion.totalEstudiantes} estudiantes
-                  </p>
-                  {miPosicion.rangoMerito && (
-                    <span className={`inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-md border ${getRangoBadge(miPosicion.rangoMerito)}`}>
-                      🏆 {miPosicion.rangoMerito}
-                    </span>
-                  )}
-                </div>
+        <div className="bg-zinc-900 rounded-xl p-6 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-5">
+            <Trophy className="w-32 h-32" />
+          </div>
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
+                <span className="text-3xl font-bold tabular-nums">{miPosicion.posicion}°</span>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">Promedio Acumulado</p>
-                <div className="text-5xl font-bold bg-gradient-to-r from-primary-700 to-primary-800 bg-clip-text text-transparent">
-                  {miPosicion.promedioPonderadoAcumulado.toFixed(2)}
-                </div>
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Tu Posición</p>
+                <h3 className="text-lg font-semibold">
+                  {miPosicion.nombres} {miPosicion.apellidos}
+                </h3>
+                <p className="text-sm text-zinc-400 mt-0.5">
+                  Promoción {miPosicion.promocion} • De {miPosicion.totalEstudiantes} estudiantes
+                </p>
+                {miPosicion.rangoMerito && (
+                  <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 bg-white/10 rounded-full text-xs font-medium border border-white/10">
+                    <Trophy className="w-3 h-3" />
+                    {miPosicion.rangoMerito}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-zinc-400 uppercase tracking-wider mb-1">Promedio Acumulado</p>
+              <div className="text-4xl font-bold tabular-nums">
+                {miPosicion.promedioPonderadoAcumulado.toFixed(2)}
               </div>
             </div>
           </div>
@@ -144,110 +124,116 @@ export default function OrdenMeritoPage() {
       {/* Tabla de Orden de Mérito */}
       {isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
+          <div className="text-center">
+            <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-zinc-500 text-sm">Cargando orden de mérito...</p>
+          </div>
         </div>
       ) : ordenMerito.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">No hay datos de orden de mérito disponibles</p>
+        <div className="bg-white border border-zinc-200 rounded-xl p-12 text-center">
+          <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Users className="w-6 h-6 text-zinc-400" />
+          </div>
+          <h3 className="text-sm font-medium text-zinc-900">Sin datos disponibles</h3>
+          <p className="text-zinc-500 text-sm mt-1">No hay información de orden de mérito</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Puesto
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50/50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    #
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Código
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[250px]">
-                    Apellidos y Nombres
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider min-w-[200px]">
+                    Estudiante
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Promoción
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    Prom
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Semestre
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                    Sem
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     CC
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     CA
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     TCC
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     TCA
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     PPS
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     PPA
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[150px]">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">
                     Distinción
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-zinc-100">
                 {ordenMerito.map((estudiante) => {
                   const isMe = miPosicion && estudiante.codigo === miPosicion.codigo;
                   const estiloFila = isMe
-                    ? 'bg-primary-50 border-l-4 border-primary-700'
+                    ? 'bg-zinc-100'
                     : getEstiloRango(estudiante.rangoMerito);
 
                   return (
                     <tr key={estudiante.codigo} className={`${estiloFila} transition-colors`}>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {getBadgePosicion(estudiante.posicion)}
-                          <span className="text-sm font-semibold text-gray-900">{estudiante.posicion}</span>
+                          <span className="text-sm font-medium text-zinc-900 tabular-nums">{estudiante.posicion}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-700">
-                        {estudiante.codigo}
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-mono text-zinc-500">{estudiante.codigo}</span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="font-medium">{estudiante.apellidos}, {estudiante.nombres}</div>
+                      <td className="px-4 py-3">
+                        <div className="text-sm font-medium text-zinc-900">{estudiante.apellidos}, {estudiante.nombres}</div>
                         {isMe && (
-                          <span className="inline-block mt-1 text-xs bg-primary-700 text-white px-2 py-0.5 rounded">
-                            Tu posición
+                          <span className="inline-block mt-0.5 text-[10px] bg-zinc-900 text-white px-1.5 py-0.5 rounded">
+                            Tú
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center text-gray-600">
+                      <td className="px-4 py-3 text-sm text-center text-zinc-600 tabular-nums">
                         {estudiante.promocion}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center text-gray-600">
+                      <td className="px-4 py-3 text-sm text-center text-zinc-600 tabular-nums">
                         {estudiante.semestre}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center text-gray-700">
+                      <td className="px-4 py-3 text-sm text-center text-zinc-600 tabular-nums">
                         {estudiante.creditosLlevadosSemestre}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center text-gray-700">
+                      <td className="px-4 py-3 text-sm text-center text-zinc-600 tabular-nums">
                         {estudiante.creditosAprobadosSemestre}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center font-medium text-gray-900">
+                      <td className="px-4 py-3 text-sm text-center font-medium text-zinc-900 tabular-nums">
                         {estudiante.totalCreditosLlevados}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center font-medium text-gray-900">
+                      <td className="px-4 py-3 text-sm text-center font-medium text-zinc-900 tabular-nums">
                         {estudiante.totalCreditosAprobados}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center font-semibold text-gray-900">
+                      <td className="px-4 py-3 text-sm text-center text-zinc-700 tabular-nums">
                         {estudiante.promedioPonderadoSemestral.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-center font-bold text-primary-700">
+                      <td className="px-4 py-3 text-sm text-center font-semibold text-zinc-900 tabular-nums">
                         {estudiante.promedioPonderadoAcumulado.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-4 py-3">
                         {estudiante.rangoMerito && (
-                          <span className={`inline-block px-3 py-1 text-xs font-medium rounded-md border ${getRangoBadge(estudiante.rangoMerito)}`}>
+                          <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${getRangoBadge(estudiante.rangoMerito)}`}>
                             {estudiante.rangoMerito}
                           </span>
                         )}
@@ -261,23 +247,26 @@ export default function OrdenMeritoPage() {
         </div>
       )}
 
-      {/* Nota informativa */}
+      {/* Info Cards */}
       {ordenMerito.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-primary-50 border border-primary-200 rounded-lg">
-            <h4 className="text-sm font-semibold text-primary-900 mb-2">📊 Información del Ranking</h4>
-            <ul className="text-xs text-primary-800 space-y-1">
-              <li>• <strong>CC:</strong> Créditos llevados en el periodo evaluado</li>
-              <li>• <strong>CA:</strong> Créditos aprobados en el periodo evaluado</li>
-              <li>• <strong>TCC/TCA:</strong> Total acumulado de créditos</li>
-              <li>• <strong>PPA:</strong> Promedio ponderado de toda tu carrera</li>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white border border-zinc-200 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-zinc-400" />
+              Información del Ranking
+            </h4>
+            <ul className="text-xs text-zinc-600 space-y-1.5">
+              <li><span className="font-medium text-zinc-700">CC:</span> Créditos llevados en el periodo</li>
+              <li><span className="font-medium text-zinc-700">CA:</span> Créditos aprobados en el periodo</li>
+              <li><span className="font-medium text-zinc-700">TCC/TCA:</span> Total acumulado de créditos</li>
+              <li><span className="font-medium text-zinc-700">PPA:</span> Promedio ponderado acumulado</li>
             </ul>
           </div>
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <h4 className="text-sm font-semibold text-amber-900 mb-2">⚠️ Importante</h4>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              Las constancias de <strong>Medio Superior</strong> solo son emitidas para PRONABEC. 
-              El orden de mérito se actualiza automáticamente al finalizar y cerrar cada período académico.
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <h4 className="text-sm font-semibold text-amber-900 mb-2">Importante</h4>
+            <p className="text-xs text-amber-700 leading-relaxed">
+              Las constancias de <strong>Medio Superior</strong> solo son emitidas para PRONABEC.
+              El orden de mérito se actualiza al finalizar cada período académico.
             </p>
           </div>
         </div>

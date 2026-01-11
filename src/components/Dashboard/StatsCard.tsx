@@ -1,11 +1,9 @@
-import { motion } from 'framer-motion'
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 
 interface StatsCardProps {
   name: string
   value: number
   icon: React.ComponentType<{ className?: string }>
-  color: string
   change: string
   changeType: 'positive' | 'negative'
   isLoading?: boolean
@@ -15,57 +13,45 @@ const StatsCard: React.FC<StatsCardProps> = ({
   name,
   value,
   icon: Icon,
-  color,
   change,
   changeType,
   isLoading = false,
 }) => {
   return (
-    <motion.div
-      className="card p-6"
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 300 }}
-    >
-      <div className="flex items-center">
-        <div className={`flex-shrink-0 p-3 rounded-lg ${color}`}>
-          <Icon className="h-6 w-6 text-white" />
+    <div className="bg-white border border-zinc-200 p-4 sm:p-5 hover:border-zinc-300 transition-colors h-full flex flex-col justify-between">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-zinc-500 truncate">{name}</p>
+          {isLoading ? (
+            <div className="animate-pulse bg-zinc-200 h-8 w-20 mt-2"></div>
+          ) : (
+            <p className="text-xl sm:text-2xl font-semibold text-zinc-900 mt-1 tracking-tight truncate">
+              {value.toLocaleString()}
+            </p>
+          )}
         </div>
-        <div className="ml-4 flex-1">
-          <dl>
-            <dt className="text-sm font-medium text-gray-500 truncate">
-              {name}
-            </dt>
-            <dd className="flex items-baseline">
-              {isLoading ? (
-                <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
-              ) : (
-                <>
-                  <div className="text-2xl font-semibold text-gray-900">
-                    {value.toLocaleString()}
-                  </div>
-                  <div className="ml-2 flex items-baseline text-sm font-semibold">
-                    {changeType === 'positive' ? (
-                      <ChevronUpIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <ChevronDownIcon className="h-4 w-4 text-red-500" />
-                    )}
-                    <span
-                      className={
-                        changeType === 'positive'
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }
-                    >
-                      {change}
-                    </span>
-                  </div>
-                </>
-              )}
-            </dd>
-          </dl>
+        <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center bg-zinc-100 shrink-0">
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-600" />
         </div>
       </div>
-    </motion.div>
+
+      {!isLoading && (
+        <div className="mt-3 flex items-center flex-wrap gap-1">
+          <div className="flex items-center">
+            {changeType === 'positive' ? (
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
+            )}
+            <span className={`text-xs sm:text-sm font-medium ml-1 ${changeType === 'positive' ? 'text-emerald-600' : 'text-red-600'
+              }`}>
+              {change}
+            </span>
+          </div>
+          <span className="text-xs sm:text-sm text-zinc-400 truncate">vs mes anterior</span>
+        </div>
+      )}
+    </div>
   )
 }
 

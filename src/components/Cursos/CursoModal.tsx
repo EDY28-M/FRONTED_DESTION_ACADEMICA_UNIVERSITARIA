@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { X, BookOpen, Clock, Award, User, GitBranch } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import { toast } from 'react-hot-toast'
 import { cursosApi } from '../../services/cursosService'
 import { Curso, CursoCreate, CursoUpdate, Docente } from '../../types'
 import { useNotifications } from '../../contexts/NotificationContext'
@@ -130,266 +130,348 @@ const CursoModal: React.FC<CursoModalProps> = ({
     return c.ciclo < cicloSeleccionado && c.id !== curso?.id
   })
 
-  const title = isCreateMode ? 'Nuevo Curso' : isEditMode ? 'Editar Curso' : 'Ver Curso'
+  const title = isCreateMode ? 'Nuevo Curso' : isEditMode ? 'Editar Curso' : 'Detalle del Curso'
+
+  // Input classes helper
+  const inputClasses = (hasError: boolean = false) => `
+    w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors 
+    placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10
+    ${hasError ? 'border-red-300 focus:border-red-500' : 'border-zinc-200 focus:border-zinc-900'}
+    disabled:bg-zinc-50 disabled:text-zinc-500
+  `
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
           as={Fragment}
-          enter="ease-out duration-300"
+          enter="ease-out duration-200"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave="ease-in duration-150"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-zinc-900/20 backdrop-blur-sm transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-center justify-center p-4">
             <Transition.Child
               as={Fragment}
-              enter="ease-out duration-300"
+              enter="ease-out duration-200"
               enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
+              leave="ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div className="absolute right-0 top-0 pr-4 pt-4">
+              <Dialog.Panel className="relative w-full max-w-2xl transform overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/5 transition-all">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100">
+                      <BookOpen className="h-4 w-4 text-zinc-600" />
+                    </div>
+                    <Dialog.Title as="h3" className="text-lg font-semibold text-zinc-900">
+                      {title}
+                    </Dialog.Title>
+                  </div>
                   <button
                     type="button"
-                    className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2"
+                    className="text-zinc-400 hover:text-zinc-600 transition-colors"
                     onClick={onClose}
                   >
-                    <span className="sr-only">Cerrar</span>
-                    <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
 
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                    <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900 mb-4">
-                      {title}
-                    </Dialog.Title>
-
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Content */}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+                    {/* Código y Nombre */}
+                    <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="label">Código del Curso</label>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Código
+                        </label>
                         <input
                           type="text"
                           {...register('codigo')}
-                          className="input"
-                          placeholder="Ej: IS040101"
+                          className={inputClasses()}
+                          placeholder="IS040101"
                           disabled={isViewMode}
                         />
                       </div>
-
-                      <div>
-                        <label className="label">Nombre del Curso *</label>
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Nombre del Curso <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
-                          {...register('nombreCurso', { required: 'El nombre del curso es requerido' })}
-                          className="input"
+                          {...register('nombreCurso', { required: 'El nombre es requerido' })}
+                          className={inputClasses(!!errors.nombreCurso)}
+                          placeholder="Ej: Programación Web"
                           disabled={isViewMode}
                         />
                         {errors.nombreCurso && (
-                          <p className="mt-1 text-sm text-red-600">{errors.nombreCurso.message}</p>
+                          <p className="mt-1 text-xs text-red-500">{errors.nombreCurso.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Créditos, Horas, Ciclo */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <Award className="h-3.5 w-3.5" />
+                            Créditos <span className="text-red-500">*</span>
+                          </span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          {...register('creditos', { 
+                            required: 'Requerido',
+                            min: { value: 1, message: 'Mín. 1' },
+                            max: { value: 10, message: 'Máx. 10' }
+                          })}
+                          className={inputClasses(!!errors.creditos)}
+                          disabled={isViewMode}
+                        />
+                        {errors.creditos && (
+                          <p className="mt-1 text-xs text-red-500">{errors.creditos.message}</p>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                          <label className="label">Créditos *</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="10"
-                            {...register('creditos', { 
-                              required: 'Los créditos son requeridos',
-                              min: { value: 1, message: 'Mínimo 1 crédito' },
-                              max: { value: 10, message: 'Máximo 10 créditos' }
-                            })}
-                            className="input"
-                            disabled={isViewMode}
-                          />
-                          {errors.creditos && (
-                            <p className="mt-1 text-sm text-red-600">{errors.creditos.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="label">Horas Semanales *</label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="40"
-                            {...register('horasSemanal', { 
-                              required: 'Las horas semanales son requeridas',
-                              min: { value: 1, message: 'Mínimo 1 hora' },
-                              max: { value: 40, message: 'Máximo 40 horas' }
-                            })}
-                            className="input"
-                            disabled={isViewMode}
-                          />
-                          {errors.horasSemanal && (
-                            <p className="mt-1 text-sm text-red-600">{errors.horasSemanal.message}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="label">Ciclo *</label>
-                          <select
-                            {...register('ciclo', { required: 'El ciclo es requerido' })}
-                            className="input"
-                            disabled={isViewMode}
-                          >
-                            <option value="">Seleccionar ciclo</option>
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ciclo) => (
-                              <option key={ciclo} value={ciclo}>
-                                Ciclo {ciclo}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.ciclo && (
-                            <p className="mt-1 text-sm text-red-600">{errors.ciclo.message}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div>
-                          <label className="label">Horas Teoría</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="30"
-                            {...register('horasTeoria', { 
-                              min: { value: 0, message: 'Mínimo 0' },
-                              max: { value: 30, message: 'Máximo 30' }
-                            })}
-                            className="input"
-                            disabled={isViewMode}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="label">Horas Práctica</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="30"
-                            {...register('horasPractica', { 
-                              min: { value: 0, message: 'Mínimo 0' },
-                              max: { value: 30, message: 'Máximo 30' }
-                            })}
-                            className="input"
-                            disabled={isViewMode}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="label">Horas Totales</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="200"
-                            {...register('horasTotales', { 
-                              min: { value: 0, message: 'Mínimo 0' },
-                              max: { value: 200, message: 'Máximo 200' }
-                            })}
-                            className="input"
-                            disabled={isViewMode}
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />
+                            Horas/Semana <span className="text-red-500">*</span>
+                          </span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="40"
+                          {...register('horasSemanal', { 
+                            required: 'Requerido',
+                            min: { value: 1, message: 'Mín. 1' },
+                            max: { value: 40, message: 'Máx. 40' }
+                          })}
+                          className={inputClasses(!!errors.horasSemanal)}
+                          disabled={isViewMode}
+                        />
+                        {errors.horasSemanal && (
+                          <p className="mt-1 text-xs text-red-500">{errors.horasSemanal.message}</p>
+                        )}
                       </div>
 
                       <div>
-                        <label className="label">Docente Asignado</label>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Ciclo <span className="text-red-500">*</span>
+                        </label>
                         <select
-                          {...register('idDocente')}
-                          className="input"
+                          {...register('ciclo', { required: 'Requerido' })}
+                          className={inputClasses(!!errors.ciclo)}
                           disabled={isViewMode}
                         >
-                          <option value="">Sin asignar</option>
-                          {docentes.map((docente) => (
-                            <option key={docente.id} value={docente.id}>
-                              {docente.nombres} {docente.apellidos} - {docente.profesion}
+                          <option value="">Seleccionar</option>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ciclo) => (
+                            <option key={ciclo} value={ciclo}>
+                              Ciclo {ciclo}
                             </option>
                           ))}
                         </select>
+                        {errors.ciclo && (
+                          <p className="mt-1 text-xs text-red-500">{errors.ciclo.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Horas detalladas */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Horas Teoría
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="30"
+                          {...register('horasTeoria')}
+                          className={inputClasses()}
+                          disabled={isViewMode}
+                        />
                       </div>
 
-                      {!isViewMode && cicloActual && Number(cicloActual) > 1 && (
-                        <div>
-                          <label className="label">Prerequisitos</label>
-                          <div className="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                            {cursosParaPrerequisitos.length > 0 ? (
-                              cursosParaPrerequisitos.map((c) => (
-                                <div key={c.id} className="flex items-center mb-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`prereq-${c.id}`}
-                                    checked={selectedPrerequisitos.includes(c.id)}
-                                    onChange={() => handlePrerequisitosChange(c.id)}
-                                    className="h-4 w-4 text-primary-700 focus:ring-primary-600 border-gray-300 rounded"
-                                  />
-                                  <label htmlFor={`prereq-${c.id}`} className="ml-2 text-sm text-gray-700">
-                                    {c.codigo ? `${c.codigo} - ` : ''}{c.nombreCurso} (Ciclo {c.ciclo})
-                                  </label>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-gray-500">No hay cursos disponibles como prerequisitos</p>
-                            )}
-                          </div>
-                          <p className="mt-1 text-xs text-gray-500">
-                            Solo se muestran cursos de ciclos anteriores
-                          </p>
-                        </div>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Horas Práctica
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="30"
+                          {...register('horasPractica')}
+                          className={inputClasses()}
+                          disabled={isViewMode}
+                        />
+                      </div>
 
-                      {isViewMode && curso?.prerequisitos && curso.prerequisitos.length > 0 && (
-                        <div>
-                          <label className="label">Prerequisitos</label>
-                          <div className="bg-gray-50 rounded-md p-3">
-                            {curso.prerequisitos.map((p) => (
-                              <div key={p.id} className="text-sm text-gray-700 mb-1">
-                                • {p.codigo ? `${p.codigo} - ` : ''}{p.nombreCurso} (Ciclo {p.ciclo})
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Horas Totales
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="200"
+                          {...register('horasTotales')}
+                          className={inputClasses()}
+                          disabled={isViewMode}
+                        />
+                      </div>
+                    </div>
 
-                      {!isViewMode && (
-                        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                          <button
-                            type="submit"
-                            className="btn btn-primary btn-md w-full sm:ml-3 sm:w-auto"
-                            disabled={createMutation.isPending || updateMutation.isPending}
-                          >
-                            {createMutation.isPending || updateMutation.isPending
-                              ? 'Guardando...'
-                              : isCreateMode
-                              ? 'Crear Curso'
-                              : 'Actualizar Curso'}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-outline btn-md mt-3 w-full sm:mt-0 sm:w-auto"
-                            onClick={onClose}
-                          >
-                            Cancelar
-                          </button>
+                    {/* Docente */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                        <span className="flex items-center gap-1.5">
+                          <User className="h-3.5 w-3.5" />
+                          Docente Asignado
+                        </span>
+                      </label>
+                      <select
+                        {...register('idDocente')}
+                        className={inputClasses()}
+                        disabled={isViewMode}
+                      >
+                        <option value="">Sin asignar</option>
+                        {docentes.map((docente) => (
+                          <option key={docente.id} value={docente.id}>
+                            {docente.nombres} {docente.apellidos} - {docente.profesion}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Prerequisitos - Edit/Create mode */}
+                    {!isViewMode && cicloActual && Number(cicloActual) > 1 && (
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <GitBranch className="h-3.5 w-3.5" />
+                            Prerequisitos
+                          </span>
+                        </label>
+                        
+                        {/* Selected pills */}
+                        {selectedPrerequisitos.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {selectedPrerequisitos.map(id => {
+                              const c = cursosDisponibles.find(curso => curso.id === id)
+                              return c ? (
+                                <span 
+                                  key={id}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700"
+                                >
+                                  {c.nombreCurso}
+                                  <button
+                                    type="button"
+                                    onClick={() => handlePrerequisitosChange(id)}
+                                    className="text-zinc-400 hover:text-zinc-600"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </span>
+                              ) : null
+                            })}
+                          </div>
+                        )}
+
+                        <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-200 divide-y divide-zinc-100">
+                          {cursosParaPrerequisitos.length > 0 ? (
+                            cursosParaPrerequisitos.map((c) => (
+                              <label
+                                key={c.id}
+                                className="flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-50 cursor-pointer transition-colors"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedPrerequisitos.includes(c.id)}
+                                  onChange={() => handlePrerequisitosChange(c.id)}
+                                  className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 accent-zinc-900"
+                                />
+                                <span className="flex-1 text-sm text-zinc-700">
+                                  {c.codigo ? `${c.codigo} - ` : ''}{c.nombreCurso}
+                                </span>
+                                <span className="text-xs text-zinc-400">Ciclo {c.ciclo}</span>
+                              </label>
+                            ))
+                          ) : (
+                            <p className="text-sm text-zinc-500 px-3 py-4 text-center">
+                              No hay cursos disponibles como prerequisitos
+                            </p>
+                          )}
                         </div>
-                      )}
-                    </form>
+                        <p className="mt-1.5 text-xs text-zinc-400">
+                          Solo se muestran cursos de ciclos anteriores
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Prerequisitos - View mode */}
+                    {isViewMode && curso?.prerequisitos && curso.prerequisitos.length > 0 && (
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <GitBranch className="h-3.5 w-3.5" />
+                            Prerequisitos
+                          </span>
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {curso.prerequisitos.map((p) => (
+                            <span 
+                              key={p.id}
+                              className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm bg-zinc-100 text-zinc-700 border border-zinc-200"
+                            >
+                              {p.codigo ? `${p.codigo} - ` : ''}{p.nombreCurso}
+                              <span className="ml-2 text-xs text-zinc-400">(Ciclo {p.ciclo})</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {/* Footer */}
+                  {!isViewMode && (
+                    <div className="flex items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50/50 px-6 py-4">
+                      <button
+                        type="button"
+                        className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                        onClick={onClose}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={createMutation.isPending || updateMutation.isPending}
+                      >
+                        {createMutation.isPending || updateMutation.isPending
+                          ? 'Guardando...'
+                          : isCreateMode
+                          ? 'Crear Curso'
+                          : 'Actualizar'}
+                      </button>
+                    </div>
+                  )}
+                </form>
               </Dialog.Panel>
             </Transition.Child>
           </div>

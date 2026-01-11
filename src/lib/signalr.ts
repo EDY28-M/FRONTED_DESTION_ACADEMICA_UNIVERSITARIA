@@ -2,6 +2,17 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@micros
 
 let connection: HubConnection | null = null;
 
+// Obtener la URL base del backend (sin /api al final)
+const getHubBaseUrl = (): string => {
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  if (apiUrl) {
+    // Si hay VITE_API_URL, quitar /api del final para obtener la URL base
+    return apiUrl.replace(/\/api$/, '');
+  }
+  // En desarrollo sin VITE_API_URL, usar ruta relativa (proxy de Vite)
+  return '';
+};
+
 export const startSignalRConnection = async (token: string): Promise<HubConnection> => {
   if (connection && connection.state === HubConnectionState.Connected) {
     console.log('SignalR ya está conectado');
@@ -9,10 +20,15 @@ export const startSignalRConnection = async (token: string): Promise<HubConnecti
   }
 
   try {
+    // Construir URL del hub
+    const baseUrl = getHubBaseUrl();
+    const url = `${baseUrl}/hub/notifications?access_token=${encodeURIComponent(token)}`;
+
+    // Log solo para debugging (sin mostrar el token completo por seguridad)
+    console.log('🔌 Conectando a SignalR hub...', baseUrl ? `(${baseUrl})` : '(local)');
+
     connection = new HubConnectionBuilder()
-      .withUrl('/hub/notifications', {
-        accessTokenFactory: () => token,
-      })
+      .withUrl(url)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           // Reintentar después de 0s, 2s, 10s, 30s...

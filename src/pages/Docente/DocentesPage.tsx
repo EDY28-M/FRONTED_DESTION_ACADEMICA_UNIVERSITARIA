@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify'
+import toast from 'react-hot-toast'
 import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
-  EyeIcon, 
-  PencilIcon, 
-  TrashIcon,
-  UserIcon,
-  EnvelopeIcon,
-  BriefcaseIcon,
-  CalendarIcon
-} from '@heroicons/react/24/outline'
+  Plus, 
+  Search, 
+  Eye, 
+  Pencil, 
+  Trash2,
+  User,
+  Mail,
+  Briefcase,
+  Calendar
+} from 'lucide-react'
 import { docentesApi } from '../../services/docentesService'
 import { Docente } from '../../types'
 import DocenteModal from '../../components/Docentes/DocenteModal'
@@ -99,7 +99,7 @@ const DocentesPage = () => {
           <div className="text-red-500 text-lg">Error al cargar los docentes</div>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-2 btn btn-primary"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
           >
             Reintentar
           </button>
@@ -111,91 +111,77 @@ const DocentesPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="md:flex md:items-center md:justify-between"
-      >
-        <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
             Gestión de Docentes
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
             Administra la información de los profesores del sistema
           </p>
         </div>
-        <div className="mt-4 flex md:ml-4 md:mt-0">
-          <button
-            onClick={handleCreate}
-            className="btn btn-primary btn-md"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Nuevo Docente
-          </button>
-        </div>
-      </motion.div>
+        <button
+          onClick={handleCreate}
+          className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors shadow-sm"
+        >
+          <Plus className="h-4 w-4" />
+          Nuevo Docente
+        </button>
+      </div>
 
       {/* Search and Filters */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card p-6"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+      <div className="bg-white rounded-xl border border-zinc-200 p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              <Search className="h-4 w-4 text-zinc-400" />
             </div>
             <input
               type="text"
-              className="input pl-10"
-              placeholder="Buscar docentes..."
+              className="block w-full rounded-lg border-zinc-200 pl-10 text-sm focus:border-zinc-900 focus:ring-zinc-900 placeholder:text-zinc-400"
+              placeholder="Buscar por nombre, correo o profesión..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center text-sm text-gray-500">
+          <div className="flex items-center text-sm text-zinc-500 whitespace-nowrap">
             {filteredDocentes.length} docente{filteredDocentes.length !== 1 ? 's' : ''} encontrado{filteredDocentes.length !== 1 ? 's' : ''}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Docentes List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="card"
-      >
+      <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
         {isLoading ? (
-          <div className="p-6">
+          <div className="p-8">
             <div className="animate-pulse space-y-4">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center space-x-4">
-                  <div className="rounded-full bg-gray-300 h-12 w-12"></div>
+                  <div className="rounded-full bg-zinc-200 h-12 w-12"></div>
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-4 bg-zinc-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-zinc-200 rounded w-1/2"></div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         ) : filteredDocentes.length === 0 ? (
-          <div className="text-center py-12">
-            <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron docentes</h3>
-            <p className="mt-1 text-sm text-gray-500">
+          <div className="text-center py-16 px-4">
+            <div className="mx-auto h-12 w-12 rounded-full bg-zinc-100 flex items-center justify-center mb-4">
+              <User className="h-6 w-6 text-zinc-400" />
+            </div>
+            <h3 className="text-sm font-medium text-zinc-900">No se encontraron docentes</h3>
+            <p className="mt-1 text-sm text-zinc-500">
               {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando un nuevo docente'}
             </p>
             {!searchTerm && (
               <div className="mt-6">
                 <button
                   onClick={handleCreate}
-                  className="btn btn-primary btn-md"
+                  className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
                 >
-                  <PlusIcon className="h-5 w-5 mr-2" />
+                  <Plus className="h-4 w-4" />
                   Nuevo Docente
                 </button>
               </div>
@@ -203,96 +189,91 @@ const DocentesPage = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table">
-              <thead className="table-header">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-50 border-b border-zinc-200">
                 <tr>
-                  <th className="table-header-cell">Docente</th>
-                  <th className="table-header-cell">Profesión</th>
-                  <th className="table-header-cell">Contacto</th>
-                  <th className="table-header-cell">Cursos</th>
-                  <th className="table-header-cell">Acciones</th>
+                  <th className="px-6 py-3 font-medium text-zinc-900">Docente</th>
+                  <th className="px-6 py-3 font-medium text-zinc-900">Profesión</th>
+                  <th className="px-6 py-3 font-medium text-zinc-900">Contacto</th>
+                  <th className="px-6 py-3 font-medium text-zinc-900">Cursos</th>
+                  <th className="px-6 py-3 font-medium text-zinc-900 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="table-body">
-                {filteredDocentes.map((docente, index) => (
-                  <motion.tr
+              <tbody className="divide-y divide-zinc-100">
+                {filteredDocentes.map((docente) => (
+                  <tr
                     key={docente.id}
-                    className="table-row"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    className="hover:bg-zinc-50/50 transition-colors"
                   >
-                    <td className="table-cell">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                          <UserIcon className="h-5 w-5 text-primary-600" />
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                          <User className="h-5 w-5 text-zinc-500" />
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
+                        <div>
+                          <div className="font-medium text-zinc-900">
                             {docente.nombres} {docente.apellidos}
                           </div>
                           {docente.fechaNacimiento && (
-                            <div className="text-sm text-gray-500 flex items-center">
-                              <CalendarIcon className="h-4 w-4 mr-1" />
+                            <div className="flex items-center gap-1 text-xs text-zinc-500 mt-0.5">
+                              <Calendar className="h-3 w-3" />
                               {format(new Date(docente.fechaNacimiento), 'dd/MM/yyyy')}
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="table-cell">
-                      <div className="flex items-center">
-                        <BriefcaseIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">
-                          {docente.profesion || 'Sin especificar'}
-                        </span>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-zinc-600">
+                        <Briefcase className="h-4 w-4 text-zinc-400" />
+                        <span>{docente.profesion || 'Sin especificar'}</span>
                       </div>
                     </td>
-                    <td className="table-cell">
+                    <td className="px-6 py-4">
                       {docente.correo && (
-                        <div className="flex items-center">
-                          <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-900">{docente.correo}</span>
+                        <div className="flex items-center gap-2 text-zinc-600">
+                          <Mail className="h-4 w-4 text-zinc-400" />
+                          <span>{docente.correo}</span>
                         </div>
                       )}
                     </td>
-                    <td className="table-cell">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
                         {docente.cursos.length} curso{docente.cursos.length !== 1 ? 's' : ''}
                       </span>
                     </td>
-                    <td className="table-cell">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => handleView(docente)}
-                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
+                          className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
                           title="Ver detalles"
                         >
-                          <EyeIcon className="h-4 w-4" />
+                          <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleEdit(docente)}
-                          className="p-1 text-gray-400 hover:text-primary-700 transition-colors"
+                          className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
                           title="Editar"
                         >
-                          <PencilIcon className="h-4 w-4" />
+                          <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(docente)}
-                          className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                          className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           title="Eliminar"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Modals */}
       <DocenteModal

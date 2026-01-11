@@ -19,6 +19,7 @@ export interface CrearDocenteConPasswordRequest {
   profesion?: string;
   fechaNacimiento?: string;
   correo?: string;
+  emailUsuario: string; // Email para la cuenta de usuario (Gmail u otro)
   password: string;
 }
 

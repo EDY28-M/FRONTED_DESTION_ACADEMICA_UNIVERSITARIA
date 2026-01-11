@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { docenteAuthApi, AuthDocenteResponse } from '../services/docenteApi';
 
 interface DocenteAuthContextType {
@@ -24,24 +24,20 @@ interface DocenteAuthProviderProps {
 }
 
 export const DocenteAuthProvider: React.FC<DocenteAuthProviderProps> = ({ children }) => {
-  const [docente, setDocente] = useState<AuthDocenteResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Verificar si hay un docente autenticado al cargar
+  // Inicializar con datos guardados para carga instantánea
+  const [docente, setDocente] = useState<AuthDocenteResponse | null>(() => {
     const savedDocente = docenteAuthApi.getCurrentDocente();
     if (savedDocente) {
-      // Verificar si el token no ha expirado
       const expiracion = new Date(savedDocente.expiracion);
       if (expiracion > new Date()) {
-        setDocente(savedDocente);
-      } else {
-        // Token expirado, limpiar
-        docenteAuthApi.logout();
+        return savedDocente;
       }
+      // Token expirado, limpiar
+      docenteAuthApi.logout();
     }
-    setIsLoading(false);
-  }, []);
+    return null;
+  });
+  const isLoading = false; // Carga instantánea - sin estado de loading
 
   const login = (authData: AuthDocenteResponse) => {
     docenteAuthApi.saveAuthData(authData);
