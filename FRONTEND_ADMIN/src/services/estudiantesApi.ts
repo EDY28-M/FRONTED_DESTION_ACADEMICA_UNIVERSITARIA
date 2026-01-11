@@ -48,7 +48,8 @@ export const estudiantesApi = {
   // Verificar si el estudiante ha pagado la matrícula
   verificarMatriculaPagada: async (idPeriodo: number): Promise<boolean> => {
     try {
-      const response = await paymentApi.get(`/payments/verificar-matricula-pagada/${idPeriodo}`);
+      // Importante: validar desde el backend principal (maneja auth/refresh y centraliza la lógica)
+      const response = await axios.get('/estudiantes/matricula-pagada', { params: { idPeriodo } });
       return response.data.pagado || false;
     } catch {
       return false;

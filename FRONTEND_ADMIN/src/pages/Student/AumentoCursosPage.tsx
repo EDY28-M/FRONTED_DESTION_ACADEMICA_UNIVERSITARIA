@@ -22,16 +22,18 @@ const AumentoCursosPage: React.FC = () => {
     queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const { data: cursosDisponibles, isLoading } = useQuery({
-    queryKey: ['cursos-disponibles'],
-    queryFn: () => estudiantesApi.getCursosDisponibles(),
-  });
-
   // Verificar si el estudiante ha pagado la matrícula
   const { data: matriculaPagada, isLoading: isLoadingPago } = useQuery({
     queryKey: ['matricula-pagada', periodoActivo?.id],
     queryFn: () => estudiantesApi.verificarMatriculaPagada(periodoActivo!.id),
     enabled: !!periodoActivo?.id,
+  });
+
+  // Importante: NO mostrar/cargar cursos hasta que la matrícula esté pagada
+  const { data: cursosDisponibles, isLoading } = useQuery({
+    queryKey: ['cursos-disponibles', periodoActivo?.id],
+    queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo!.id),
+    enabled: !!periodoActivo?.id && !!matriculaPagada,
   });
 
   const matricularMutation = useMutation({

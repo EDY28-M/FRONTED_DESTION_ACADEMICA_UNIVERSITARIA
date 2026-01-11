@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
 import { StripePaymentForm } from '../../components/Payment/StripePaymentForm';
@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 
 const PagoMatriculaInicialPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [clientSecret, setClientSecret] = useState<string>('');
   const [paymentIntentId, setPaymentIntentId] = useState<string>('');
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
@@ -69,6 +70,9 @@ const PagoMatriculaInicialPage: React.FC = () => {
 
       if (response.data.procesado) {
         toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
+        // Refrescar estado de matrícula pagada y cursos (evita cache viejo en la navegación)
+        queryClient.invalidateQueries({ queryKey: ['matricula-pagada'] });
+        queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
         setTimeout(() => {
           navigate('/estudiante/aumento-cursos');
         }, 2000);
@@ -77,6 +81,8 @@ const PagoMatriculaInicialPage: React.FC = () => {
         const statusResponse = await paymentApi.get(`/payments/status/${paymentIntentId}`);
         if (statusResponse.data.status === 'succeeded' && statusResponse.data.procesado) {
           toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
+          queryClient.invalidateQueries({ queryKey: ['matricula-pagada'] });
+          queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
           setTimeout(() => {
             navigate('/estudiante/aumento-cursos');
           }, 2000);
