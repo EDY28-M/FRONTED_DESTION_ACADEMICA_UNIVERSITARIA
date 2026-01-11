@@ -65,6 +65,8 @@ import TrabajosPage from './pages/Student/TrabajosPage'
 import TrabajoDetallePage from './pages/Student/TrabajoDetallePage'
 import { AnunciosPage } from './pages/Student/AnunciosPage'
 import { MaterialesPage } from './pages/Student/MaterialesPage'
+import PagoExitosoPage from './pages/Student/PagoExitosoPage'
+import PagoCanceladoPage from './pages/Student/PagoCanceladoPage'
 
 function App() {
   const { isAuthenticated, user } = useAuth()
@@ -198,6 +200,8 @@ function App() {
         <Route path="perfil" element={<PerfilEstudiantePage />} />
         <Route path="trabajos/curso/:idCurso" element={<TrabajosPage />} />
         <Route path="trabajos/:id" element={<TrabajoDetallePage />} />
+        <Route path="pago-exitoso" element={<PagoExitosoPage />} />
+        <Route path="pago-cancelado" element={<PagoCanceladoPage />} />
       </Route>
 
       {/* Rutas protegidas de administrador - requieren autenticación */}
