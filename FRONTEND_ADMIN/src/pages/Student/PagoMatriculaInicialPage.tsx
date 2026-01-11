@@ -28,7 +28,7 @@ const PagoMatriculaInicialPage: React.FC = () => {
     queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const montoMatricula = 1.00; // 1 PEN
+  const montoMatricula = 5.00; // 5 PEN
 
   useEffect(() => {
     if (periodoActivo && !clientSecret) {
@@ -63,30 +63,46 @@ const PagoMatriculaInicialPage: React.FC = () => {
     setPagoExitoso(true);
     setIsVerifyingPayment(true);
 
-    // Verificar el estado del pago periódicamente
-    const checkPaymentStatus = async () => {
-      try {
-        const response = await paymentApi.get(`/payments/status/${paymentIntentId}`);
-        const status = response.data.status;
+    try {
+      // Llamar al endpoint para confirmar el pago directamente
+      const response = await paymentApi.post(`/payments/confirm-payment/${paymentIntentId}`);
 
-        if (status === 'succeeded' && response.data.procesado) {
+      if (response.data.procesado) {
+        toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
+        setTimeout(() => {
+          navigate('/estudiante/aumento-cursos');
+        }, 2000);
+      } else {
+        // Si el procesado falló, intentar verificar el estado
+        const statusResponse = await paymentApi.get(`/payments/status/${paymentIntentId}`);
+        if (statusResponse.data.status === 'succeeded' && statusResponse.data.procesado) {
           toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
           setTimeout(() => {
             navigate('/estudiante/aumento-cursos');
           }, 2000);
-        } else if (status === 'succeeded' && !response.data.procesado) {
-          // El pago fue exitoso pero aún no se procesó
-          setTimeout(checkPaymentStatus, 2000);
+        } else {
+          toast.error('Error al procesar el pago. Por favor, contacta con soporte.');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error al confirmar pago:', error);
+      // Fallback: verificar estado directamente
+      try {
+        const statusResponse = await paymentApi.get(`/payments/status/${paymentIntentId}`);
+        if (statusResponse.data.status === 'succeeded') {
+          toast.success('Pago recibido. Procesando matrícula...');
+          setTimeout(() => {
+            navigate('/estudiante/aumento-cursos');
+          }, 2000);
         } else {
           toast.error('Error al procesar el pago');
         }
-      } catch (error) {
-        console.error('Error al verificar estado del pago:', error);
-        setTimeout(checkPaymentStatus, 2000);
+      } catch {
+        toast.error('Error al verificar el pago. Por favor, intenta de nuevo.');
       }
-    };
-
-    checkPaymentStatus();
+    } finally {
+      setIsVerifyingPayment(false);
+    }
   };
 
   const handlePaymentError = (error: string) => {
