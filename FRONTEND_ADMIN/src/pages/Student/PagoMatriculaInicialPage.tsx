@@ -3,26 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
-import { 
-  Loader2, 
-  ArrowLeft, 
-  User, 
-  GraduationCap, 
-  Calendar, 
-  CreditCard,
-  CheckCircle,
-  Shield
-} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PagoMatriculaInicialPage: React.FC = () => {
   const navigate = useNavigate();
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
-
-  const { data: perfil, isLoading: loadingPerfil } = useQuery({
-    queryKey: ['estudiante-perfil'],
-    queryFn: estudiantesApi.getPerfil,
-  });
 
   const { data: periodoActivo, isLoading: loadingPeriodo } = useQuery({
     queryKey: ['periodo-activo'],
@@ -48,219 +33,120 @@ const PagoMatriculaInicialPage: React.FC = () => {
       if (response.data.checkoutUrl) {
         window.location.href = response.data.checkoutUrl;
       } else {
-        toast.error('Error: No se recibió la URL de pago');
+        toast.error('No se pudo iniciar el proceso de pago');
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.mensaje || 'Error al iniciar el pago';
+      const errorMessage = error.response?.data?.mensaje || 'Error al procesar la solicitud';
       toast.error(errorMessage);
-      console.error('Error al crear checkout:', error);
     } finally {
       setIsCreatingCheckout(false);
     }
   };
 
-  if (loadingPeriodo || loadingPerfil) {
+  if (loadingPeriodo) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+      <div className="flex items-center justify-center py-16">
+        <span className="text-sm text-zinc-500">Cargando...</span>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Header */}
+    <div className="space-y-6">
+      {/* Navegación */}
       <div className="mb-6">
         <button
           onClick={() => navigate('/estudiante/inicio')}
-          className="flex items-center gap-1 text-gray-600 hover:text-gray-900 mb-3 text-sm transition-colors"
+          className="text-sm text-zinc-600 hover:text-zinc-900 hover:underline"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Volver
+          Volver al inicio
         </button>
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
-            <CreditCard className="w-6 h-6 text-white" />
+      </div>
+
+      {/* Título */}
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-zinc-900">
+          Pago de Matrícula
+        </h1>
+        <p className="text-sm text-zinc-600 mt-1">
+          {periodoActivo?.nombre || 'Período académico'}
+        </p>
+      </div>
+
+      {/* Contenedor principal */}
+      <div className="border border-zinc-300 bg-white">
+        {/* Concepto */}
+        <div className="px-5 py-4 border-b border-zinc-200">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Concepto</td>
+                <td className="text-right text-zinc-900 font-medium">Derecho de matrícula</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Período</td>
+                <td className="text-right text-zinc-900">{periodoActivo?.nombre || '—'}</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Año</td>
+                <td className="text-right text-zinc-900">{periodoActivo?.anio || '—'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Resumen de montos */}
+        <div className="px-5 py-4 border-b border-zinc-200 bg-zinc-50">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="text-zinc-600 py-1">Subtotal</td>
+                <td className="text-right font-mono text-zinc-900">S/ {montoMatricula.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1">Descuento</td>
+                <td className="text-right font-mono text-zinc-900">S/ 0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Total */}
+        <div className="px-5 py-4 border-b border-zinc-300">
+          <div className="flex justify-between items-center">
+            <span className="text-zinc-900 font-semibold">Total a pagar</span>
+            <span className="text-lg font-mono font-bold text-zinc-900">S/ {montoMatricula.toFixed(2)}</span>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Pago de Matrícula</h1>
-            <p className="text-sm text-gray-600">Completa tu matrícula para el período académico</p>
-          </div>
+        </div>
+
+        {/* Método de pago */}
+        <div className="px-5 py-4 border-b border-zinc-200">
+          <p className="text-sm text-zinc-600 mb-2">Método de pago</p>
+          <p className="text-sm text-zinc-900">Tarjeta de crédito o débito (Stripe)</p>
+        </div>
+
+        {/* Botón de acción */}
+        <div className="px-5 py-5">
+          <button
+            onClick={handlePagarConStripe}
+            disabled={isCreatingCheckout || !periodoActivo}
+            className="w-full py-3 px-4 bg-[#2E7D32] hover:bg-[#1B5E20] disabled:bg-zinc-300 
+                     text-white text-sm font-medium transition-colors disabled:cursor-not-allowed"
+          >
+            {isCreatingCheckout ? 'Procesando...' : 'Continuar con el pago'}
+          </button>
+          <p className="text-xs text-zinc-500 text-center mt-3">
+            Será redirigido a la pasarela de pago segura.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Columna izquierda - Información */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Datos del Estudiante */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Datos del Estudiante</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Nombre Completo</p>
-                <p className="font-semibold text-gray-900">
-                  {perfil?.nombres} {perfil?.apellidos}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Código</p>
-                <p className="font-semibold text-gray-900">{perfil?.codigo || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Carrera</p>
-                <p className="font-semibold text-gray-900">{perfil?.carrera || 'No especificada'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Correo Electrónico</p>
-                <p className="font-semibold text-gray-900 text-sm truncate">{perfil?.correo}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Ciclo Académico */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <GraduationCap className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Ciclo Académico</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Período Actual</p>
-                <p className="font-semibold text-gray-900">{periodoActivo?.nombre || 'No disponible'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Año Académico</p>
-                <p className="font-semibold text-gray-900">{periodoActivo?.anio || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Ciclo Actual del Estudiante</p>
-                <p className="font-semibold text-gray-900">{perfil?.cicloActual || 'N/A'}° Ciclo</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Estado</p>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <p className="font-semibold text-gray-900">{perfil?.estado || 'Activo'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Beneficios */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Beneficios de tu Matrícula</h2>
-            </div>
-            <ul className="space-y-2">
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Acceso completo a matricular cursos del período</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Participación en todas las actividades académicas</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Acceso a servicios de biblioteca y laboratorios</span>
-              </li>
-              <li className="flex items-start gap-2 text-sm text-gray-700">
-                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Validez oficial de tus estudios</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Columna derecha - Pago */}
-        <div className="lg:col-span-1">
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden sticky top-4">
-            {/* Resumen */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-5 h-5 text-gray-700" />
-                <h2 className="font-semibold text-gray-900">Resumen de Pago</h2>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="bg-white p-4 rounded-lg border border-gray-200">
-                  <p className="text-xs text-gray-600 mb-1">Concepto</p>
-                  <p className="font-semibold text-gray-900">Matrícula Académica</p>
-                  <p className="text-xs text-gray-500 mt-1">{periodoActivo?.nombre}</p>
-                </div>
-
-                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <span className="text-sm text-gray-600">Subtotal</span>
-                  <span className="font-medium text-gray-900">S/ {montoMatricula.toFixed(2)}</span>
-                </div>
-
-                <div className="flex justify-between items-center text-lg pt-3 border-t-2 border-gray-300">
-                  <span className="font-bold text-gray-900">Total</span>
-                  <span className="font-bold text-blue-600">S/ {montoMatricula.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Método de Pago */}
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-gray-700" />
-                <h2 className="font-semibold text-gray-900">Método de Pago</h2>
-              </div>
-              
-              <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-6 bg-[#635BFF] rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-[10px]">stripe</span>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">Pago Seguro con Stripe</p>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Visa, Mastercard, American Express
-                </p>
-              </div>
-
-              <button
-                onClick={handlePagarConStripe}
-                disabled={isCreatingCheckout || !periodoActivo}
-                className="w-full py-4 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
-                         disabled:from-gray-300 disabled:to-gray-300 text-white font-semibold rounded-lg 
-                         transition-all duration-200 disabled:cursor-not-allowed 
-                         flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-              >
-                {isCreatingCheckout ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    Pagar S/ {montoMatricula.toFixed(2)}
-                  </>
-                )}
-              </button>
-
-              <p className="text-xs text-center text-gray-500 mt-3">
-                🔒 Conexión segura SSL · Redirige a Stripe
-              </p>
-            </div>
-          </div>
-
-          {/* Nota de seguridad */}
-          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-xs text-amber-800 font-medium mb-1">
-              ⚠️ Importante
-            </p>
-            <p className="text-xs text-amber-700">
-              No compartas tu información de pago con terceros. Los pagos son procesados de forma segura.
-            </p>
-          </div>
-        </div>
+      {/* Nota legal */}
+      <div className="mt-6 text-xs text-zinc-500 leading-relaxed">
+        <p>
+          Al continuar, acepta los términos y condiciones de matrícula vigentes.
+          El pago es procesado mediante pasarela certificada PCI-DSS.
+        </p>
       </div>
     </div>
   );
