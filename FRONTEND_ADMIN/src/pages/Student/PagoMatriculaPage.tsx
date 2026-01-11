@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
 import { StripePaymentForm } from '../../components/Payment/StripePaymentForm';
-import { 
-  ShoppingCart, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  ShoppingCart,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
   X,
   CreditCard,
   ArrowLeft
@@ -160,7 +160,7 @@ const PagoMatriculaPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8 px-4">
+    <div className="space-y-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -183,7 +183,7 @@ const PagoMatriculaPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white border border-zinc-200 rounded-xl p-6 sticky top-4">
               <h2 className="text-lg font-semibold text-zinc-900 mb-4">Resumen</h2>
-              
+
               <div className="space-y-3 mb-6">
                 {cursosSeleccionados.map((curso) => (
                   <div

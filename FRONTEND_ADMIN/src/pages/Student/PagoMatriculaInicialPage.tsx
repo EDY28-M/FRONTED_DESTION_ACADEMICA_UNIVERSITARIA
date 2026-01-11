@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
 import { StripePaymentForm } from '../../components/Payment/StripePaymentForm';
-import { 
-  GraduationCap, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle, 
+import {
+  GraduationCap,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
   CreditCard,
   ArrowLeft,
   Shield
@@ -118,8 +118,8 @@ const PagoMatriculaInicialPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="mb-6">
           <button
@@ -130,7 +130,7 @@ const PagoMatriculaInicialPage: React.FC = () => {
             <span className="text-sm">Volver</span>
           </button>
           <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
-            <GraduationCap className="w-6 h-6" />
+
             Pago de Matrícula
           </h1>
           <p className="text-zinc-600 mt-1">Completa el pago de matrícula para poder matricular cursos</p>
@@ -143,7 +143,7 @@ const PagoMatriculaInicialPage: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-blue-900 mb-1">Información importante</p>
               <p className="text-xs text-blue-700">
-                El pago de matrícula es un requisito obligatorio para poder matricular cursos. 
+                El pago de matrícula es un requisito obligatorio para poder matricular cursos.
                 Una vez completado el pago, podrás matricular todos los cursos disponibles para tu ciclo.
               </p>
             </div>
@@ -155,7 +155,7 @@ const PagoMatriculaInicialPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white border border-zinc-200 rounded-xl p-6 sticky top-4">
               <h2 className="text-lg font-semibold text-zinc-900 mb-4">Resumen</h2>
-              
+
               <div className="space-y-3 mb-6">
                 <div className="flex items-start justify-between p-3 bg-zinc-50 rounded-lg">
                   <div className="flex-1">
