@@ -12,6 +12,22 @@ const AumentoCursosPage: React.FC = () => {
   const { addNotification } = useNotifications();
   const [cursosSeleccionados, setCursosSeleccionados] = useState<number[]>([]);
 
+  // Detectar si viene de un pago exitoso (URL puede tener parámetros)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pagoExitoso = urlParams.get('pago_exitoso');
+    
+    if (pagoExitoso === 'true') {
+      // Invalidar todas las queries relacionadas con pago y cursos
+      queryClient.invalidateQueries({ queryKey: ['matricula-pagada'] });
+      queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['historial-pagos'] });
+      
+      // Limpiar el parámetro de la URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [queryClient]);
+
   const { data: perfil } = useQuery({
     queryKey: ['estudiante-perfil'],
     queryFn: estudiantesApi.getPerfil,
@@ -23,10 +39,19 @@ const AumentoCursosPage: React.FC = () => {
   });
 
   // Verificar si el estudiante ha pagado la matrícula
-  const { data: matriculaPagada, isLoading: isLoadingPago } = useQuery({
+  // Configurado para refetch automático y datos frescos
+  const { data: matriculaPagada, isLoading: isLoadingPago, refetch: refetchMatriculaPagada } = useQuery({
     queryKey: ['matricula-pagada', periodoActivo?.id],
     queryFn: () => estudiantesApi.verificarMatriculaPagada(periodoActivo!.id),
     enabled: !!periodoActivo?.id,
+    staleTime: 0, // Los datos siempre se consideran stale, forzando refetch
+    refetchOnMount: true, // Refetch cuando el componente se monta
+    refetchOnWindowFocus: true, // Refetch cuando la ventana recupera el foco
+    // Refetch cada 3 segundos solo si no está pagado (para detectar pago reciente)
+    refetchInterval: (query) => {
+      // Solo refetch si no está pagado y hay periodo activo
+      return query.state.data === false ? 3000 : false;
+    },
   });
 
   // Importante: NO mostrar/cargar cursos hasta que la matrícula esté pagada
@@ -34,7 +59,16 @@ const AumentoCursosPage: React.FC = () => {
     queryKey: ['cursos-disponibles', periodoActivo?.id],
     queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo!.id),
     enabled: !!periodoActivo?.id && !!matriculaPagada,
+    staleTime: 0, // Siempre refetch para obtener datos frescos
+    refetchOnMount: true,
   });
+
+  // Refetch inmediato cuando se monta el componente o cambia el periodo
+  useEffect(() => {
+    if (periodoActivo?.id && !isLoadingPago) {
+      refetchMatriculaPagada();
+    }
+  }, [periodoActivo?.id, refetchMatriculaPagada, isLoadingPago]);
 
   const matricularMutation = useMutation({
     mutationFn: estudiantesApi.matricular,
@@ -141,7 +175,8 @@ const AumentoCursosPage: React.FC = () => {
       </div>
 
       {/* Tabla de cursos disponibles */}
-      {!isLoadingPago && !matriculaPagada && (
+      {/* Mostrar mensaje de pago solo si NO está cargando Y NO está pagado */}
+      {!isLoadingPago && matriculaPagada === false && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4">
           <CreditCard className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
