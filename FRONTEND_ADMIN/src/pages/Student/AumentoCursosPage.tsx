@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { estudiantesApi } from '../../services/estudiantesApi';
-import { Plus, AlertCircle, Check, GraduationCap, Clock, CreditCard } from 'lucide-react';
+import { CursoDisponible } from '../../types/estudiante';
+import { AlertCircle, Check, Clock, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotifications } from '../../contexts/NotificationContext';
 
@@ -39,14 +40,15 @@ const AumentoCursosPage: React.FC = () => {
   });
 
   // Verificar si el estudiante ha pagado la matrícula
-  // Configurado para refetch automático y datos frescos
-  const { data: matriculaPagada, isLoading: isLoadingPago, refetch: refetchMatriculaPagada } = useQuery({
+  // Optimizado: usar cache para evitar refetches innecesarios
+  const { data: matriculaPagada, isLoading: isLoadingPago, refetch: refetchMatriculaPagada } = useQuery<boolean>({
     queryKey: ['matricula-pagada', periodoActivo?.id],
     queryFn: () => estudiantesApi.verificarMatriculaPagada(periodoActivo!.id),
     enabled: !!periodoActivo?.id,
-    staleTime: 0, // Los datos siempre se consideran stale, forzando refetch
-    refetchOnMount: true, // Refetch cuando el componente se monta
-    refetchOnWindowFocus: true, // Refetch cuando la ventana recupera el foco
+    staleTime: 30000, // Cache por 30 segundos (más rápido en navegación)
+    gcTime: 300000, // Mantener en cache por 5 minutos (gcTime reemplaza a cacheTime en v5)
+    refetchOnMount: true, // Siempre refetch al montar para datos frescos
+    refetchOnWindowFocus: false, // No refetch en focus para mejor performance
     // Refetch cada 3 segundos solo si no está pagado (para detectar pago reciente)
     refetchInterval: (query) => {
       // Solo refetch si no está pagado y hay periodo activo
@@ -54,21 +56,44 @@ const AumentoCursosPage: React.FC = () => {
     },
   });
 
-  // Importante: NO mostrar/cargar cursos hasta que la matrícula esté pagada
-  const { data: cursosDisponibles, isLoading } = useQuery({
+  // OPTIMIZACIÓN: Cargar cursos en paralelo si ya sabemos que está pagado (desde cache)
+  // Esto permite mostrar cursos inmediatamente si el usuario ya pagó antes
+  const matriculaPagadaFromCache = queryClient.getQueryData<boolean>(['matricula-pagada', periodoActivo?.id]);
+  const shouldLoadCursos = !!periodoActivo?.id && (matriculaPagada === true || matriculaPagadaFromCache === true);
+
+  // Cargar cursos disponibles - optimizado para carga rápida
+  const { data: cursosDisponibles, isLoading } = useQuery<CursoDisponible[]>({
     queryKey: ['cursos-disponibles', periodoActivo?.id],
     queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo!.id),
-    enabled: !!periodoActivo?.id && !!matriculaPagada,
-    staleTime: 0, // Siempre refetch para obtener datos frescos
-    refetchOnMount: true,
+    enabled: shouldLoadCursos, // Cargar si está pagado (incluso desde cache)
+    staleTime: 60000, // Cache por 1 minuto (los cursos no cambian tan frecuentemente)
+    gcTime: 300000, // Mantener en cache por 5 minutos (gcTime reemplaza a cacheTime en v5)
+    refetchOnMount: false, // No refetch automático (usar cache si está disponible)
+    refetchOnWindowFocus: false, // No refetch en focus
+    // Prefetch: si el periodo está disponible, prefetch los cursos mientras verificamos el pago
+    placeholderData: (previousData) => previousData, // Mantener datos anteriores mientras carga
   });
 
-  // Refetch inmediato cuando se monta el componente o cambia el periodo
+  // Prefetch optimizado: cargar datos en paralelo cuando el periodo está disponible
   useEffect(() => {
-    if (periodoActivo?.id && !isLoadingPago) {
-      refetchMatriculaPagada();
+    if (periodoActivo?.id) {
+      // Refetch de pago si no está en cache o está obsoleto
+      if (!queryClient.getQueryData(['matricula-pagada', periodoActivo.id])) {
+        refetchMatriculaPagada();
+      }
+      
+      // Prefetch de cursos si ya sabemos que está pagado (desde cache)
+      const cachedPago = queryClient.getQueryData<boolean>(['matricula-pagada', periodoActivo.id]);
+      if (cachedPago === true) {
+        // Prefetch cursos en background para carga instantánea
+        queryClient.prefetchQuery({
+          queryKey: ['cursos-disponibles', periodoActivo.id],
+          queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo.id),
+          staleTime: 60000,
+        });
+      }
     }
-  }, [periodoActivo?.id, refetchMatriculaPagada, isLoadingPago]);
+  }, [periodoActivo?.id, refetchMatriculaPagada, queryClient]);
 
   const matricularMutation = useMutation({
     mutationFn: estudiantesApi.matricular,
@@ -81,8 +106,8 @@ const AumentoCursosPage: React.FC = () => {
     },
   });
 
-  const cursosParaMatricular = cursosDisponibles?.filter(c => c.disponible && !c.yaMatriculado) || [];
-  const cursosNoDisponibles = cursosDisponibles?.filter(c => !c.disponible && !c.yaMatriculado) || [];
+  const cursosParaMatricular = (cursosDisponibles ?? []).filter((c: CursoDisponible) => c.disponible && !c.yaMatriculado);
+  const cursosNoDisponibles = (cursosDisponibles ?? []).filter((c: CursoDisponible) => !c.disponible && !c.yaMatriculado);
 
   const handleToggleCurso = (idCurso: number) => {
     setCursosSeleccionados(prev =>
@@ -116,7 +141,7 @@ const AumentoCursosPage: React.FC = () => {
       try {
         await matricularMutation.mutateAsync({ idCurso, idPeriodo });
         exitosos++;
-        const curso = cursosDisponibles?.find(c => c.id === idCurso);
+        const curso = cursosDisponibles?.find((c: CursoDisponible) => c.id === idCurso);
         if (curso) {
           addNotification({
             type: 'academico',
@@ -175,8 +200,8 @@ const AumentoCursosPage: React.FC = () => {
       </div>
 
       {/* Tabla de cursos disponibles */}
-      {/* Mostrar mensaje de pago solo si NO está cargando Y NO está pagado */}
-      {!isLoadingPago && matriculaPagada === false && (
+      {/* Mostrar mensaje de pago solo si NO está cargando Y definitivamente NO está pagado */}
+      {!isLoadingPago && matriculaPagada === false && !matriculaPagadaFromCache && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4">
           <CreditCard className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
@@ -207,12 +232,14 @@ const AumentoCursosPage: React.FC = () => {
           )}
         </div>
 
-        {isLoading ? (
-          <div className="p-12 text-center">
-            <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-zinc-500 text-sm">Cargando cursos disponibles...</p>
-          </div>
-        ) : cursosParaMatricular.length > 0 ? (
+        {/* Mostrar cursos si están pagados (incluso desde cache) */}
+        {shouldLoadCursos ? (
+          isLoading && !cursosDisponibles ? (
+            <div className="p-12 text-center">
+              <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+              <p className="text-zinc-500 text-sm">Cargando cursos disponibles...</p>
+            </div>
+          ) : cursosParaMatricular.length > 0 ? (
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -225,7 +252,7 @@ const AumentoCursosPage: React.FC = () => {
                         checked={cursosSeleccionados.length === cursosParaMatricular.length && cursosParaMatricular.length > 0}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setCursosSeleccionados(cursosParaMatricular.map(c => c.id));
+                            setCursosSeleccionados(cursosParaMatricular.map((c: CursoDisponible) => c.id));
                           } else {
                             setCursosSeleccionados([]);
                           }
@@ -241,7 +268,7 @@ const AumentoCursosPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {cursosParaMatricular.map((curso) => {
+                  {cursosParaMatricular.map((curso: CursoDisponible) => {
                     const vacantes = (curso.capacidadMaxima || 30) - curso.estudiantesMatriculados;
                     const isSelected = cursosSeleccionados.includes(curso.id);
                     return (
@@ -313,7 +340,8 @@ const AumentoCursosPage: React.FC = () => {
             <p className="text-sm text-zinc-500 mb-1">No hay cursos disponibles para aumento</p>
             <p className="text-xs text-zinc-400">Ya estás matriculado en todos los cursos disponibles para tu ciclo</p>
           </div>
-        )}
+        )
+        ) : null}
       </div>
 
       {/* Cursos No Disponibles */}
@@ -324,7 +352,7 @@ const AumentoCursosPage: React.FC = () => {
             <span className="text-sm font-medium text-amber-800">Cursos No Disponibles ({cursosNoDisponibles.length})</span>
           </div>
           <div className="p-4 space-y-2">
-            {cursosNoDisponibles.map((curso) => (
+            {cursosNoDisponibles.map((curso: CursoDisponible) => (
               <div key={curso.id} className="flex items-center justify-between p-3 bg-zinc-50 border border-zinc-100 rounded-lg">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-zinc-700">{curso.nombreCurso}</p>
