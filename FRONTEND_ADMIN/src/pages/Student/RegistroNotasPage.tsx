@@ -18,6 +18,9 @@ export default function RegistroNotasPage() {
   const { data: registroNotas, isLoading, error } = useQuery({
     queryKey: ['registro-notas'],
     queryFn: () => estudiantesApi.getRegistroNotas(),
+    staleTime: 5 * 60 * 1000,    // 5 minutos - datos no cambian frecuentemente
+    gcTime: 30 * 60 * 1000,      // 30 minutos en memoria
+    refetchOnWindowFocus: false, // No recargar al cambiar de pestaña
   });
 
   const toggleSemestre = (idPeriodo: number) => {
@@ -118,8 +121,8 @@ export default function RegistroNotasPage() {
                       {semestre.anio} - Ciclo {semestre.cicloAcademico}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${semestre.estado === 'Cerrado'
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
                       {semestre.estado}
                     </span>
@@ -252,8 +255,8 @@ export default function RegistroNotasPage() {
                           {/* Nota Final */}
                           <td className="px-4 py-3 text-center bg-emerald-50/30">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-semibold border tabular-nums ${curso.notaFinal >= 11
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-red-50 text-red-700 border-red-200'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-red-50 text-red-700 border-red-200'
                               }`}>
                               {curso.notaFinal}
                             </span>
@@ -262,8 +265,8 @@ export default function RegistroNotasPage() {
                           {/* Estado */}
                           <td className="px-4 py-3 text-center">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${curso.estadoCurso === 'Aprobado'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-red-50 text-red-700 border-red-200'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-red-50 text-red-700 border-red-200'
                               }`}>
                               {curso.estadoCurso === 'Aprobado' ? 'Aprob' : 'Desap'}
                             </span>

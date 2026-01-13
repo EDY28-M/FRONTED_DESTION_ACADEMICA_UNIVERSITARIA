@@ -194,8 +194,8 @@ const MisCursosPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-3 text-center">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${curso.estado === 'Matriculado'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-red-50 text-red-700 border-red-200'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-red-50 text-red-700 border-red-200'
                         }`}>
                         {curso.estado}
                       </span>

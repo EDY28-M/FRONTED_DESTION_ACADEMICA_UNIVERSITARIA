@@ -64,8 +64,9 @@ export const HorarioEstudiantePage = () => {
   const { data: horarios = [], isLoading } = useQuery<Horario[]>({
     queryKey: ['mi-horario-estudiante'],
     queryFn: estudiantesApi.getMiHorario,
-    staleTime: 30000,
-    refetchOnWindowFocus: true
+    staleTime: 0,                 // Sin cache - siempre datos frescos
+    refetchOnMount: 'always',      // Recargar siempre al entrar
+    refetchOnWindowFocus: true     // Recargar al volver a la pestaña
   });
 
   // Obtener periodo activo para el título del PDF

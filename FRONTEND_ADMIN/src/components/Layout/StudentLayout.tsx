@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { estudiantesApi } from '../../services/estudiantesApi';
 import { Notifications } from './Notifications';
 import {
   BookOpen,
@@ -36,6 +38,36 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { notifications, clearNotifications, markAsRead } = useNotifications();
+
+  // ========== PREFETCH GLOBAL: Periodo Activo y Cursos ==========
+  // Pre-carga el periodo activo apenas el estudiante entra al portal.
+  const { data: periodoActivo } = useQuery({
+    queryKey: ['periodo-activo'],
+    queryFn: estudiantesApi.getPeriodoActivo,
+    staleTime: 5 * 60 * 1000,     // 5 minutos
+    gcTime: 30 * 60 * 1000,       // 30 minutos en cache
+    refetchOnWindowFocus: false,
+  });
+
+  // Pre-carga cursos disponibles tan pronto como tengamos el periodo
+  useQuery({
+    queryKey: ['cursos-disponibles', periodoActivo?.id],
+    queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo!.id),
+    enabled: !!periodoActivo?.id,
+    staleTime: 60 * 1000,         // 1 minuto
+    gcTime: 5 * 60 * 1000,        // 5 minutos
+    refetchOnWindowFocus: false,
+  });
+
+  // Pre-carga registro de notas (datos históricos, cambian poco)
+  useQuery({
+    queryKey: ['registro-notas'],
+    queryFn: estudiantesApi.getRegistroNotas,
+    staleTime: 5 * 60 * 1000,     // 5 minutos
+    gcTime: 30 * 60 * 1000,       // 30 minutos
+    refetchOnWindowFocus: false,
+  });
+  // ===============================================================
 
   // Marcar el <body> para que el "no rounded" aplique también a modales portaleados
   // dentro del portal estudiante.

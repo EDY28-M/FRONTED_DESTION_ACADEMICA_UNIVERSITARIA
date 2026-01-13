@@ -38,8 +38,8 @@ const NotasPage: React.FC = () => {
 
   // Extraer datos del response
   const cursosConEvaluaciones = notasResponse?.cursosConEvaluaciones || [];
-  const periodoMostrar = periodoSeleccionado 
-    ? periodos?.find(p => p.id === periodoSeleccionado) 
+  const periodoMostrar = periodoSeleccionado
+    ? periodos?.find(p => p.id === periodoSeleccionado)
     : periodoActivo;
 
   // Crear mapa de idCurso a codigoCurso desde misCursos
@@ -120,7 +120,7 @@ const NotasPage: React.FC = () => {
     if (tipo.includes('trabajo')) {
       return `T${numero || ''}`;
     }
-    
+
     const palabras = tipoEvaluacion.split(' ').filter(p => p.length > 0);
     if (palabras.length >= 2) {
       return palabras.slice(0, 2).map(p => p[0].toUpperCase()).join('') + numero;
@@ -244,16 +244,16 @@ const NotasPage: React.FC = () => {
             const evaluacionesConPF = tienePromedioFinal
               ? evaluaciones
               : [
-                  ...evaluaciones,
-                  {
-                    id: '__pf__',
-                    tipoEvaluacion: 'Promedio Final',
-                    tieneNota: true,
-                    notaValor: promedioFinalCurso,
-                    peso: 100,
-                  },
-                ];
-            
+                ...evaluaciones,
+                {
+                  id: '__pf__',
+                  tipoEvaluacion: 'Promedio Final',
+                  tieneNota: true,
+                  notaValor: promedioFinalCurso,
+                  peso: 100,
+                },
+              ];
+
             return (
               <div key={curso.idMatricula} className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
                 {/* Encabezado del curso */}
@@ -265,7 +265,7 @@ const NotasPage: React.FC = () => {
                     <span className="text-base font-semibold text-slate-700">{curso.nombreCurso}</span>
                   </div>
                 </div>
-                
+
                 {/* Tabla de evaluaciones */}
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -282,7 +282,7 @@ const NotasPage: React.FC = () => {
                     <tbody className="divide-y divide-zinc-100">
                       {evaluacionesConPF.length > 0 ? (
                         evaluacionesConPF.map((evaluacion, idx) => {
-                          const puntaje = evaluacion.tieneNota && evaluacion.notaValor > 0 
+                          const puntaje = evaluacion.tieneNota && evaluacion.notaValor > 0
                             ? (evaluacion.notaValor * evaluacion.peso / 100).toFixed(2)
                             : '0.00';
                           const esPromedioGeneral = evaluacion.tipoEvaluacion.toLowerCase().includes('promedio general');
@@ -295,7 +295,7 @@ const NotasPage: React.FC = () => {
                             if (esPromedioFinal) return String(Math.round(evaluacion.notaValor));
                             return evaluacion.notaValor.toFixed(2);
                           };
-                          
+
                           return (
                             <tr
                               key={`${curso.idMatricula}-${evaluacion.id}-${idx}`}

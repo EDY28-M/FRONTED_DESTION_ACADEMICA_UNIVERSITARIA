@@ -215,17 +215,15 @@ const AumentoCursosPage: React.FC = () => {
         },
     });
 
-    // !! OPTIMIZACIÓN: Cargar cursos en paralelo, no depender del estado de pago !!
-    // Simplemente requerimos que exista un periodo activo
+    // Cargar cursos disponibles (ahora CON cache para respuesta instantánea)
     const { data: cursosDisponibles, isLoading: isLoadingCursos } = useQuery<CursoDisponible[]>({
         queryKey: ['cursos-disponibles', periodoActivo?.id],
         queryFn: () => estudiantesApi.getCursosDisponibles(periodoActivo!.id),
-        enabled: !!periodoActivo?.id, // SOLO depende del periodo, no del pago
-        staleTime: 0, // Datos siempre frescos
-        gcTime: 0, // No mantener en caché
-        refetchOnMount: 'always', // Recargar siempre al entrar
-        refetchOnWindowFocus: true, // Recargar al volver a la pestaña
-        placeholderData: (previousData) => previousData,
+        enabled: !!periodoActivo?.id,
+        staleTime: 60 * 1000,        // 1 minuto - cache activo, respuesta instantánea
+        gcTime: 5 * 60 * 1000,       // 5 minutos en memoria
+        refetchOnMount: true,        // Recargar en background si están stale
+        refetchOnWindowFocus: false, // No recargar al cambiar de pestaña
     });
 
     useEffect(() => {
@@ -241,6 +239,7 @@ const AumentoCursosPage: React.FC = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
             queryClient.invalidateQueries({ queryKey: ['mis-cursos'] });
+            queryClient.invalidateQueries({ queryKey: ['mi-horario-estudiante'] }); // Recargar horario
         },
     });
 
@@ -399,7 +398,7 @@ const AumentoCursosPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Carga de Cursos: Ahora independiente del pago */}
+                {/* Mostrar spinner SOLO si no hay datos en cache (primera carga) */}
                 {isLoadingCursos && !cursosDisponibles ? (
                     <div className="p-12 text-center">
                         <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />

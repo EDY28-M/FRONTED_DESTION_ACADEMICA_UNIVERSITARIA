@@ -51,7 +51,7 @@ const PagoMatriculaPage: React.FC = () => {
     if (cursosSeleccionados.length > 0 && periodoActivo && !clientSecret) {
       crearPaymentIntent();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cursosSeleccionados, periodoActivo]);
 
   const crearPaymentIntent = async () => {
