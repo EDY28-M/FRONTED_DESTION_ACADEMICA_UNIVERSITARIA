@@ -10,13 +10,13 @@ export const EstadisticasDocentePage: React.FC = () => {
     queryFn: () => docenteCursosApi.getMisCursos(),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-zinc-500">Cargando estadísticas...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div className="text-zinc-500">Cargando estadísticas...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-6">

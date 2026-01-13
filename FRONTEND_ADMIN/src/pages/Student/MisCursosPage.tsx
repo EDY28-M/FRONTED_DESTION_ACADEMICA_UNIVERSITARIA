@@ -122,7 +122,7 @@ const MisCursosPage: React.FC = () => {
         </select>
       </div>
 
-      {cursosSeleccionados.length > 0 && (
+      {/* {cursosSeleccionados.length > 0 && (
         <button
           onClick={handleRetirarSeleccionados}
           className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-100 transition-colors"
@@ -130,7 +130,7 @@ const MisCursosPage: React.FC = () => {
           <Trash2 className="w-4 h-4" />
           Retirar ({cursosSeleccionados.length})
         </button>
-      )}
+      )} */}
     </div>
   );
 
@@ -155,9 +155,9 @@ const MisCursosPage: React.FC = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50/50">
-                  <th className="w-12 px-6 py-3 text-center">
+                  {/* <th className="w-12 px-6 py-3 text-center">
                     <div className="w-4 h-4 border border-zinc-300 rounded bg-zinc-50" />
-                  </th>
+                  </th> */}
                   <th className="px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Código</th>
                   <th className="px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
@@ -170,7 +170,7 @@ const MisCursosPage: React.FC = () => {
               <tbody className="divide-y divide-zinc-50">
                 {[...cursosMatriculados, ...cursosRetirados].map((curso) => (
                   <tr key={curso.id} className={`group transition-colors ${curso.estado === 'Retirado' ? 'bg-zinc-50/50 opacity-60' : 'hover:bg-zinc-50/50'}`}>
-                    <td className="px-6 py-3 text-center">
+                    {/* <td className="px-6 py-3 text-center">
                       {curso.estado === 'Matriculado' && (
                         <input
                           type="checkbox"
@@ -179,7 +179,7 @@ const MisCursosPage: React.FC = () => {
                           className="w-4 h-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
                         />
                       )}
-                    </td>
+                    </td> */}
                     <td className="px-6 py-3">
                       <span className="text-xs font-mono text-zinc-500">{curso.codigoCurso}</span>
                     </td>

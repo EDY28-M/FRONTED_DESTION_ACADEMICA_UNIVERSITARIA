@@ -197,11 +197,11 @@ export const DocenteLayout = () => {
             icon={CalendarDaysIcon}
             label="Mi Horario"
           />
-          <SidebarItem
+          {/* <SidebarItem
             to="/docente/anuncios"
             icon={MegaphoneIcon}
             label="Anuncios"
-          />
+          /> */}
           <SidebarItem
             to="/docente/materiales"
             icon={PaperClipIcon}

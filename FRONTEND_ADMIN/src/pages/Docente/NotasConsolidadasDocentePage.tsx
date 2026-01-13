@@ -20,13 +20,13 @@ export const NotasConsolidadasDocentePage: React.FC = () => {
     enabled: !!cursoSeleccionado,
   });
 
-  if (cargandoCursos) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-zinc-500">Cargando cursos...</div>
-      </div>
-    );
-  }
+  // if (cargandoCursos) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div className="text-zinc-500">Cargando cursos...</div>
+  //     </div>
+  //   );
+  // }
 
   const estudiantesFiltrados = estudiantes?.filter(estudiante =>
     estudiante.nombreCompleto?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -82,11 +82,12 @@ export const NotasConsolidadasDocentePage: React.FC = () => {
             </div>
           </div>
 
-          {cargandoNotas ? (
+          {/* {cargandoNotas ? (
             <div className="p-8 text-center text-zinc-500">
               Cargando notas...
             </div>
-          ) : estudiantesFiltrados.length === 0 ? (
+          ) :  */}
+          {estudiantesFiltrados.length === 0 ? (
             <div className="p-8 text-center">
               <BookOpen className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
               <p className="text-zinc-500">No hay estudiantes disponibles para este curso</p>

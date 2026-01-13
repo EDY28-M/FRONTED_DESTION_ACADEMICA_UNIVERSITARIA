@@ -246,9 +246,10 @@ const AttendanceModal = ({ isOpen, onClose, cursoId, cursoNombre, onSuccess }: A
 
           {/* Lista de estudiantes */}
           <div className="px-6 py-4">
-            {isLoading ? (
+            {/* {isLoading ? (
               <div className="py-8 text-center text-sm text-zinc-400">Cargando estudiantes...</div>
-            ) : (
+            ) :  */}
+            (
               <div className="space-y-2">
                 {estudiantes.map((estudiante, index) => {
                   const estado = asistencias[estudiante.id];
@@ -302,7 +303,7 @@ const AttendanceModal = ({ isOpen, onClose, cursoId, cursoNombre, onSuccess }: A
                   );
                 })}
               </div>
-            )}
+            )
           </div>
 
           {/* Footer con botones */}
@@ -443,13 +444,13 @@ export const AsistenciasDocentePage = () => {
 
   const cursoSeleccionado = cursos.find(c => c.id === selectedCurso);
 
-  if (isLoadingCursos) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-      </div>
-    );
-  }
+  // if (isLoadingCursos) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -533,11 +534,12 @@ export const AsistenciasDocentePage = () => {
         {/* ========== TAB: RESUMEN ========== */}
         {activeTab === 'resumen' && (
           <div className="w-full border border-zinc-200 rounded-lg bg-white overflow-hidden">
-            {isLoadingAsistencias ? (
+            {/* {isLoadingAsistencias ? (
               <div className="py-16 text-center">
                 <div className="animate-pulse text-zinc-400 text-sm">Cargando asistencias...</div>
               </div>
-            ) : resumenAsistencias.length === 0 ? (
+            ) :  */}
+            {resumenAsistencias.length === 0 ? (
               <EmptyState
                 icon={CalendarIcon}
                 title="Sin registros"
@@ -598,11 +600,12 @@ export const AsistenciasDocentePage = () => {
         {/* ========== TAB: HISTORIAL ========== */}
         {activeTab === 'historial' && (
           <div className="space-y-4">
-            {isLoadingHistorial ? (
+            {/* {isLoadingHistorial ? (
               <div className="border border-zinc-200 rounded-lg bg-white py-16 text-center">
                 <div className="animate-pulse text-zinc-400 text-sm">Cargando historial...</div>
               </div>
-            ) : historialAsistencias.length === 0 ? (
+            ) :  */}
+            {historialAsistencias.length === 0 ? (
               <div className="border border-zinc-200 rounded-lg bg-white">
                 <EmptyState
                   icon={ClockIcon}

@@ -60,6 +60,7 @@ export const GestionCursoDocentePage = () => {
   // Estado para configuración de tipos de evaluación
   const [mostrarModalConfig, setMostrarModalConfig] = useState(false);
   const [tiposEvaluacion, setTiposEvaluacion] = useState<any[]>([]);
+  const [tiposEvaluacionOriginales, setTiposEvaluacionOriginales] = useState<any[]>([]);
   const [isLoadingTipos, setIsLoadingTipos] = useState(false);
 
   // Estado para asistencia
@@ -360,6 +361,30 @@ export const GestionCursoDocentePage = () => {
     }
   };
 
+  // Función para comparar si hay cambios en los tipos de evaluación
+  const hayCambiosEnEvaluaciones = () => {
+    if (tiposEvaluacionOriginales.length === 0 && tiposEvaluacion.length === 0) {
+      return false;
+    }
+    if (tiposEvaluacionOriginales.length !== tiposEvaluacion.length) {
+      return true;
+    }
+    // Comparar cada elemento
+    for (let i = 0; i < tiposEvaluacion.length; i++) {
+      const actual = tiposEvaluacion[i];
+      const original = tiposEvaluacionOriginales[i];
+      if (!original) return true;
+      if (actual.id !== original.id ||
+          actual.nombre !== original.nombre ||
+          parseFloat(actual.peso.toString()) !== parseFloat(original.peso.toString()) ||
+          actual.activo !== original.activo ||
+          actual.orden !== original.orden) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // Guardar configuración de tipos de evaluación
   const handleGuardarConfiguracion = async () => {
     try {
@@ -389,6 +414,9 @@ export const GestionCursoDocentePage = () => {
 
       // Recargar tipos de evaluación para actualizar el estado local con los nombres nuevos
       await cargarTiposEvaluacion();
+      // Actualizar también los originales
+      const tiposRecargados = await docenteCursosApi.getTiposEvaluacion(cursoId);
+      setTiposEvaluacionOriginales(JSON.parse(JSON.stringify(tiposRecargados)));
 
       // Recargar estudiantes para actualizar las notas
       await cargarEstudiantes();
@@ -621,16 +649,16 @@ export const GestionCursoDocentePage = () => {
     est.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando información del curso...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-700 mx-auto"></div>
+  //         <p className="mt-4 text-gray-600">Cargando información del curso...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -801,8 +829,11 @@ export const GestionCursoDocentePage = () => {
               </h2>
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button
-                  onClick={() => {
-                    cargarTiposEvaluacion();
+                  onClick={async () => {
+                    await cargarTiposEvaluacion();
+                    // Guardar copia original después de cargar
+                    const tipos = await docenteCursosApi.getTiposEvaluacion(cursoId);
+                    setTiposEvaluacionOriginales(JSON.parse(JSON.stringify(tipos)));
                     setMostrarModalConfig(true);
                   }}
                   className="px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2"
@@ -810,13 +841,13 @@ export const GestionCursoDocentePage = () => {
                   <Cog6ToothIcon className="w-5 h-5" />
                   Configurar Evaluaciones
                 </button>
-                <button
+                {/* <button
                   onClick={handleGuardarTodasLasNotas}
                   disabled={isSubmittingNotas || notasEditadas.size === 0}
                   className="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
                 >
                   {isSubmittingNotas ? 'Guardando...' : `Guardar Todas las Notas ${notasEditadas.size > 0 ? `(${notasEditadas.size})` : ''}`}
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -849,9 +880,9 @@ export const GestionCursoDocentePage = () => {
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-primary-50">
                         Promedio
                       </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {/* <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Acciones
-                      </th>
+                      </th> */}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -912,7 +943,8 @@ export const GestionCursoDocentePage = () => {
                                     value={valorActual}
                                     onChange={(e) => handleNotaChange(estudiante.idMatricula, campoNota, e.target.value)}
                                     placeholder="0-20"
-                                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                                    disabled
+                                    className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-primary-600 focus:border-transparent bg-gray-100 cursor-not-allowed"
                                   />
                                 </td>
                               );
@@ -929,7 +961,7 @@ export const GestionCursoDocentePage = () => {
                           </td>
 
                           {/* Acciones */}
-                          <td className="px-4 py-3 text-center">
+                          {/* <td className="px-4 py-3 text-center">
                             <button
                               onClick={() => handleGuardarNotasEstudiante(estudiante)}
                               disabled={isSubmittingNotas}
@@ -937,7 +969,7 @@ export const GestionCursoDocentePage = () => {
                             >
                               Guardar
                             </button>
-                          </td>
+                          </td> */}
                         </tr>
                       );
                     })}
@@ -1099,12 +1131,13 @@ export const GestionCursoDocentePage = () => {
                 <p className="text-sm text-gray-600 mt-1">Historial de todas las asistencias registradas en este curso</p>
               </div>
 
-              {isLoadingAsistenciasRegistradas ? (
+              {/* {isLoadingAsistenciasRegistradas ? (
                 <div className="px-6 py-12 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-700 mx-auto"></div>
                   <p className="mt-3 text-sm text-gray-600">Cargando asistencias...</p>
                 </div>
-              ) : asistenciasRegistradas.length === 0 ? (
+              ) :  */}
+              {asistenciasRegistradas.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <CalendarDaysIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">Sin asistencias registradas</h3>
@@ -1224,12 +1257,13 @@ export const GestionCursoDocentePage = () => {
 
             {/* Contenido del Modal */}
             <div className="flex-1 overflow-y-auto p-6">
-              {isLoadingTipos ? (
+              {/* {isLoadingTipos ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700 mx-auto"></div>
                   <p className="mt-4 text-gray-600">Cargando configuración...</p>
                 </div>
-              ) : (
+              ) :  */}
+              {(
                 <div className="space-y-4">
                   <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
                     <p className="text-sm text-primary-900">
@@ -1345,10 +1379,10 @@ export const GestionCursoDocentePage = () => {
               </button>
               <button
                 onClick={handleGuardarConfiguracion}
-                disabled={isSubmittingNotas || Math.abs(tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0) - 100) > 0.01}
+                disabled={isSubmittingNotas || !hayCambiosEnEvaluaciones() || Math.abs(tiposEvaluacion.filter(t => t.activo).reduce((sum, t) => sum + parseFloat(t.peso.toString()), 0) - 100) > 0.01}
                 className="px-6 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
               >
-                {isSubmittingNotas ? 'Guardando...' : 'Guardar Configuración'}
+                {isSubmittingNotas ? 'Guardando...' : 'Guardar Evaluación'}
               </button>
             </div>
           </div>
