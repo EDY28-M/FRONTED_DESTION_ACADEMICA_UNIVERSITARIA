@@ -37,13 +37,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               autoClose={4000}
               hideProgressBar={false}
               newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
           </NotificationProvider>
         </AuthProvider>
       </BrowserRouter>

@@ -4,11 +4,11 @@ import { cursosApi } from '../../services/cursosService';
 import { adminCursosApi, EstudianteAdmin } from '../../services/adminCursosApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import toast from 'react-hot-toast';
-import { 
-  BookOpen, 
-  CheckSquare, 
-  Square, 
-  Send, 
+import {
+  BookOpen,
+  CheckSquare,
+  Square,
+  Send,
   AlertCircle,
   Info,
   UserCheck,
@@ -54,7 +54,7 @@ export default function CursosDirigidosPage() {
         `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
         { duration: 5000 }
       );
-      
+
       // Mostrar detalles
       if (data.detalles.exitosos.length > 0) {
         console.log('Matrículas exitosas:', data.detalles.exitosos);
@@ -129,10 +129,10 @@ export default function CursosDirigidosPage() {
 
   // Filtros
   const estudiantesFiltrados = estudiantes.filter(est => {
-    const matchNombre = filtroNombre === '' || 
+    const matchNombre = filtroNombre === '' ||
       est.nombreCompleto.toLowerCase().includes(filtroNombre.toLowerCase()) ||
       est.codigo.toLowerCase().includes(filtroNombre.toLowerCase());
-    
+
     const matchCiclo = filtroCiclo === null || est.cicloActual === filtroCiclo;
 
     return matchNombre && matchCiclo && est.estado === 'Activo';
@@ -143,10 +143,10 @@ export default function CursosDirigidosPage() {
 
   if (loadingCursos || loadingEstudiantes || loadingPeriodos) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+      <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Cargando datos...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-zinc-500 text-sm">Cargando datos...</p>
         </div>
       </div>
     );
@@ -172,7 +172,7 @@ export default function CursosDirigidosPage() {
         <div className="text-sm text-blue-900">
           <p className="font-medium mb-1">¿Qué son los Cursos Dirigidos?</p>
           <p className="text-blue-700 leading-relaxed">
-            Los cursos dirigidos permiten a los administradores autorizar matrículas que normalmente estarían 
+            Los cursos dirigidos permiten a los administradores autorizar matrículas que normalmente estarían
             restringidas por ciclo. Por ejemplo, un estudiante de ciclo 2 podría matricularse en un curso de ciclo 4.
           </p>
         </div>
@@ -183,10 +183,10 @@ export default function CursosDirigidosPage() {
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-6 sticky top-6">
             <h2 className="text-lg font-semibold text-zinc-900 mb-6 flex items-center gap-2">
-              
+
               Configuración
             </h2>
-            
+
             <div className="space-y-6">
               {/* Selector de Período */}
               <div>
@@ -337,9 +337,8 @@ export default function CursosDirigidosPage() {
                         return (
                           <tr
                             key={estudiante.id}
-                            className={`cursor-pointer transition-colors ${
-                              isSelected ? 'bg-zinc-50' : 'hover:bg-zinc-50/50'
-                            }`}
+                            className={`cursor-pointer transition-colors ${isSelected ? 'bg-zinc-50' : 'hover:bg-zinc-50/50'
+                              }`}
                             onClick={() => handleToggleEstudiante(estudiante.id)}
                           >
                             <td className="px-6 py-4">
@@ -351,9 +350,8 @@ export default function CursosDirigidosPage() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center">
-                                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium mr-3 ${
-                                  isSelected ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'
-                                }`}>
+                                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium mr-3 ${isSelected ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'
+                                  }`}>
                                   {estudiante.nombreCompleto.charAt(0)}
                                 </div>
                                 <div>

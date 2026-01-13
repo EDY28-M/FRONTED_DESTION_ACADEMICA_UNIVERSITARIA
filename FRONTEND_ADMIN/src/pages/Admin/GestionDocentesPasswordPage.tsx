@@ -124,8 +124,8 @@ export default function GestionDocentesPasswordPage() {
       apellidos: docente.apellidos,
       nombres: docente.nombres,
       profesion: docente.profesion || '',
-      fechaNacimiento: docente.fechaNacimiento 
-        ? docente.fechaNacimiento.split('T')[0] 
+      fechaNacimiento: docente.fechaNacimiento
+        ? docente.fechaNacimiento.split('T')[0]
         : '',
       correo: docente.correo || '',
       emailUsuario: '',
@@ -147,7 +147,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleCrear = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password.length < 6) {
       toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -158,7 +158,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleAsignarPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.password.length < 6) {
       toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -174,7 +174,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleActualizar = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (docenteSeleccionado) {
       const { password, ...dataToUpdate } = formData;
       actualizarMutation.mutate({
@@ -192,10 +192,10 @@ export default function GestionDocentesPasswordPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+      <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Cargando docentes...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-zinc-500 text-sm">Cargando docentes...</p>
         </div>
       </div>
     );
@@ -315,12 +315,12 @@ export default function GestionDocentesPasswordPage() {
                           <p className="text-sm font-medium text-zinc-900">{docente.nombreCompleto}</p>
                           <div className="flex items-center gap-1 text-xs text-zinc-500">
                             <Calendar className="w-3 h-3" />
-                            {docente.fechaNacimiento 
+                            {docente.fechaNacimiento
                               ? new Date(docente.fechaNacimiento).toLocaleDateString('es-ES', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric'
-                                })
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })
                               : 'Fecha no disponible'
                             }
                           </div>
@@ -362,11 +362,10 @@ export default function GestionDocentesPasswordPage() {
                         </button>
                         <button
                           onClick={() => abrirModalAsignarPassword(docente)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            docente.tienePassword
+                          className={`p-2 rounded-lg transition-colors ${docente.tienePassword
                               ? 'text-zinc-400 hover:text-amber-600 hover:bg-amber-50'
                               : 'text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50'
-                          }`}
+                            }`}
                           title={docente.tienePassword ? 'Cambiar contraseña' : 'Asignar contraseña'}
                         >
                           <Key className="w-4 h-4" />
@@ -748,7 +747,7 @@ export default function GestionDocentesPasswordPage() {
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
                         <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
                         <p className="text-sm text-amber-800">
-                          Este docente tiene <strong>{docenteSeleccionado?.totalCursos}</strong> curso(s) asignado(s). 
+                          Este docente tiene <strong>{docenteSeleccionado?.totalCursos}</strong> curso(s) asignado(s).
                           Los cursos quedarán sin docente asignado.
                         </p>
                       </div>

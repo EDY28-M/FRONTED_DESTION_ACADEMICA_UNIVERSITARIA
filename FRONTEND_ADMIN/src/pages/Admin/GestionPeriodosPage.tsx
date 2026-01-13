@@ -1,11 +1,11 @@
 import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, Transition } from '@headlessui/react';
-import { 
-  adminCursosApi, 
-  PeriodoAdmin, 
-  ValidacionCierrePeriodo, 
-  ResultadoCierrePeriodo 
+import {
+  adminCursosApi,
+  PeriodoAdmin,
+  ValidacionCierrePeriodo,
+  ResultadoCierrePeriodo
 } from '../../services/adminCursosApi';
 
 // Extend interfaces to fix TypeScript errors
@@ -252,14 +252,14 @@ export default function GestionPeriodosPage() {
       toast.error('Solo se puede cerrar el período activo');
       return;
     }
-    
+
     setPeriodoACerrar(periodo);
     validarCierreMutation.mutate(periodo.id);
   };
 
   const handleConfirmarCierre = () => {
     if (!periodoACerrar) return;
-    
+
     if (validacionData && !validacionData.puedeSerCerrado) {
       toast.error('El período tiene estudiantes sin notas completas. Revise las advertencias.');
       return;
@@ -295,7 +295,7 @@ export default function GestionPeriodosPage() {
       toast.error('Este período ya está activo');
       return;
     }
-    
+
     setPeriodoAAbrir(periodo);
     setModalAperturaAbierto(true);
   };
@@ -317,10 +317,10 @@ export default function GestionPeriodosPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+      <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Cargando períodos...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-zinc-500 text-sm">Cargando períodos...</p>
         </div>
       </div>
     );
@@ -376,11 +376,10 @@ export default function GestionPeriodosPage() {
                   <tr key={periodo.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${
-                          periodo.activo 
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
+                        <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${periodo.activo
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
                             : 'bg-zinc-100 border-zinc-200 text-zinc-500'
-                        }`}>
+                          }`}>
                           <Calendar className="w-5 h-5" />
                         </div>
                         <div>
@@ -447,7 +446,7 @@ export default function GestionPeriodosPage() {
                             <Lock className="w-4 h-4" />
                           </button>
                         )}
-                        
+
                         <button
                           onClick={() => abrirModalEditar(periodo)}
                           className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
@@ -455,7 +454,7 @@ export default function GestionPeriodosPage() {
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        
+
                         {periodo.totalMatriculas === 0 && (
                           <button
                             onClick={() => handleEliminar(periodo)}

@@ -33,7 +33,7 @@ export default function VisualizacionEstudiantesPage() {
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<number | null>(null);
   const [tabActiva, setTabActiva] = useState<'datos' | 'actuales' | 'historial' | 'estadisticas'>('datos');
   const [estudianteAEliminar, setEstudianteAEliminar] = useState<EstudianteAdmin | null>(null);
-  
+
   const queryClient = useQueryClient();
 
   // Queries
@@ -79,10 +79,10 @@ export default function VisualizacionEstudiantesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+      <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Cargando estudiantes...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-zinc-500 text-sm">Cargando estudiantes...</p>
         </div>
       </div>
     );
@@ -211,7 +211,7 @@ export default function VisualizacionEstudiantesPage() {
                           </span>
                         </div>
                         <div className="w-24 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className="h-full bg-zinc-900 rounded-full"
                             style={{ width: `${Math.min(((estudiante.promedioAcumulado || 0) / 20) * 100, 100)}%` }}
                           />
@@ -223,15 +223,13 @@ export default function VisualizacionEstudiantesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                          estudiante.estado === 'Activo'
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${estudiante.estado === 'Activo'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-red-50 text-red-700 border-red-200'
-                        }`}
+                          }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          estudiante.estado === 'Activo' ? 'bg-emerald-500' : 'bg-red-500'
-                        }`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${estudiante.estado === 'Activo' ? 'bg-emerald-500' : 'bg-red-500'
+                          }`} />
                         {estudiante.estado}
                       </span>
                     </td>
@@ -307,7 +305,7 @@ export default function VisualizacionEstudiantesPage() {
                       <p className="font-medium text-zinc-900">{estudianteAEliminar?.nombreCompleto}</p>
                       <p className="text-sm text-zinc-500 font-mono mt-1">{estudianteAEliminar?.codigo}</p>
                     </div>
-                    
+
                     <div className="text-sm text-zinc-600 space-y-2">
                       <p>Se eliminará permanentemente:</p>
                       <ul className="list-disc pl-5 space-y-1 text-zinc-500">
@@ -382,8 +380,8 @@ export default function VisualizacionEstudiantesPage() {
                 <Dialog.Panel className="w-full max-w-5xl transform overflow-hidden rounded-xl bg-white text-left align-middle shadow-2xl transition-all ring-1 ring-black/5">
                   {loadingDetalle ? (
                     <div className="p-12 text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-                      <p className="mt-4 text-zinc-500">Cargando información...</p>
+                      <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+                      <p className="text-zinc-500 text-sm">Cargando información...</p>
                     </div>
                   ) : estudianteDetalle ? (
                     <>
@@ -459,11 +457,10 @@ export default function VisualizacionEstudiantesPage() {
                             <button
                               key={tab.id}
                               onClick={() => setTabActiva(tab.id as any)}
-                              className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-colors ${
-                                tabActiva === tab.id
+                              className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-colors ${tabActiva === tab.id
                                   ? 'border-zinc-900 text-zinc-900'
                                   : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300'
-                              }`}
+                                }`}
                             >
                               <tab.icon className="w-4 h-4" />
                               {tab.label}
@@ -525,11 +522,10 @@ export default function VisualizacionEstudiantesPage() {
                                   <div>
                                     <label className="text-xs font-medium text-zinc-500">Estado</label>
                                     <div className="mt-1">
-                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                                        estudianteDetalle.datosPersonales.estado === 'Activo'
+                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${estudianteDetalle.datosPersonales.estado === 'Activo'
                                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                           : 'bg-red-50 text-red-700 border-red-200'
-                                      }`}>
+                                        }`}>
                                         {estudianteDetalle.datosPersonales.estado}
                                       </span>
                                     </div>
@@ -581,7 +577,7 @@ export default function VisualizacionEstudiantesPage() {
                                       </span>
                                     </div>
                                   </div>
-                                  
+
                                   <div className="grid grid-cols-4 gap-4 py-4 border-t border-zinc-100">
                                     <div>
                                       <span className="text-xs text-zinc-500 block mb-1">Ciclo</span>
@@ -597,9 +593,8 @@ export default function VisualizacionEstudiantesPage() {
                                     </div>
                                     <div>
                                       <span className="text-xs text-zinc-500 block mb-1">Promedio</span>
-                                      <span className={`text-sm font-bold ${
-                                        (curso.promedioFinal || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
-                                      }`}>
+                                      <span className={`text-sm font-bold ${(curso.promedioFinal || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
+                                        }`}>
                                         {curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '-'}
                                       </span>
                                     </div>
@@ -637,9 +632,8 @@ export default function VisualizacionEstudiantesPage() {
                               estudianteDetalle.historialPorPeriodo.map((periodo) => (
                                 <div key={periodo.idPeriodo} className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
                                   {/* Header del período */}
-                                  <div className={`px-6 py-4 border-b border-zinc-200 ${
-                                    periodo.esActivo ? 'bg-zinc-50' : 'bg-white'
-                                  }`}>
+                                  <div className={`px-6 py-4 border-b border-zinc-200 ${periodo.esActivo ? 'bg-zinc-50' : 'bg-white'
+                                    }`}>
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-4">
                                         <div className={`p-2 rounded-lg ${periodo.esActivo ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
@@ -668,9 +662,8 @@ export default function VisualizacionEstudiantesPage() {
                                         </div>
                                         <div className="text-center">
                                           <p className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Promedio</p>
-                                          <p className={`font-bold ${
-                                            (periodo.promedioGeneral || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
-                                          }`}>
+                                          <p className={`font-bold ${(periodo.promedioGeneral || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
+                                            }`}>
                                             {periodo.promedioGeneral?.toFixed(2) || '0.00'}
                                           </p>
                                         </div>
@@ -707,11 +700,10 @@ export default function VisualizacionEstudiantesPage() {
                                             <td className="px-6 py-3 text-center text-zinc-900">{curso.ciclo}</td>
                                             <td className="px-6 py-3 text-center text-zinc-900">{curso.creditos}</td>
                                             <td className="px-6 py-3 text-center">
-                                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                                curso.estado === 'Matriculado' 
-                                                  ? 'bg-zinc-100 text-zinc-800' 
+                                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${curso.estado === 'Matriculado'
+                                                  ? 'bg-zinc-100 text-zinc-800'
                                                   : 'bg-zinc-50 text-zinc-500'
-                                              }`}>
+                                                }`}>
                                                 {curso.estado}
                                               </span>
                                             </td>
@@ -796,8 +788,8 @@ export default function VisualizacionEstudiantesPage() {
                                   <span className="text-zinc-500">Tasa Aprobación</span>
                                   <span className="font-bold text-zinc-900">
                                     {estudianteDetalle.estadisticas.totalCursosAprobados + estudianteDetalle.estadisticas.totalCursosDesaprobados > 0
-                                      ? ((estudianteDetalle.estadisticas.totalCursosAprobados / 
-                                         (estudianteDetalle.estadisticas.totalCursosAprobados + estudianteDetalle.estadisticas.totalCursosDesaprobados)) * 100).toFixed(1)
+                                      ? ((estudianteDetalle.estadisticas.totalCursosAprobados /
+                                        (estudianteDetalle.estadisticas.totalCursosAprobados + estudianteDetalle.estadisticas.totalCursosDesaprobados)) * 100).toFixed(1)
                                       : 0}%
                                   </span>
                                 </div>

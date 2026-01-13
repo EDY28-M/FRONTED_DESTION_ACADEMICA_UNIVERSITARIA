@@ -79,26 +79,29 @@ const navigation = [
     href: '/admin/activacion-cursos',
     icon: BookOpenCheck,
   },
-  {
-    name: 'Estadísticas',
-    href: '/admin/estadisticas',
-    icon: TrendingUp,
-  },
+  // OCULTO: Ya está integrado en el Dashboard
+  // {
+  //   name: 'Estadísticas',
+  //   href: '/admin/estadisticas',
+  //   icon: TrendingUp,
+  // },
   {
     name: 'Notas Consolidadas',
     href: '/admin/notas-consolidadas',
     icon: DocumentTextIcon,
   },
-  {
-    name: 'Anuncios',
-    href: '/admin/anuncios',
-    icon: MegaphoneIcon,
-  },
-  {
-    name: 'Materiales',
-    href: '/admin/materiales',
-    icon: FolderOpen,
-  },
+  // OCULTO: No es necesario en admin
+  // {
+  //   name: 'Anuncios',
+  //   href: '/admin/anuncios',
+  //   icon: MegaphoneIcon,
+  // },
+  // OCULTO: Pertenece al portal docente
+  // {
+  //   name: 'Materiales',
+  //   href: '/admin/materiales',
+  //   icon: FolderOpen,
+  // },
   {
     name: 'Mi Perfil',
     href: '/admin/perfil',
