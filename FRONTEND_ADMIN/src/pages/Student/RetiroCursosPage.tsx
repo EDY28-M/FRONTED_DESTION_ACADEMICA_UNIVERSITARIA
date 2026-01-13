@@ -188,8 +188,8 @@ const RetiroCursosPage: React.FC = () => {
     refetchOnMount: 'always', // Recargar siempre al entrar
   });
 
-  const retirarMutation = useMutation({
-    mutationFn: (idMatricula: number) => estudiantesApi.retirar(idMatricula),
+  const retirarMasivoMutation = useMutation({
+    mutationFn: (idsMatriculas: number[]) => estudiantesApi.retirarMasivo(idsMatriculas),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
       queryClient.invalidateQueries({ queryKey: ['mis-cursos'] });
@@ -227,13 +227,11 @@ const RetiroCursosPage: React.FC = () => {
   const handleConfirmRetiro = async () => {
     setIsProcessing(true);
 
-    let exitosos = 0;
-    let fallidos = 0;
+    try {
+      await retirarMasivoMutation.mutateAsync(cursosParaRetirar);
 
-    for (const idMatricula of cursosParaRetirar) {
-      try {
-        await retirarMutation.mutateAsync(idMatricula);
-        exitosos++;
+      // Notificaciones locales para UX
+      cursosParaRetirar.forEach(idMatricula => {
         const curso = misCursos?.find(c => c.id === idMatricula);
         if (curso) {
           addNotification({
@@ -247,22 +245,14 @@ const RetiroCursosPage: React.FC = () => {
             }
           });
         }
-      } catch {
-        fallidos++;
-      }
-    }
+      });
 
-    setIsProcessing(false);
-
-    if (exitosos > 0) {
       setIsSuccess(true);
-    } else {
+    } catch {
+      toast.error('Error al procesar el retiro de cursos');
       setShowConfirmModal(false);
-      toast.error('No se pudo retirar ningún curso');
-    }
-
-    if (fallidos > 0 && exitosos > 0) {
-      toast.error(`${fallidos} curso(s) no pudieron ser retirados`);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -373,7 +363,7 @@ const RetiroCursosPage: React.FC = () => {
                             className="rounded border-zinc-300 text-red-600 focus:ring-red-500"
                             checked={isSelected}
                             onChange={() => handleToggleRetiro(curso.id)}
-                            disabled={retirarMutation.isPending}
+                            disabled={retirarMasivoMutation.isPending}
                           />
                         </td>
                         <td className="px-4 py-3">

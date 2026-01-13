@@ -18,19 +18,8 @@ const ConfirmModal: React.FC<{
 }> = ({ isOpen, onClose, onConfirm, isLoading, isSuccess, cursosCount }) => {
     const [loadingStep, setLoadingStep] = useState(0);
 
-    // Efecto para simular pasos de progreso durante la carga
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (isLoading) {
-            setLoadingStep(0);
-            interval = setInterval(() => {
-                setLoadingStep((prev) => (prev < 3 ? prev + 1 : prev));
-            }, 800); // Cambia de mensaje cada 800ms
-        } else {
-            setLoadingStep(0);
-        }
-        return () => clearInterval(interval);
-    }, [isLoading]);
+    // Efecto acelerado para simular pasos de progreso muy rápido (estética sin demora)
+
 
     if (!isOpen) return null;
 
@@ -247,8 +236,8 @@ const AumentoCursosPage: React.FC = () => {
         }
     }, [periodoActivo?.id, refetchMatriculaPagada, queryClient]);
 
-    const matricularMutation = useMutation({
-        mutationFn: estudiantesApi.matricular,
+    const matricularMasivoMutation = useMutation({
+        mutationFn: estudiantesApi.matricularMasivo,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
             queryClient.invalidateQueries({ queryKey: ['mis-cursos'] });
@@ -304,59 +293,33 @@ const AumentoCursosPage: React.FC = () => {
 
         setIsProcessing(true);
 
-        const minTimePromise = new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const matriculas = await matricularMasivoMutation.mutateAsync({
+                idsCursos: cursosSeleccionados,
+                idPeriodo
+            });
 
-        let exitosos = 0;
-        let fallidos = 0;
+            // Notificaciones de éxito para feedback visual
+            matriculas.forEach(matricula => {
+                addNotification({
+                    type: 'academico',
+                    action: 'matricula',
+                    nombre: matricula.nombreCurso,
+                    metadata: {
+                        idCurso: matricula.idCurso,
+                        nombreCurso: matricula.nombreCurso,
+                        periodo: matricula.nombrePeriodo || 'Período actual'
+                    }
+                });
+            });
 
-        const matriculaPromises = cursosSeleccionados.map(async (idCurso) => {
-            try {
-                await matricularMutation.mutateAsync({ idCurso, idPeriodo });
-                const curso = cursosDisponibles?.find((c: CursoDisponible) => c.id === idCurso);
-                if (curso) {
-                    // Notifications are handled silently or at end
-                }
-                return { success: true, id: idCurso, curso };
-            } catch (error) {
-                console.error('Error matriculando:', idCurso, error);
-                return { success: false, id: idCurso };
-            }
-        });
-
-        const results = await Promise.all([minTimePromise, ...matriculaPromises]);
-        const mutationResults = results.slice(1) as { success: boolean, id: number, curso?: CursoDisponible }[];
-
-        mutationResults.forEach(res => {
-            if (res.success) {
-                exitosos++;
-                if (res.curso) {
-                    addNotification({
-                        type: 'academico',
-                        action: 'matricula',
-                        nombre: res.curso.nombreCurso,
-                        metadata: {
-                            idCurso: res.curso.id,
-                            nombreCurso: res.curso.nombreCurso,
-                            periodo: periodoActivo?.nombre || 'Período actual'
-                        }
-                    });
-                }
-            } else {
-                fallidos++;
-            }
-        });
-
-        setIsProcessing(false);
-
-        if (exitosos > 0) {
             setIsSuccess(true);
-        } else {
+        } catch (error) {
+            console.error('Error matriculando:', error);
             setShowConfirmModal(false);
-            toast.error('No se pudo matricular ningún curso');
-        }
-
-        if (fallidos > 0 && exitosos > 0) {
-            toast.error(`${fallidos} curso(s) no pudieron ser matriculados`);
+            toast.error('Ocurrió un error al procesar la matrícula');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -461,7 +424,7 @@ const AumentoCursosPage: React.FC = () => {
                                                     }
                                                 }}
                                                 /* Permitimos seleccionar incluso si no ha pagado, para que explore. El bloqueo es al final. */
-                                                disabled={matricularMutation.isPending}
+                                                disabled={matricularMasivoMutation.isPending}
                                             />
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Código</th>
@@ -488,7 +451,7 @@ const AumentoCursosPage: React.FC = () => {
                                                         className="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
                                                         checked={isSelected}
                                                         onChange={() => handleToggleCurso(curso.id)}
-                                                        disabled={matricularMutation.isPending}
+                                                        disabled={matricularMasivoMutation.isPending}
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -539,14 +502,14 @@ const AumentoCursosPage: React.FC = () => {
                                 <button
                                     className={`
                         inline-flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-lg transition-all
-                        ${cursosSeleccionados.length === 0 || matricularMutation.isPending || !matriculaPagada
+                        ${cursosSeleccionados.length === 0 || matricularMasivoMutation.isPending || !matriculaPagada
                                             ? 'bg-zinc-300 cursor-not-allowed opacity-70'
                                             : 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200'}
                     `}
                                     onClick={handleOpenConfirmModal}
-                                    disabled={cursosSeleccionados.length === 0 || matricularMutation.isPending || !matriculaPagada}
+                                    disabled={cursosSeleccionados.length === 0 || matricularMasivoMutation.isPending || !matriculaPagada}
                                 >
-                                    {matricularMutation.isPending ? 'Matriculando...' : `Matricular (${cursosSeleccionados.length})`}
+                                    {matricularMasivoMutation.isPending ? 'Matriculando...' : `Matricular (${cursosSeleccionados.length})`}
                                 </button>
                             </div>
                         </div>
