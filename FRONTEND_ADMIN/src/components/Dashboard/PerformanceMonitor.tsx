@@ -89,8 +89,7 @@ const PerformanceMonitor: React.FC = () => {
             {/* Gauge container */}
             <div className="flex-1 flex items-center justify-center relative">
                 {/* Grid lines */}
-                <div className="absolute w-full h-[1px] bg-zinc-200"></div>
-                <div className="absolute h-full w-[1px] bg-zinc-200"></div>
+           
 
                 {isLoading ? (
                     <div className="flex flex-col items-center gap-2">
@@ -155,7 +154,7 @@ const PerformanceMonitor: React.FC = () => {
                         </svg>
 
                         {/* Center percentage */}
-                        <div className="absolute flex flex-col items-center bg-white/90 p-4 border border-zinc-200">
+                        <div className="absolute flex flex-col items-center bg-white/90 p-4 ">
                             <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
                                 {metrics.efficiencyTotal}
                                 <span className={`text-lg ${visualTheme.percentText}`}>%</span>

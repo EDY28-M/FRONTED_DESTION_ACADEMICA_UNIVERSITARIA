@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Users } from 'lucide-react'
+
 import { estadisticasApi } from '../../services/estadisticasApi'
 
 const TeacherLoadCard: React.FC = () => {
@@ -12,9 +12,7 @@ const TeacherLoadCard: React.FC = () => {
     <div className="bg-gradient-to-b from-white to-sky-50/40 border border-zinc-200 p-6 flex flex-col h-[400px] overflow-hidden">
       <div className="flex items-center justify-between mb-4 border-b border-zinc-200 pb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 border border-zinc-200 bg-white flex items-center justify-center">
-            <Users className="w-4 h-4 text-sky-600" />
-          </div>
+
           <div>
             <h3 className="font-bold text-zinc-900 uppercase tracking-tight text-sm">Carga Docente</h3>
             <p className="text-[10px] text-zinc-500 font-mono">TOP DOCENTES • HORAS/SEMANA</p>
