@@ -10,11 +10,11 @@ import {
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
 import StatsCard from '../components/Dashboard/StatsCard'
-import QuickActions from '../components/Dashboard/QuickActions'
 import ChartsSection from '../components/Dashboard/ChartsSection'
 import PerformanceMonitor from '../components/Dashboard/PerformanceMonitor'
-import SystemLogs from '../components/Dashboard/SystemLogs'
 import AcademicPerformanceChart from '../components/Dashboard/AcademicPerformanceChart'
+import TopStudentsChart from '../components/Dashboard/TopStudentsChart'
+import TeacherLoadCard from '../components/Dashboard/TeacherLoadCard'
 
 const Dashboard = () => {
   const { data: docentes, isLoading: loadingDocentes } = useQuery({
@@ -225,7 +225,7 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">
             DASHBOARD GESTION ACADEMICA
           </h1>
         </div>
@@ -233,7 +233,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleExportarDatos}
-            className="inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white px-3 py-2 text-sm font-medium text-slate-700 border border-slate-300 hover:bg-slate-50 transition-colors w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />
             Exportar
@@ -241,7 +241,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleGenerarReporte}
-            className="inline-flex items-center justify-center gap-2 bg-lime-400 hover:bg-lime-300 px-3 py-2 text-sm font-bold text-slate-900 uppercase tracking-wider transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 px-3 py-2 text-sm font-bold text-white uppercase tracking-wider transition-colors w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
             Report
@@ -256,28 +256,29 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Charts Section - Left Column */}
-        <div className="col-span-12 lg:col-span-4">
+      {/* Main Content Columns (no vertical gaps) */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex flex-col gap-4 lg:flex-1 lg:min-w-0">
           <ChartsSection />
         </div>
 
-        {/* Performance Monitor - Center */}
-        <div className="col-span-12 lg:col-span-4">
+        <div className="flex flex-col gap-4 lg:flex-1 lg:min-w-0">
           <PerformanceMonitor />
         </div>
 
-        {/* Quick Actions - Right Column */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
-          <QuickActions />
+        <div className="flex flex-col gap-4 lg:flex-1 lg:min-w-0">
+          <TopStudentsChart />
         </div>
       </div>
 
-      {/* Second row - Academic Performance and System Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <AcademicPerformanceChart />
-        <SystemLogs />
+      {/* Second row */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="lg:flex-1 lg:min-w-0">
+          <TeacherLoadCard />
+        </div>
+        <div className="lg:flex-1 lg:min-w-0">
+          <AcademicPerformanceChart />
+        </div>
       </div>
     </div>
   )

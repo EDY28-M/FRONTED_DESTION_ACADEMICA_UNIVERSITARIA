@@ -12,11 +12,8 @@ import {
   X,
   Clock,
   ClipboardCheck,
-  LayoutGrid
 } from 'lucide-react'
-import {
-  DocumentTextIcon,
-} from '@heroicons/react/24/outline'
+import { DocumentTextIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
 
 interface SidebarProps {
@@ -115,17 +112,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
   }
 
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
-    <div className="flex flex-col h-full bg-zinc-900 border-r border-zinc-800">
+    <div className="flex flex-col h-full bg-white border-r border-zinc-200">
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-zinc-800 bg-zinc-950">
+      <div className="h-16 flex items-center px-6 border-b border-zinc-200 bg-white">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-lime-400 flex items-center justify-center">
-            <LayoutGrid className="text-zinc-900 w-5 h-5" />
+          <div className="w-9 h-9 flex items-center justify-center">
+            <img
+              src="/images/fondouni.svg"
+              alt="Logo Universidad"
+              className="h-8 w-8 object-contain"
+              loading="eager"
+            />
           </div>
           {!collapsed && (
             <div>
-              <h1 className="font-bold text-sm tracking-widest uppercase text-white">
-                ADMIN<span className="text-lime-400">.SYS</span>
+              <h1 className="font-bold text-sm tracking-widest uppercase text-zinc-900">
+                PORTAL <span className="text-zinc-700">ADMIN</span>
               </h1>
             </div>
           )}
@@ -136,7 +138,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
       <nav className="flex-1 overflow-y-auto py-4">
         {/* Main Module */}
         <div className="px-3 mb-2">
-          <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-mono mb-2 pl-3">Módulo Principal</p>
+          <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono mb-2 pl-3">Módulo Principal</p>
           {navigation.filter(item => item.section === 'main').map((item) => {
             const active = isActive(item.href)
             return (
@@ -145,8 +147,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                 to={item.href}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2.5 transition-all group border-l-2 ${active
-                  ? 'bg-zinc-800 text-lime-400 border-lime-400'
-                  : 'text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200 hover:border-zinc-600'
+                  ? 'bg-zinc-100 text-lime-700 border-lime-600'
+                  : 'text-zinc-700 border-transparent hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300'
                   } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : undefined}
               >
@@ -159,7 +161,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
 
         {/* System */}
         <div className="px-3 mt-6 mb-2">
-          <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-mono mb-2 pl-3">Sistema</p>
+          <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono mb-2 pl-3">Sistema</p>
           {navigation.filter(item => item.section === 'system').map((item) => {
             const active = isActive(item.href)
             return (
@@ -168,8 +170,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                 to={item.href}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2.5 transition-all group border-l-2 ${active
-                  ? 'bg-zinc-800 text-lime-400 border-lime-400'
-                  : 'text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200 hover:border-zinc-600'
+                  ? 'bg-zinc-100 text-lime-700 border-lime-600'
+                  : 'text-zinc-700 border-transparent hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300'
                   } ${collapsed ? 'justify-center' : ''}`}
                 title={collapsed ? item.name : undefined}
               >
@@ -182,10 +184,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-zinc-800">
-        <div className={`bg-black border border-zinc-700 p-3 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+      <div className="p-4 border-t border-zinc-200">
+        <div className={`bg-zinc-50 border border-zinc-200 p-3 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
           <div className="w-1.5 h-1.5 bg-green-500 shrink-0"></div>
-          {!collapsed && <span className="text-[10px] font-mono text-zinc-300">V.2.4.0 STABLE</span>}
+          {!collapsed && <span className="text-[10px] font-mono text-zinc-700">V.2.4.0 STABLE</span>}
         </div>
       </div>
     </div>
@@ -205,7 +207,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-zinc-900/80 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-zinc-900/60 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 flex">
@@ -231,7 +233,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                   <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
                     <button
                       type="button"
-                      className="flex h-10 w-10 items-center justify-center hover:bg-white/10 transition-colors"
+                      className="flex h-10 w-10 items-center justify-center hover:bg-black/10 transition-colors"
                       onClick={onClose}
                     >
                       <span className="sr-only">Cerrar sidebar</span>
@@ -239,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                     </button>
                   </div>
                 </Transition.Child>
-                <div className="flex grow flex-col overflow-y-auto bg-zinc-900">
+                <div className="flex grow flex-col overflow-y-auto bg-white">
                   <SidebarContent collapsed={false} />
                 </div>
               </Dialog.Panel>
@@ -250,7 +252,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
 
       {/* Desktop sidebar */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col transition-all duration-300 ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
-        <div className="flex grow flex-col overflow-y-auto border-r border-zinc-800 bg-zinc-900">
+        <div className="flex grow flex-col overflow-y-auto border-r border-zinc-200 bg-white">
           <SidebarContent collapsed={isCollapsed} />
         </div>
       </div>

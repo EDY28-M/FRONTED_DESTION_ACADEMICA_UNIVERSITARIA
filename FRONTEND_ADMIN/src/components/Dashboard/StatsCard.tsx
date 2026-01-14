@@ -31,7 +31,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   const sparklinePath = generateSparklineData()
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-lime-400/50 dark:hover:border-lime-400/50 transition-colors">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-sky-400/50 dark:hover:border-sky-400/50 transition-colors">
       <div className="flex justify-between items-start mb-2">
         <span className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{name}</span>
         <Icon className="text-slate-600 dark:text-slate-500 w-5 h-5" />
@@ -44,7 +44,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
           ) : (
             <p className="text-3xl font-bold text-slate-900 dark:text-white font-mono">{value}</p>
           )}
-          <span className="text-[10px] text-green-500 font-mono flex items-center gap-1 mt-1">
+          <span className="text-[10px] text-sky-600 font-mono flex items-center gap-1 mt-1">
             <ArrowUp className="w-3 h-3" /> {change} vs mes anterior
           </span>
         </div>
@@ -55,26 +55,26 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
               <path
                 d={`${sparklinePath} V40 H0 Z`}
-                fill="rgba(190, 242, 100, 0.2)"
+                fill="rgba(56, 189, 248, 0.18)"
               />
               <path
                 d={sparklinePath}
                 fill="none"
-                stroke="#bef264"
+                stroke="#38bdf8"
                 strokeWidth="1.5"
               />
             </svg>
           ) : (
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
-              <rect fill="#334155" x="0" y="20" width="8" height="20" />
-              <rect fill="#334155" x="12" y="15" width="8" height="25" />
-              <rect fill="#334155" x="24" y="25" width="8" height="15" />
-              <rect fill="#334155" x="36" y="10" width="8" height="30" />
-              <rect fill="#334155" x="48" y="18" width="8" height="22" />
-              <rect fill="#bef264" x="60" y="12" width="8" height="28" />
-              <rect fill="#334155" x="72" y="22" width="8" height="18" />
-              <rect fill="#334155" x="84" y="8" width="8" height="32" />
-              <rect fill="#334155" x="96" y="15" width="4" height="25" />
+              <rect fill="#cbd5e1" x="0" y="20" width="8" height="20" />
+              <rect fill="#cbd5e1" x="12" y="15" width="8" height="25" />
+              <rect fill="#cbd5e1" x="24" y="25" width="8" height="15" />
+              <rect fill="#cbd5e1" x="36" y="10" width="8" height="30" />
+              <rect fill="#cbd5e1" x="48" y="18" width="8" height="22" />
+              <rect fill="#38bdf8" x="60" y="12" width="8" height="28" />
+              <rect fill="#cbd5e1" x="72" y="22" width="8" height="18" />
+              <rect fill="#cbd5e1" x="84" y="8" width="8" height="32" />
+              <rect fill="#cbd5e1" x="96" y="15" width="4" height="25" />
             </svg>
           )}
         </div>

@@ -4,12 +4,52 @@
 
 @layer base {
   html {
-    font-family: 'Montserrat', 'Roboto', system-ui, sans-serif;
+    font-family: 'Roboto', 'Roboto', system-ui, sans-serif;
   }
 
   body {
     @apply bg-gray-50 text-gray-900;
-    font-family: 'Montserrat', 'Roboto', system-ui, sans-serif;
+    font-family: 'Roboto', 'Roboto', system-ui, sans-serif;
+  }
+
+  /* Portal Admin (forzado a tema claro) */
+  body.admin-light {
+    @apply bg-white text-zinc-900 ;
+  }
+
+  /* Tipografía estilo Dashboard (solo Portal Admin) */
+  body.admin-light h1 {
+    @apply uppercase tracking-tight font-bold text-slate-900;
+  }
+
+  body.admin-light h2 {
+    @apply uppercase tracking-tight font-bold text-slate-900;
+  }
+
+  body.admin-light h3 {
+    @apply uppercase tracking-wider font-bold text-slate-900;
+  }
+
+  body.admin-light label {
+    @apply uppercase tracking-wide text-xs font-medium text-zinc-500;
+  }
+
+  body.admin-light th {
+    @apply uppercase tracking-wider;
+  }
+
+  body.admin-light button {
+    @apply tracking-wide;
+  }
+
+  body.admin-light a {
+    @apply text-zinc-900;
+  }
+
+  body.admin-light input,
+  body.admin-light select,
+  body.admin-light textarea {
+    @apply bg-white text-zinc-900 font-mono;
   }
 }
 

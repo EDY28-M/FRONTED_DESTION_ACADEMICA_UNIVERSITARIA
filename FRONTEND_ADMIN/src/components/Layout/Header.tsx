@@ -74,14 +74,14 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+    <header className="sticky top-0 z-30 bg-white border-b border-zinc-200">
       <div className="flex items-center justify-between h-14 px-4 sm:px-6">
         {/* Left: Mobile menu + Breadcrumbs */}
         <div className="flex items-center gap-4">
           {/* Mobile menu button */}
           <button
             type="button"
-            className="lg:hidden flex items-center justify-center h-9 w-9 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="lg:hidden flex items-center justify-center h-9 w-9 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
             onClick={onMenuClick}
           >
             <span className="sr-only">Abrir menú</span>
@@ -92,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
           {onToggleCollapse && (
             <button
               type="button"
-              className="hidden lg:flex items-center justify-center h-9 w-9 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="hidden lg:flex items-center justify-center h-9 w-9 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               onClick={onToggleCollapse}
             >
               <span className="sr-only">{isCollapsed ? 'Expandir menú' : 'Contraer menú'}</span>
@@ -102,16 +102,16 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
 
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-1 text-sm overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
-            <span className="text-zinc-400 dark:text-zinc-500 shrink-0">Admin</span>
+            <span className="text-zinc-500 shrink-0">Admin</span>
             {breadcrumbs.map((crumb, index) => (
               <Fragment key={crumb.path}>
-                <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600" />
+                <ChevronRight className="h-4 w-4 text-zinc-300" />
                 {crumb.isLast ? (
-                  <span className="font-medium text-zinc-900 dark:text-white">{crumb.name}</span>
+                  <span className="font-medium text-zinc-900">{crumb.name}</span>
                 ) : (
                   <button
                     onClick={() => navigate(crumb.path)}
-                    className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                    className="text-zinc-600 hover:text-zinc-900 transition-colors"
                   >
                     {crumb.name}
                   </button>
@@ -128,15 +128,15 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
 
           {/* Profile Dropdown */}
           <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center gap-2 px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-              <div className="h-8 w-8 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
-                <User className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+            <Menu.Button className="flex items-center gap-2 px-2 py-1.5 hover:bg-zinc-100 transition-colors">
+              <div className="h-8 w-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                <User className="h-4 w-4 text-zinc-600" />
               </div>
               <div className="hidden md:block text-left">
-                <div className="text-sm font-medium text-zinc-900 dark:text-white">
+                <div className="text-sm font-medium text-zinc-900">
                   {user?.nombres || 'Usuario'}
                 </div>
-                <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="text-xs text-zinc-500">
                   {user?.rol || 'Sin rol'}
                 </div>
               </div>
@@ -151,20 +151,20 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right bg-white dark:bg-zinc-900 shadow-lg ring-1 ring-zinc-200 dark:ring-zinc-700 focus:outline-none z-50">
+              <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right bg-white shadow-lg ring-1 ring-zinc-200 focus:outline-none z-50">
                 {/* Profile Header */}
-                <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="px-4 py-3 border-b border-zinc-100">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-zinc-900 dark:bg-lime-400 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-white dark:text-zinc-900">
+                    <div className="h-10 w-10 bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-zinc-900">
                         {user ? getInitials(user.nombres, user.apellidos) : 'U'}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+                      <p className="text-sm font-medium text-zinc-900 truncate">
                         {user?.nombres} {user?.apellidos}
                       </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                      <p className="text-xs text-zinc-500 truncate">
                         {user?.rol}
                       </p>
                     </div>
@@ -176,7 +176,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${active ? 'bg-zinc-50 dark:bg-zinc-800' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300`}
+                        className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
                         onClick={() => navigate('/admin/perfil')}
                       >
                         <User className="h-4 w-4 text-zinc-400" />
@@ -187,7 +187,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${active ? 'bg-zinc-50 dark:bg-zinc-800' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300`}
+                        className={`${active ? 'bg-zinc-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-zinc-700`}
                         onClick={() => navigate('/admin/perfil', { state: { openChangePassword: true } })}
                       >
                         <KeyRound className="h-4 w-4 text-zinc-400" />
@@ -198,11 +198,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                 </div>
 
                 {/* Logout */}
-                <div className="border-t border-zinc-100 dark:border-zinc-800 py-1">
+                <div className="border-t border-zinc-100 py-1">
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${active ? 'bg-red-50 dark:bg-red-900/20' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400`}
+                        className={`${active ? 'bg-red-50' : ''} flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600`}
                         onClick={handleLogout}
                         disabled={isLoggingOut}
                       >

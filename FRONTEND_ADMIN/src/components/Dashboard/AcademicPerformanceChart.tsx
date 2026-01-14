@@ -62,26 +62,26 @@ const AcademicPerformanceChart: React.FC = () => {
     }
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 flex flex-col h-[400px]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-tight text-sm">
+        <div className="bg-gradient-to-b from-white to-slate-50/60 border border-slate-200 p-6 flex flex-col h-[400px]">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-4">
+                <h3 className="font-bold text-slate-900 uppercase tracking-tight text-sm">
                     Rendimiento por Período
                 </h3>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-lime-400"></div>
-                    <span className="text-xs text-slate-400">Últimos 5 períodos</span>
+                    <div className="w-3 h-3 bg-sky-500"></div>
+                    <span className="text-xs text-slate-500">Últimos 5 períodos</span>
                 </div>
             </div>
 
             {data && (
                 <div className="flex gap-6 mb-4 text-xs">
                     <div className="flex items-center gap-2">
-                        <span className="text-slate-400">Promedio General:</span>
-                        <span className="text-lime-400 font-mono font-bold text-lg">{data.promedioGeneral.toFixed(1)}</span>
+                        <span className="text-slate-500">Promedio General:</span>
+                        <span className="text-sky-600 font-mono font-bold text-lg">{data.promedioGeneral.toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-slate-400">Total Estudiantes:</span>
-                        <span className="text-slate-900 dark:text-white font-mono font-bold text-lg">{data.totalEstudiantes}</span>
+                        <span className="text-slate-500">Total Estudiantes:</span>
+                        <span className="text-slate-900 font-mono font-bold text-lg">{data.totalEstudiantes}</span>
                     </div>
                 </div>
             )}
@@ -89,8 +89,8 @@ const AcademicPerformanceChart: React.FC = () => {
             {isLoading ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-slate-400 text-sm">Cargando datos...</p>
+                        <div className="w-8 h-8 border-2 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-slate-500 text-sm">Cargando datos...</p>
                     </div>
                 </div>
             ) : (
@@ -98,21 +98,21 @@ const AcademicPerformanceChart: React.FC = () => {
                     {/* Tooltip */}
                     {tooltip && (
                         <div
-                            className="absolute z-50 bg-slate-800 border border-lime-400/50 px-4 py-3 text-xs shadow-xl pointer-events-none"
+                            className="absolute z-50 bg-white border border-slate-200 px-4 py-3 text-xs shadow-xl pointer-events-none"
                             style={{
                                 left: Math.min(Math.max(tooltip.x, 80), 250),
                                 top: Math.max(tooltip.y - 80, 10)
                             }}
                         >
-                            <div className="text-lime-400 font-bold text-sm mb-2">{tooltip.punto.semana}</div>
+                            <div className="text-sky-700 font-bold text-sm mb-2">{tooltip.punto.semana}</div>
                             <div className="flex flex-col gap-1">
                                 <div className="flex justify-between gap-4">
-                                    <span className="text-slate-400">Promedio:</span>
-                                    <span className="text-white font-mono font-bold">{tooltip.punto.rendimiento.toFixed(1)}</span>
+                                    <span className="text-slate-500">Promedio:</span>
+                                    <span className="text-slate-900 font-mono font-bold">{tooltip.punto.rendimiento.toFixed(1)}</span>
                                 </div>
                                 <div className="flex justify-between gap-4">
-                                    <span className="text-slate-400">Estudiantes:</span>
-                                    <span className="text-white font-mono font-bold">{tooltip.punto.numeroSemana}</span>
+                                    <span className="text-slate-500">Estudiantes:</span>
+                                    <span className="text-slate-900 font-mono font-bold">{tooltip.punto.numeroSemana}</span>
                                 </div>
                             </div>
                         </div>
@@ -126,8 +126,8 @@ const AcademicPerformanceChart: React.FC = () => {
                     >
                         <defs>
                             <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-                                <stop offset="0%" stopColor="#bef264" stopOpacity="0.4"></stop>
-                                <stop offset="100%" stopColor="#bef264" stopOpacity="0.05"></stop>
+                                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.28"></stop>
+                                <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.06"></stop>
                             </linearGradient>
                         </defs>
 
@@ -137,7 +137,7 @@ const AcademicPerformanceChart: React.FC = () => {
                             return (
                                 <line
                                     key={i}
-                                    stroke="#334155"
+                                    stroke="#e2e8f0"
                                     strokeDasharray="3 3"
                                     strokeWidth="0.5"
                                     x1={chartConfig.paddingLeft}
@@ -171,7 +171,7 @@ const AcademicPerformanceChart: React.FC = () => {
                         <path
                             d={generatePath()}
                             fill="none"
-                            stroke="#bef264"
+                            stroke="#38bdf8"
                             strokeWidth="3"
                             strokeLinejoin="round"
                             strokeLinecap="round"
@@ -199,7 +199,7 @@ const AcademicPerformanceChart: React.FC = () => {
                                             cx={x}
                                             cy={y}
                                             r="12"
-                                            fill="#bef264"
+                                            fill="#38bdf8"
                                             opacity="0.3"
                                         />
                                     )}
@@ -208,8 +208,8 @@ const AcademicPerformanceChart: React.FC = () => {
                                         cx={x}
                                         cy={y}
                                         r={isHovered ? 7 : 5}
-                                        fill={isHovered ? "#bef264" : "#1e293b"}
-                                        stroke="#bef264"
+                                        fill={isHovered ? "#38bdf8" : "#0f172a"}
+                                        stroke="#38bdf8"
                                         strokeWidth="2"
                                     />
                                 </g>
@@ -225,7 +225,7 @@ const AcademicPerformanceChart: React.FC = () => {
                                     x={x}
                                     y={chartConfig.paddingTop + chartConfig.height + 20}
                                     textAnchor="middle"
-                                    className="fill-slate-400 text-[9px] font-mono"
+                                    className="fill-slate-500 text-[9px] font-mono"
                                 >
                                     {punto.semana}
                                 </text>
