@@ -17,28 +17,43 @@ const Layout: React.FC = () => {
   }, [])
 
   return (
-    <div className="h-screen bg-zinc-50/50 admin-square">
+    <div className="h-screen bg-zinc-950 admin-square overflow-hidden">
       {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      
+
       {/* Main content */}
       <div className={`flex flex-col h-full transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Header */}
-        <Header 
+        <Header
           onMenuClick={() => setSidebarOpen(true)}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           isCollapsed={sidebarCollapsed}
         />
-        
+
         {/* Page content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-5 sm:py-5 lg:px-5 lg:py-5">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-6 bg-zinc-950">
           <Outlet />
         </main>
+
+        {/* Footer */}
+        <footer className="border-t border-zinc-800 bg-zinc-900/50 px-6 py-3">
+          <div className="flex flex-col md:flex-row justify-between items-center text-[10px] uppercase font-mono tracking-wide text-zinc-500">
+            <p>© 2026 Sistema de Gestión Académica. Build v.4.0.2</p>
+            <div className="flex items-center gap-4 mt-2 md:mt-0">
+              <span className="cursor-pointer hover:text-lime-400 transition-colors">Privacidad</span>
+              <span className="cursor-pointer hover:text-lime-400 transition-colors">Términos</span>
+              <div className="flex items-center gap-2 border border-green-900/50 bg-green-900/10 px-2 py-0.5">
+                <div className="w-1.5 h-1.5 bg-green-500 animate-pulse"></div>
+                <span className="text-green-500 font-bold">SISTEMA ONLINE</span>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   )

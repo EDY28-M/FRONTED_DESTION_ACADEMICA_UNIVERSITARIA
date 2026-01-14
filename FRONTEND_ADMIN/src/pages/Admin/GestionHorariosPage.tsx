@@ -335,7 +335,7 @@ function DocenteKanbanCard({ docente, status, onClick }: DocenteKanbanCardProps)
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.badge}`}>
           {cursosConHorarios}/{docente.totalCursos} completos
         </span>
-        <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 group-hover:tranzinc-x-0.5 transition-all" />
       </div>
     </button>
   );
@@ -479,11 +479,11 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
               <Transition.Child
                 as={Fragment}
                 enter="transform transition ease-in-out duration-300"
-                enterFrom="translate-x-full"
-                enterTo="translate-x-0"
+                enterFrom="tranzinc-x-full"
+                enterTo="tranzinc-x-0"
                 leave="transform transition ease-in-out duration-300"
-                leaveFrom="translate-x-0"
-                leaveTo="translate-x-full"
+                leaveFrom="tranzinc-x-0"
+                leaveTo="tranzinc-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-2xl">
                   <div className="flex h-full flex-col bg-white shadow-2xl">

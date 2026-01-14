@@ -10,9 +10,11 @@ import {
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
 import StatsCard from '../components/Dashboard/StatsCard'
-
 import QuickActions from '../components/Dashboard/QuickActions'
 import ChartsSection from '../components/Dashboard/ChartsSection'
+import PerformanceMonitor from '../components/Dashboard/PerformanceMonitor'
+import SystemLogs from '../components/Dashboard/SystemLogs'
+import AcademicPerformanceChart from '../components/Dashboard/AcademicPerformanceChart'
 
 const Dashboard = () => {
   const { data: docentes, isLoading: loadingDocentes } = useQuery({
@@ -188,6 +190,7 @@ const Dashboard = () => {
       icon: Users,
       change: '+12%',
       changeType: 'positive' as const,
+      chartType: 'line' as const,
     },
     {
       name: 'Total Cursos',
@@ -195,6 +198,7 @@ const Dashboard = () => {
       icon: BookOpen,
       change: '+8%',
       changeType: 'positive' as const,
+      chartType: 'line' as const,
     },
     {
       name: 'Total Créditos',
@@ -202,6 +206,7 @@ const Dashboard = () => {
       icon: Award,
       change: '+5%',
       changeType: 'positive' as const,
+      chartType: 'bar' as const,
     },
     {
       name: 'Horas Semanales',
@@ -209,6 +214,7 @@ const Dashboard = () => {
       icon: Clock,
       change: '+15%',
       changeType: 'positive' as const,
+      chartType: 'line' as const,
     },
   ]
 
@@ -219,18 +225,15 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">
-            Dashboard
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+            DASHBOARD GESTION ACADEMICA
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Resumen general del sistema de gestión académica
-          </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
           <button
             type="button"
             onClick={handleExportarDatos}
-            className="inline-flex items-center justify-center gap-2 bg-white px-3 py-2 text-sm font-medium text-zinc-700 border border-zinc-300 hover:bg-zinc-50 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />
             Exportar
@@ -238,10 +241,10 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleGenerarReporte}
-            className="inline-flex items-center justify-center gap-2 bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors w-full sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 bg-lime-400 hover:bg-lime-300 px-3 py-2 text-sm font-bold text-slate-900 uppercase tracking-wider transition-colors w-full sm:w-auto"
           >
             <FileText className="h-4 w-4" />
-            Generar Reporte
+            Report
           </button>
         </div>
       </div>
@@ -254,20 +257,31 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Charts Section */}
-        <div className="xl:col-span-2">
-          <ChartsSection cursos={cursos} />
+      <div className="grid grid-cols-12 gap-4">
+        {/* Charts Section - Left Column */}
+        <div className="col-span-12 lg:col-span-4">
+          <ChartsSection />
         </div>
 
-        {/* Sidebar Content */}
-        <div className="space-y-6">
+        {/* Performance Monitor - Center */}
+        <div className="col-span-12 lg:col-span-4">
+          <PerformanceMonitor />
+        </div>
+
+        {/* Quick Actions - Right Column */}
+        <div className="col-span-12 lg:col-span-4 flex flex-col gap-4">
           <QuickActions />
-
         </div>
+      </div>
+
+      {/* Second row - Academic Performance and System Logs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AcademicPerformanceChart />
+        <SystemLogs />
       </div>
     </div>
   )
 }
 
 export default Dashboard
+

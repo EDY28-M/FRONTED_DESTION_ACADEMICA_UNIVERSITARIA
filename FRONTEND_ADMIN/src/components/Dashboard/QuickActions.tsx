@@ -1,22 +1,22 @@
-import { Users, BookOpen, BarChart3, ArrowRight } from 'lucide-react'
+import { BarChart3, ArrowRight, UserPlus, FileText } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const actions = [
   {
     name: 'Nuevo Docente',
-    description: 'Agregar un nuevo profesor',
-    icon: Users,
+    command: '/add_teacher',
+    icon: UserPlus,
     href: '/docentes?action=new',
   },
   {
     name: 'Nuevo Curso',
-    description: 'Crear curso académico',
-    icon: BookOpen,
+    command: '/create_course',
+    icon: FileText,
     href: '/cursos?action=new',
   },
   {
     name: 'Ver Estadísticas',
-    description: 'Reportes y métricas',
+    command: '/view_stats',
     icon: BarChart3,
     href: '/estadisticas',
   },
@@ -24,23 +24,31 @@ const actions = [
 
 const QuickActions = () => {
   return (
-    <div className="bg-white border border-zinc-200 p-5">
-      <h3 className="text-sm font-semibold text-zinc-900 mb-4">Acciones Rápidas</h3>
-      <div className="space-y-2">
+    <div className="bg-white dark:bg-slate-900 border border-zinc-200 dark:border-slate-800 p-6 flex flex-col h-full">
+      <h3 className="font-bold text-slate-900 dark:text-white mb-6 uppercase tracking-tight text-sm">Acciones Rápidas</h3>
+      <div className="grid grid-cols-1 gap-3 flex-1">
         {actions.map((action) => (
           <Link
             key={action.name}
             to={action.href}
-            className="flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors group"
+            className="group relative flex items-center p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-lime-400 dark:hover:border-lime-400 transition-all text-left overflow-hidden"
           >
-            <div className="flex h-9 w-9 items-center justify-center bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
-              <action.icon className="h-4 w-4 text-white" />
+            {/* Sliding background effect */}
+            <div className="absolute inset-0 bg-lime-400/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+
+            {/* Icon container */}
+            <div className="w-10 h-10 border border-slate-300 dark:border-slate-600 bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-lime-400 group-hover:border-lime-400 transition-colors z-10">
+              <action.icon className="w-5 h-5" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-zinc-900">{action.name}</p>
-              <p className="text-xs text-zinc-500">{action.description}</p>
+
+            {/* Text content */}
+            <div className="ml-4 z-10 flex-1">
+              <p className="font-bold text-slate-900 dark:text-white text-sm">{action.name}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">CMD: {action.command}</p>
             </div>
-            <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+
+            {/* Arrow icon */}
+            <ArrowRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-lime-400 transition-colors z-10" />
           </Link>
         ))}
       </div>

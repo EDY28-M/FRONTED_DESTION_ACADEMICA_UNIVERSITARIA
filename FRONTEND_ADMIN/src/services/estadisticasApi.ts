@@ -76,7 +76,7 @@ export const estadisticasApi = {
       const totalCursos = cursos.length
 
       // Contar matrículas activas
-      const totalMatriculasActivas = estudiantes.reduce((sum: number, est: any) => 
+      const totalMatriculasActivas = estudiantes.reduce((sum: number, est: any) =>
         sum + (est.cursosMatriculadosActual || 0), 0)
 
       // Calcular promedio institucional
@@ -91,8 +91,8 @@ export const estadisticasApi = {
 
       // Tasa de aprobación aproximada (basada en promedios >= 10.5)
       const aprobados = estudiantesConPromedio.filter((e: any) => e.promedioAcumulado >= 10.5).length
-      const tasaAprobacion = estudiantesConPromedio.length > 0 
-        ? (aprobados / estudiantesConPromedio.length) * 100 
+      const tasaAprobacion = estudiantesConPromedio.length > 0
+        ? (aprobados / estudiantesConPromedio.length) * 100
         : 0
 
       return {
@@ -171,7 +171,7 @@ export const estadisticasApi = {
       const total = estudiantesConPromedio.length
 
       return rangos.map(rango => {
-        const cantidad = estudiantesConPromedio.filter((e: any) => 
+        const cantidad = estudiantesConPromedio.filter((e: any) =>
           e.promedioAcumulado >= rango.min && e.promedioAcumulado < rango.max
         ).length
 
@@ -200,10 +200,10 @@ export const estadisticasApi = {
 
       // Contar matrículas por curso (simplificado)
       const matriculasPorCurso: Record<number, number> = {}
-      
+
       // Para cada curso, contar cuántos estudiantes tienen créditos en ese ciclo
       cursos.forEach((curso: any) => {
-        matriculasPorCurso[curso.id] = estudiantes.filter((e: any) => 
+        matriculasPorCurso[curso.id] = estudiantes.filter((e: any) =>
           e.cicloActual >= curso.ciclo
         ).length * (Math.random() * 0.3 + 0.1) // Estimación basada en ciclo
       })
@@ -241,7 +241,7 @@ export const estadisticasApi = {
       return docentes.map((docente: any) => {
         const cursosDocente = cursos.filter((c: any) => c.idDocente === docente.id)
         const horasSemanales = cursosDocente.reduce((sum: number, c: any) => sum + (c.horasSemanal || 0), 0)
-        
+
         return {
           id: docente.id,
           nombre: `${docente.nombres} ${docente.apellidos}`,
@@ -275,6 +275,44 @@ export const estadisticasApi = {
     } catch (error) {
       console.error('Error al obtener cursos por ciclo:', error)
       return []
+    }
+  },
+
+  // Obtener rendimiento académico del período
+  getRendimientoAcademico: async (idPeriodo?: number) => {
+    try {
+      const params = idPeriodo ? { idPeriodo } : {}
+      const response = await api.get('/admin/estadisticas/rendimiento', { params })
+      return response.data
+    } catch (error) {
+      console.error('Error al obtener rendimiento académico:', error)
+      return {
+        datos: [],
+        promedioGeneral: 0,
+        totalEstudiantes: 0
+      }
+    }
+  },
+
+  // Obtener métricas de rendimiento del sistema
+  getPerformanceMetrics: async () => {
+    try {
+      const response = await api.get('/admin/estadisticas/performance')
+      return response.data
+    } catch (error) {
+      console.error('Error al obtener métricas de rendimiento:', error)
+      return {
+        efficiencyTotal: 0,
+        docentesConCursosPercent: 0,
+        estudiantesMatriculadosPercent: 0,
+        cursosActivosPercent: 0,
+        totalDocentes: 0,
+        docentesConCursos: 0,
+        totalEstudiantes: 0,
+        estudiantesMatriculados: 0,
+        totalCursos: 0,
+        cursosActivos: 0
+      }
     }
   }
 }

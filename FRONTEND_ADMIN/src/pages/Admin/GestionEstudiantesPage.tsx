@@ -200,7 +200,7 @@ export default function GestionEstudiantesPage() {
                         </option>
                       ))}
                     </select>
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <div className="absolute right-3 top-1/2 transform -tranzinc-y-1/2 pointer-events-none">
                       <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>

@@ -312,7 +312,7 @@ const ResetPasswordAdminPage = () => {
             <button
               onClick={() => navigate('/admin/login?passwordReset=success')}
               autoFocus
-              className="w-full py-4 px-6 text-white font-bold rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-300"
+              className="w-full py-4 px-6 text-white font-bold rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-lg transform hover:-tranzinc-y-0.5 focus:outline-none focus:ring-4 focus:ring-primary-300"
               style={{
                 backgroundColor: '#003366',
                 fontFamily: "'Montserrat', 'Roboto', sans-serif",
@@ -501,7 +501,7 @@ const ResetPasswordAdminPage = () => {
                 type="submit"
                 disabled={!isFormValid || isLoading}
                 className={`w-full flex justify-center items-center py-3.5 px-4 text-white font-bold rounded-lg transition-all duration-300 ${isFormValid && !isLoading
-                    ? 'hover:opacity-90 hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer'
+                    ? 'hover:opacity-90 hover:shadow-lg transform hover:-tranzinc-y-0.5 cursor-pointer'
                     : 'cursor-not-allowed opacity-50'
                   }`}
                 style={{

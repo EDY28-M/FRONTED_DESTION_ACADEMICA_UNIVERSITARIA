@@ -246,7 +246,7 @@ export default function GestionDocentesPasswordPage() {
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nombre, correo o profesión..."
@@ -433,7 +433,7 @@ export default function GestionDocentesPasswordPage() {
                           Apellidos <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <User className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             required
@@ -450,7 +450,7 @@ export default function GestionDocentesPasswordPage() {
                           Nombres <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <User className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             required
@@ -465,7 +465,7 @@ export default function GestionDocentesPasswordPage() {
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">Profesión</label>
                         <div className="relative">
-                          <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Briefcase className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             value={formData.profesion}
@@ -481,7 +481,7 @@ export default function GestionDocentesPasswordPage() {
                           Fecha de Nacimiento
                         </label>
                         <div className="relative">
-                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Calendar className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="date"
                             value={formData.fechaNacimiento}
@@ -496,7 +496,7 @@ export default function GestionDocentesPasswordPage() {
                           Correo Electrónico (Institucional)
                         </label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Mail className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="email"
                             value={formData.correo}
@@ -515,7 +515,7 @@ export default function GestionDocentesPasswordPage() {
                               Email de Usuario (Gmail u otro) <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <Mail className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                               <input
                                 type="email"
                                 required
@@ -533,7 +533,7 @@ export default function GestionDocentesPasswordPage() {
                               Contraseña <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <Lock className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                               <input
                                 type={mostrarPassword ? 'text' : 'password'}
                                 required
@@ -546,7 +546,7 @@ export default function GestionDocentesPasswordPage() {
                               <button
                                 type="button"
                                 onClick={() => setMostrarPassword(!mostrarPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                                className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-zinc-600"
                               >
                                 {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                               </button>
@@ -646,7 +646,7 @@ export default function GestionDocentesPasswordPage() {
                         Nueva Contraseña <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                        <Lock className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                         <input
                           type={mostrarPassword ? 'text' : 'password'}
                           required
@@ -659,7 +659,7 @@ export default function GestionDocentesPasswordPage() {
                         <button
                           type="button"
                           onClick={() => setMostrarPassword(!mostrarPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                          className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-zinc-600"
                         >
                           {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>

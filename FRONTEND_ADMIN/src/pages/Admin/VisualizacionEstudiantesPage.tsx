@@ -125,7 +125,7 @@ export default function VisualizacionEstudiantesPage() {
       {/* Buscador */}
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-5 h-5" />
           <input
             type="text"
             placeholder="Buscar por nombre, código, email o DNI..."

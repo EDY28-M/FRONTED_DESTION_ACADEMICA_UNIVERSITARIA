@@ -194,7 +194,7 @@ export default function CursosDirigidosPage() {
                   Período Académico
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                  <Calendar className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                   <select
                     value={periodoSeleccionado || ''}
                     onChange={handlePeriodoChange}
@@ -216,7 +216,7 @@ export default function CursosDirigidosPage() {
                   Curso a Asignar
                 </label>
                 <div className="relative">
-                  <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                  <BookOpen className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                   <select
                     value={cursoSeleccionado || ''}
                     onChange={handleCursoChange}
@@ -273,7 +273,7 @@ export default function CursosDirigidosPage() {
                 {/* Filtros */}
                 <div className="flex gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                     <input
                       type="text"
                       placeholder="Buscar por nombre o código..."
@@ -283,7 +283,7 @@ export default function CursosDirigidosPage() {
                     />
                   </div>
                   <div className="w-40 relative">
-                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                    <Filter className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                     <select
                       value={filtroCiclo || ''}
                       onChange={(e) => setFiltroCiclo(e.target.value ? parseInt(e.target.value) : null)}
