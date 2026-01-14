@@ -65,13 +65,13 @@ export const MisCursosDocentePage = () => {
 
   const totalEstudiantes = cursos.reduce((sum, c) => sum + c.totalEstudiantes, 0);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">

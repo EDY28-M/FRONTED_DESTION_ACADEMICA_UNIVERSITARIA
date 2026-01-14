@@ -3,7 +3,7 @@ export interface Estudiante {
   codigo: string;
   nombreCompleto: string;
   email: string;
-  
+
   // Información personal adicional
   nombres?: string;
   apellidos?: string;
@@ -12,7 +12,7 @@ export interface Estudiante {
   correo?: string;
   telefono?: string;
   direccion?: string;
-  
+
   // Información académica
   cicloActual: number;
   creditosAcumulados: number;

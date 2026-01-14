@@ -248,7 +248,7 @@ export default function OrdenMeritoPage() {
       )}
 
       {/* Info Cards */}
-      {ordenMerito.length > 0 && (
+      {/* {ordenMerito.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white border border-zinc-200 rounded-xl p-4">
             <h4 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
@@ -270,7 +270,7 @@ export default function OrdenMeritoPage() {
             </p>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

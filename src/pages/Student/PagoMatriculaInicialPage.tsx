@@ -1,246 +1,152 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
-import { StripePaymentForm } from '../../components/Payment/StripePaymentForm';
-import {
-  GraduationCap,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  CreditCard,
-  ArrowLeft,
-  Shield
-} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PagoMatriculaInicialPage: React.FC = () => {
   const navigate = useNavigate();
-  const [clientSecret, setClientSecret] = useState<string>('');
-  const [paymentIntentId, setPaymentIntentId] = useState<string>('');
-  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
-  const [pagoExitoso, setPagoExitoso] = useState(false);
-  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
-  const { data: periodoActivo } = useQuery({
+  const { data: periodoActivo, isLoading: loadingPeriodo } = useQuery({
     queryKey: ['periodo-activo'],
     queryFn: estudiantesApi.getPeriodoActivo,
   });
 
-  const montoMatricula = 5.00; // 5 PEN
+  const montoMatricula = 5.00;
 
-  useEffect(() => {
-    if (periodoActivo && !clientSecret) {
-      crearPaymentIntent();
-    }
-  }, [periodoActivo]);
-
-  const crearPaymentIntent = async () => {
+  const handlePagarConStripe = async () => {
     if (!periodoActivo) {
       toast.error('No hay período activo');
       return;
     }
 
-    setIsCreatingIntent(true);
+    setIsCreatingCheckout(true);
 
     try {
-      const response = await paymentApi.post('/payments/pagar-matricula', { idPeriodo: periodoActivo.id });
+      const response = await paymentApi.post('/payments/checkout/matricula', {
+        idPeriodo: periodoActivo.id,
+        tipoPago: 'matricula',
+      });
 
-      setClientSecret(response.data.clientSecret);
-      setPaymentIntentId(response.data.paymentIntentId);
-      toast.success('Payment Intent creado exitosamente');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.mensaje || 'Error al crear Payment Intent';
-      toast.error(errorMessage);
-      console.error('Error al crear Payment Intent:', error);
-    } finally {
-      setIsCreatingIntent(false);
-    }
-  };
-
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    setPagoExitoso(true);
-    setIsVerifyingPayment(true);
-
-    try {
-      // Llamar al endpoint para confirmar el pago directamente
-      const response = await paymentApi.post(`/payments/confirm-payment/${paymentIntentId}`);
-
-      if (response.data.procesado) {
-        toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
-        setTimeout(() => {
-          navigate('/estudiante/aumento-cursos');
-        }, 2000);
+      if (response.data.checkoutUrl) {
+        window.location.href = response.data.checkoutUrl;
       } else {
-        // Si el procesado falló, intentar verificar el estado
-        const statusResponse = await paymentApi.get(`/payments/status/${paymentIntentId}`);
-        if (statusResponse.data.status === 'succeeded' && statusResponse.data.procesado) {
-          toast.success('Matrícula pagada exitosamente. Ahora puedes matricular cursos.');
-          setTimeout(() => {
-            navigate('/estudiante/aumento-cursos');
-          }, 2000);
-        } else {
-          toast.error('Error al procesar el pago. Por favor, contacta con soporte.');
-        }
+        toast.error('No se pudo iniciar el proceso de pago');
       }
     } catch (error: any) {
-      console.error('Error al confirmar pago:', error);
-      // Fallback: verificar estado directamente
-      try {
-        const statusResponse = await paymentApi.get(`/payments/status/${paymentIntentId}`);
-        if (statusResponse.data.status === 'succeeded') {
-          toast.success('Pago recibido. Procesando matrícula...');
-          setTimeout(() => {
-            navigate('/estudiante/aumento-cursos');
-          }, 2000);
-        } else {
-          toast.error('Error al procesar el pago');
-        }
-      } catch {
-        toast.error('Error al verificar el pago. Por favor, intenta de nuevo.');
-      }
+      const errorMessage = error.response?.data?.mensaje || 'Error al procesar la solicitud';
+      toast.error(errorMessage);
     } finally {
-      setIsVerifyingPayment(false);
+      setIsCreatingCheckout(false);
     }
   };
 
-  const handlePaymentError = (error: string) => {
-    toast.error(error);
-  };
-
-  if (pagoExitoso) {
+  if (loadingPeriodo) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
-        <div className="bg-white border border-zinc-200 rounded-xl p-8 max-w-md w-full text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-            </div>
-          </div>
-          <h2 className="text-xl font-semibold text-zinc-900 mb-2">¡Pago Exitoso!</h2>
-          <p className="text-zinc-600 mb-6">
-            Estamos procesando tu pago de matrícula. Por favor espera...
-          </p>
-          {isVerifyingPayment && (
-            <div className="flex items-center justify-center gap-2 text-zinc-500">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Verificando pago...</span>
-            </div>
-          )}
-        </div>
+      <div className="flex items-center justify-center py-16">
+        <span className="text-sm text-zinc-500">Cargando...</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="mb-6">
+      {/* Navegación */}
+      <div className="mb-6">
+        <button
+          onClick={() => navigate('/estudiante/inicio')}
+          className="text-sm text-zinc-600 hover:text-zinc-900 hover:underline"
+        >
+          Volver al inicio
+        </button>
+      </div>
+
+      {/* Título */}
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-zinc-900">
+          Pago de Matrícula
+        </h1>
+        <p className="text-sm text-zinc-600 mt-1">
+          {periodoActivo?.nombre || 'Período académico'}
+        </p>
+      </div>
+
+      {/* Contenedor principal */}
+      <div className="border border-zinc-300 bg-white">
+        {/* Concepto */}
+        <div className="px-5 py-4 border-b border-zinc-200">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Concepto</td>
+                <td className="text-right text-zinc-900 font-medium">Derecho de matrícula</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Período</td>
+                <td className="text-right text-zinc-900">{periodoActivo?.nombre || '—'}</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1.5">Año</td>
+                <td className="text-right text-zinc-900">{periodoActivo?.anio || '—'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Resumen de montos */}
+        <div className="px-5 py-4 border-b border-zinc-200 bg-zinc-50">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="text-zinc-600 py-1">Subtotal</td>
+                <td className="text-right font-mono text-zinc-900">S/ {montoMatricula.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td className="text-zinc-600 py-1">Descuento</td>
+                <td className="text-right font-mono text-zinc-900">S/ 0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Total */}
+        <div className="px-5 py-4 border-b border-zinc-300">
+          <div className="flex justify-between items-center">
+            <span className="text-zinc-900 font-semibold">Total a pagar</span>
+            <span className="text-lg font-mono font-bold text-zinc-900">S/ {montoMatricula.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Método de pago */}
+        <div className="px-5 py-4 border-b border-zinc-200">
+          <p className="text-sm text-zinc-600 mb-2">Método de pago</p>
+          <p className="text-sm text-zinc-900">Tarjeta de crédito o débito (Stripe)</p>
+        </div>
+
+        {/* Botón de acción */}
+        <div className="px-5 py-5">
           <button
-            onClick={() => navigate('/estudiante/inicio')}
-            className="flex items-center gap-2 text-zinc-600 hover:text-zinc-900 mb-4 transition-colors"
+            onClick={handlePagarConStripe}
+            disabled={isCreatingCheckout || !periodoActivo}
+            className="w-full py-3 px-4 bg-[#2E7D32] hover:bg-[#1B5E20] disabled:bg-zinc-300 
+                     text-white text-sm font-medium transition-colors disabled:cursor-not-allowed"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Volver</span>
+            {isCreatingCheckout ? 'Procesando...' : 'Continuar con el pago'}
           </button>
-          <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
-
-            Pago de Matrícula
-          </h1>
-          <p className="text-zinc-600 mt-1">Completa el pago de matrícula para poder matricular cursos</p>
+          <p className="text-xs text-zinc-500 text-center mt-3">
+            Será redirigido a la pasarela de pago segura.
+          </p>
         </div>
+      </div>
 
-        {/* Información importante */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-blue-900 mb-1">Información importante</p>
-              <p className="text-xs text-blue-700">
-                El pago de matrícula es un requisito obligatorio para poder matricular cursos.
-                Una vez completado el pago, podrás matricular todos los cursos disponibles para tu ciclo.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Resumen */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-zinc-200 rounded-xl p-6 sticky top-4">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Resumen</h2>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-start justify-between p-3 bg-zinc-50 rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-zinc-900">Matrícula</p>
-                    <p className="text-xs text-zinc-500 mt-1">
-                      Período: {periodoActivo?.nombre || 'Cargando...'}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-zinc-900">
-                    S/ {montoMatricula.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
-              <div className="border-t border-zinc-200 pt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-zinc-900">Total</span>
-                  <span className="text-xl font-bold text-zinc-900">
-                    S/ {montoMatricula.toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-xs text-zinc-500 mt-2">
-                  Moneda: Soles Peruanos (PEN)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Formulario de pago */}
-          <div className="lg:col-span-2">
-            <div className="bg-white border border-zinc-200 rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <CreditCard className="w-5 h-5 text-zinc-600" />
-                <h2 className="text-lg font-semibold text-zinc-900">Información de Pago</h2>
-              </div>
-
-              {isCreatingIntent ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-zinc-600 mb-4" />
-                  <p className="text-zinc-600">Preparando el pago...</p>
-                </div>
-              ) : clientSecret ? (
-                <StripePaymentForm
-                  clientSecret={clientSecret}
-                  paymentIntentId={paymentIntentId}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                  buttonText="Pagar Matrícula"
-                />
-              ) : (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-800">Error al inicializar el pago</p>
-                    <p className="text-xs text-amber-700 mt-1">
-                      Por favor, intenta nuevamente o contacta con soporte.
-                    </p>
-                    <button
-                      onClick={crearPaymentIntent}
-                      className="mt-3 text-sm text-amber-800 hover:text-amber-900 underline"
-                    >
-                      Reintentar
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      {/* Nota legal */}
+      <div className="mt-6 text-xs text-zinc-500 leading-relaxed">
+        <p>
+          Al continuar, acepta los términos y condiciones de matrícula vigentes.
+          El pago es procesado mediante pasarela certificada PCI-DSS.
+        </p>
       </div>
     </div>
   );

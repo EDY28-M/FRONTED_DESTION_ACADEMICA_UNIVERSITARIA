@@ -4,15 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import paymentApi from '../../lib/paymentApi';
 import { StripePaymentForm } from '../../components/Payment/StripePaymentForm';
-import {
-  ShoppingCart,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  CreditCard,
-  ArrowLeft
-} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CursoSeleccionado {
@@ -32,6 +23,7 @@ const PagoMatriculaPage: React.FC = () => {
   const location = useLocation();
   const state = location.state as LocationState;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cursosSeleccionados, setCursosSeleccionados] = useState<CursoSeleccionado[]>(
     state?.cursos || []
   );
@@ -50,7 +42,7 @@ const PagoMatriculaPage: React.FC = () => {
 
   useEffect(() => {
     if (cursosSeleccionados.length === 0) {
-      toast.error('No hay cursos seleccionados para pagar');
+      toast.error('No hay cursos seleccionados');
       navigate('/estudiante/matricula');
     }
   }, [cursosSeleccionados, navigate]);
@@ -59,6 +51,7 @@ const PagoMatriculaPage: React.FC = () => {
     if (cursosSeleccionados.length > 0 && periodoActivo && !clientSecret) {
       crearPaymentIntent();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cursosSeleccionados, periodoActivo]);
 
   const crearPaymentIntent = async () => {
@@ -81,46 +74,36 @@ const PagoMatriculaPage: React.FC = () => {
 
       setClientSecret(response.data.clientSecret);
       setPaymentIntentId(response.data.paymentIntentId);
-      toast.success('Payment Intent creado exitosamente');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.mensaje || 'Error al crear Payment Intent';
+      const errorMessage = error.response?.data?.mensaje || 'Error al inicializar el pago';
       toast.error(errorMessage);
-      console.error('Error al crear Payment Intent:', error);
     } finally {
       setIsCreatingIntent(false);
     }
   };
 
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
+  const handlePaymentSuccess = async (intentId: string) => {
     setPagoExitoso(true);
     setIsVerifyingPayment(true);
 
-    // Verificar el estado del pago periódicamente
     const checkPaymentStatus = async () => {
       try {
-        const response = await paymentApi.get(`/payments/status/${paymentIntentId}`);
+        const response = await paymentApi.get(`/payments/status/${intentId}`);
         const status = response.data.status;
 
         if (status === 'succeeded' && response.data.procesado) {
-          toast.success('Matrícula completada exitosamente');
-          setTimeout(() => {
-            navigate('/estudiante/mis-cursos');
-          }, 2000);
+          toast.success('Matrícula completada');
+          setTimeout(() => navigate('/estudiante/mis-cursos'), 2000);
         } else if (status === 'succeeded' && !response.data.procesado) {
-          // El pago fue exitoso pero aún no se procesó la matrícula
-          // Continuar verificando
           setTimeout(checkPaymentStatus, 2000);
         } else {
           toast.error('Error al procesar la matrícula');
         }
-      } catch (error) {
-        console.error('Error al verificar estado del pago:', error);
-        // Continuar verificando
+      } catch {
         setTimeout(checkPaymentStatus, 2000);
       }
     };
 
-    // Iniciar verificación
     checkPaymentStatus();
   };
 
@@ -128,118 +111,88 @@ const PagoMatriculaPage: React.FC = () => {
     toast.error(error);
   };
 
-  const eliminarCurso = (idCurso: number) => {
-    setCursosSeleccionados(cursosSeleccionados.filter(c => c.idCurso !== idCurso));
-    // Si se elimina un curso, recrear el Payment Intent
-    setClientSecret('');
-    setPaymentIntentId('');
-  };
-
+  // Estado: Pago exitoso
   if (pagoExitoso) {
     return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
-        <div className="bg-white border border-zinc-200 rounded-xl p-8 max-w-md w-full text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-            </div>
+      <div className="max-w-lg mx-auto px-4 py-16">
+        <div className="border border-zinc-300 bg-white">
+          <div className="bg-zinc-100 border-b border-zinc-300 px-5 py-3">
+            <h2 className="text-sm font-semibold text-zinc-900">Confirmación de Pago</h2>
           </div>
-          <h2 className="text-xl font-semibold text-zinc-900 mb-2">¡Pago Exitoso!</h2>
-          <p className="text-zinc-600 mb-6">
-            Estamos procesando tu matrícula. Por favor espera...
-          </p>
-          {isVerifyingPayment && (
-            <div className="flex items-center justify-center gap-2 text-zinc-500">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Verificando matrícula...</span>
-            </div>
-          )}
+          <div className="px-5 py-8 text-center">
+            <p className="text-zinc-900 font-medium mb-2">Pago recibido correctamente</p>
+            <p className="text-sm text-zinc-600 mb-6">
+              Estamos registrando su matrícula en el sistema.
+            </p>
+            {isVerifyingPayment && (
+              <p className="text-sm text-zinc-500">Procesando...</p>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/estudiante/matricula')}
-            className="flex items-center gap-2 text-zinc-600 hover:text-zinc-900 mb-4 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Volver a matrícula</span>
-          </button>
-          <h1 className="text-2xl font-bold text-zinc-900 flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6" />
-            Pago de Matrícula
-          </h1>
-          <p className="text-zinc-600 mt-1">Completa el pago para finalizar tu matrícula</p>
-        </div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Navegación */}
+      <div className="mb-6">
+        <button
+          onClick={() => navigate('/estudiante/matricula')}
+          className="text-sm text-zinc-600 hover:text-zinc-900 hover:underline"
+        >
+          Volver a selección de cursos
+        </button>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Resumen de cursos */}
-          <div className="lg:col-span-1">
-            <div className="bg-white border border-zinc-200 rounded-xl p-6 sticky top-4">
-              <h2 className="text-lg font-semibold text-zinc-900 mb-4">Resumen</h2>
+      {/* Título */}
+      <div className="mb-8">
+        <h1 className="text-xl font-semibold text-zinc-900">
+          Pago de Cursos
+        </h1>
+        <p className="text-sm text-zinc-600 mt-1">
+          {periodoActivo?.nombre || 'Período académico'}
+        </p>
+      </div>
 
-              <div className="space-y-3 mb-6">
-                {cursosSeleccionados.map((curso) => (
-                  <div
-                    key={curso.idCurso}
-                    className="flex items-start justify-between p-3 bg-zinc-50 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-zinc-900">{curso.nombre}</p>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {curso.codigo} • {curso.creditos} créditos
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Columna izquierda: Cursos y pago */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Lista de cursos */}
+          <div className="border border-zinc-300 bg-white">
+            <div className="bg-zinc-100 border-b border-zinc-300 px-5 py-3">
+              <h2 className="text-sm font-semibold text-zinc-900">Cursos seleccionados</h2>
+            </div>
+            <div className="divide-y divide-zinc-200">
+              {cursosSeleccionados.map((curso, index) => (
+                <div key={curso.idCurso} className="px-5 py-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-sm text-zinc-900">
+                        {index + 1}. {curso.nombre}
+                      </p>
+                      <p className="text-xs text-zinc-500 mt-0.5">
+                        {curso.codigo} — {curso.creditos} créditos
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-zinc-900">
-                        ${curso.precio.toFixed(2)}
-                      </span>
-                      <button
-                        onClick={() => eliminarCurso(curso.idCurso)}
-                        className="text-zinc-400 hover:text-red-600 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <p className="text-sm font-mono text-zinc-900">
+                      ${curso.precio.toFixed(2)}
+                    </p>
                   </div>
-                ))}
-              </div>
-
-              <div className="border-t border-zinc-200 pt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-zinc-600">Subtotal</span>
-                  <span className="text-sm font-medium text-zinc-900">
-                    ${total.toFixed(2)}
-                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold text-zinc-900">Total</span>
-                  <span className="text-xl font-bold text-zinc-900">
-                    ${total.toFixed(2)}
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
           {/* Formulario de pago */}
-          <div className="lg:col-span-2">
-            <div className="bg-white border border-zinc-200 rounded-xl p-6">
-              <div className="flex items-center gap-2 mb-6">
-                <CreditCard className="w-5 h-5 text-zinc-600" />
-                <h2 className="text-lg font-semibold text-zinc-900">Información de Pago</h2>
-              </div>
-
+          <div className="border border-zinc-300 bg-white">
+            <div className="bg-zinc-100 border-b border-zinc-300 px-5 py-3">
+              <h2 className="text-sm font-semibold text-zinc-900">Información de pago</h2>
+            </div>
+            <div className="p-5">
               {isCreatingIntent ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-zinc-600 mb-4" />
-                  <p className="text-zinc-600">Preparando el pago...</p>
+                <div className="py-12 text-center">
+                  <p className="text-sm text-zinc-500">Inicializando pasarela de pago...</p>
                 </div>
               ) : clientSecret ? (
                 <StripePaymentForm
@@ -249,23 +202,73 @@ const PagoMatriculaPage: React.FC = () => {
                   onError={handlePaymentError}
                 />
               ) : (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-amber-800">Error al inicializar el pago</p>
-                    <p className="text-xs text-amber-700 mt-1">
-                      Por favor, intenta nuevamente o contacta con soporte.
-                    </p>
-                    <button
-                      onClick={crearPaymentIntent}
-                      className="mt-3 text-sm text-amber-800 hover:text-amber-900 underline"
-                    >
-                      Reintentar
-                    </button>
-                  </div>
+                <div className="py-8 text-center">
+                  <p className="text-sm text-zinc-700 mb-3">
+                    No se pudo inicializar el proceso de pago.
+                  </p>
+                  <button
+                    onClick={crearPaymentIntent}
+                    className="text-sm text-zinc-600 hover:text-zinc-900 underline"
+                  >
+                    Reintentar
+                  </button>
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Columna derecha: Resumen */}
+        <div className="lg:col-span-2">
+          <div className="border border-zinc-300 bg-white sticky top-4">
+            <div className="bg-zinc-100 border-b border-zinc-300 px-5 py-3">
+              <h2 className="text-sm font-semibold text-zinc-900">Resumen de pago</h2>
+            </div>
+            <div className="px-5 py-4">
+              <table className="w-full text-sm">
+                <tbody>
+                  <tr>
+                    <td className="text-zinc-600 py-1.5">Concepto</td>
+                    <td className="text-right text-zinc-900">Matrícula de cursos</td>
+                  </tr>
+                  <tr>
+                    <td className="text-zinc-600 py-1.5">Cantidad</td>
+                    <td className="text-right text-zinc-900">{cursosSeleccionados.length} curso(s)</td>
+                  </tr>
+                  <tr>
+                    <td className="text-zinc-600 py-1.5">Período</td>
+                    <td className="text-right text-zinc-900">{periodoActivo?.nombre || '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="px-5 py-3 border-t border-zinc-200 bg-zinc-50">
+              <table className="w-full text-sm">
+                <tbody>
+                  <tr>
+                    <td className="text-zinc-600 py-1">Subtotal</td>
+                    <td className="text-right font-mono text-zinc-900">${total.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td className="text-zinc-600 py-1">Descuento</td>
+                    <td className="text-right font-mono text-zinc-900">$0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="px-5 py-4 border-t border-zinc-300">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-900 font-semibold">Total</span>
+                <span className="text-lg font-mono font-bold text-zinc-900">${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Nota */}
+          <div className="mt-4 text-xs text-zinc-500 leading-relaxed">
+            <p>
+              Al completar el pago, acepta los términos de matrícula institucional.
+            </p>
           </div>
         </div>
       </div>

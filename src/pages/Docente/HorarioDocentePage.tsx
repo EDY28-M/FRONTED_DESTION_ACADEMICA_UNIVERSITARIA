@@ -30,13 +30,13 @@ export const HorarioDocentePage = () => {
     refetchOnWindowFocus: true, // Refresca al volver a la ventana
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando horario...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando horario...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">

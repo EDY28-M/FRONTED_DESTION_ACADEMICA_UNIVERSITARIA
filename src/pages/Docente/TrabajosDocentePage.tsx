@@ -136,16 +136,16 @@ const TrabajosDocentePage: React.FC<TrabajosDocentePageProps> = ({ idCurso: idCu
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-200 rounded w-1/3"></div>
-          <div className="h-64 bg-zinc-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-6">
+  //       <div className="animate-pulse space-y-4">
+  //         <div className="h-8 bg-zinc-200 rounded w-1/3"></div>
+  //         <div className="h-64 bg-zinc-200 rounded"></div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Mostrar error si hay uno, pero no redirigir
   if (queryError) {
@@ -356,11 +356,12 @@ const ModalEntregas: React.FC<ModalEntregasProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          {isLoading ? (
+          {/* {isLoading ? (
             <div className="text-center py-12">
               <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto"></div>
             </div>
-          ) : entregas.length > 0 ? (
+          ) :  */}
+          {entregas.length > 0 ? (
             <div className="space-y-4">
               {entregas.map((entrega) => (
                 <div key={entrega.id} className="border border-zinc-200 rounded-lg p-4">

@@ -104,13 +104,13 @@ export const EstudiantesDocentePage = () => {
 
   const cursoSeleccionado = cursos.find(c => c.id === selectedCurso);
 
-  if (isLoadingCursos) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-      </div>
-    );
-  }
+  // if (isLoadingCursos) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -170,11 +170,12 @@ export const EstudiantesDocentePage = () => {
 
         {/* ========== DATA TABLE ========== */}
         <div className="border border-zinc-200 rounded-lg bg-white overflow-hidden">
-          {isLoadingEstudiantes ? (
+          {/* {isLoadingEstudiantes ? (
             <div className="py-16 text-center">
               <div className="animate-pulse text-zinc-400 text-sm">Cargando estudiantes...</div>
             </div>
-          ) : filteredEstudiantes.length === 0 ? (
+          ) :  */}
+          {filteredEstudiantes.length === 0 ? (
             <EmptyState 
               icon={UsersIcon}
               title={searchTerm ? "Sin resultados" : "Sin estudiantes"}

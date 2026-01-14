@@ -124,8 +124,8 @@ export default function GestionDocentesPasswordPage() {
       apellidos: docente.apellidos,
       nombres: docente.nombres,
       profesion: docente.profesion || '',
-      fechaNacimiento: docente.fechaNacimiento 
-        ? docente.fechaNacimiento.split('T')[0] 
+      fechaNacimiento: docente.fechaNacimiento
+        ? docente.fechaNacimiento.split('T')[0]
         : '',
       correo: docente.correo || '',
       emailUsuario: '',
@@ -147,7 +147,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleCrear = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password.length < 6) {
       toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -158,7 +158,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleAsignarPassword = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.password.length < 6) {
       toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
@@ -174,7 +174,7 @@ export default function GestionDocentesPasswordPage() {
 
   const handleActualizar = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (docenteSeleccionado) {
       const { password, ...dataToUpdate } = formData;
       actualizarMutation.mutate({
@@ -192,10 +192,10 @@ export default function GestionDocentesPasswordPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-50">
+      <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-900 mx-auto"></div>
-          <p className="mt-4 text-zinc-600">Cargando docentes...</p>
+          <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-zinc-500 text-sm">Cargando docentes...</p>
         </div>
       </div>
     );
@@ -246,7 +246,7 @@ export default function GestionDocentesPasswordPage() {
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
         <div className="flex flex-col md:flex-row md:items-center gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nombre, correo o profesión..."
@@ -315,12 +315,12 @@ export default function GestionDocentesPasswordPage() {
                           <p className="text-sm font-medium text-zinc-900">{docente.nombreCompleto}</p>
                           <div className="flex items-center gap-1 text-xs text-zinc-500">
                             <Calendar className="w-3 h-3" />
-                            {docente.fechaNacimiento 
+                            {docente.fechaNacimiento
                               ? new Date(docente.fechaNacimiento).toLocaleDateString('es-ES', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric'
-                                })
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                              })
                               : 'Fecha no disponible'
                             }
                           </div>
@@ -362,11 +362,10 @@ export default function GestionDocentesPasswordPage() {
                         </button>
                         <button
                           onClick={() => abrirModalAsignarPassword(docente)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            docente.tienePassword
+                          className={`p-2 rounded-lg transition-colors ${docente.tienePassword
                               ? 'text-zinc-400 hover:text-amber-600 hover:bg-amber-50'
                               : 'text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50'
-                          }`}
+                            }`}
                           title={docente.tienePassword ? 'Cambiar contraseña' : 'Asignar contraseña'}
                         >
                           <Key className="w-4 h-4" />
@@ -434,7 +433,7 @@ export default function GestionDocentesPasswordPage() {
                           Apellidos <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <User className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             required
@@ -451,7 +450,7 @@ export default function GestionDocentesPasswordPage() {
                           Nombres <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <User className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             required
@@ -466,7 +465,7 @@ export default function GestionDocentesPasswordPage() {
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">Profesión</label>
                         <div className="relative">
-                          <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Briefcase className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="text"
                             value={formData.profesion}
@@ -482,7 +481,7 @@ export default function GestionDocentesPasswordPage() {
                           Fecha de Nacimiento
                         </label>
                         <div className="relative">
-                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Calendar className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="date"
                             value={formData.fechaNacimiento}
@@ -497,7 +496,7 @@ export default function GestionDocentesPasswordPage() {
                           Correo Electrónico (Institucional)
                         </label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                          <Mail className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                           <input
                             type="email"
                             value={formData.correo}
@@ -516,7 +515,7 @@ export default function GestionDocentesPasswordPage() {
                               Email de Usuario (Gmail u otro) <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <Mail className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                               <input
                                 type="email"
                                 required
@@ -534,7 +533,7 @@ export default function GestionDocentesPasswordPage() {
                               Contraseña <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                              <Lock className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                               <input
                                 type={mostrarPassword ? 'text' : 'password'}
                                 required
@@ -547,7 +546,7 @@ export default function GestionDocentesPasswordPage() {
                               <button
                                 type="button"
                                 onClick={() => setMostrarPassword(!mostrarPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                                className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-zinc-600"
                               >
                                 {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                               </button>
@@ -647,7 +646,7 @@ export default function GestionDocentesPasswordPage() {
                         Nueva Contraseña <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-4 h-4" />
+                        <Lock className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-4 h-4" />
                         <input
                           type={mostrarPassword ? 'text' : 'password'}
                           required
@@ -660,7 +659,7 @@ export default function GestionDocentesPasswordPage() {
                         <button
                           type="button"
                           onClick={() => setMostrarPassword(!mostrarPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                          className="absolute right-3 top-1/2 -tranzinc-y-1/2 text-zinc-400 hover:text-zinc-600"
                         >
                           {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
@@ -748,7 +747,7 @@ export default function GestionDocentesPasswordPage() {
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
                         <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
                         <p className="text-sm text-amber-800">
-                          Este docente tiene <strong>{docenteSeleccionado?.totalCursos}</strong> curso(s) asignado(s). 
+                          Este docente tiene <strong>{docenteSeleccionado?.totalCursos}</strong> curso(s) asignado(s).
                           Los cursos quedarán sin docente asignado.
                         </p>
                       </div>

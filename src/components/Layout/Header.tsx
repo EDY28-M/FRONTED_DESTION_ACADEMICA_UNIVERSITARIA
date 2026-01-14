@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from 'react'
+import { useState, Fragment } from 'react'
 import { Menu, Transition } from '@headlessui/react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
           {/* Mobile menu button */}
           <button
             type="button"
-            className="lg:hidden flex items-center justify-center h-9 w-9 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+            className="lg:hidden flex items-center justify-center h-9 w-9 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
             onClick={onMenuClick}
           >
             <span className="sr-only">Abrir menú</span>
@@ -92,7 +92,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
           {onToggleCollapse && (
             <button
               type="button"
-              className="hidden lg:flex items-center justify-center h-9 w-9 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+              className="hidden lg:flex items-center justify-center h-9 w-9 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               onClick={onToggleCollapse}
             >
               <span className="sr-only">{isCollapsed ? 'Expandir menú' : 'Contraer menú'}</span>
@@ -102,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
 
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-1 text-sm overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
-            <span className="text-zinc-400 shrink-0">Admin</span>
+            <span className="text-zinc-500 shrink-0">Admin</span>
             {breadcrumbs.map((crumb, index) => (
               <Fragment key={crumb.path}>
                 <ChevronRight className="h-4 w-4 text-zinc-300" />
@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
                 ) : (
                   <button
                     onClick={() => navigate(crumb.path)}
-                    className="text-zinc-500 hover:text-zinc-900 transition-colors"
+                    className="text-zinc-600 hover:text-zinc-900 transition-colors"
                   >
                     {crumb.name}
                   </button>
@@ -128,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
 
           {/* Profile Dropdown */}
           <Menu as="div" className="relative">
-            <Menu.Button className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-zinc-100 transition-colors">
+            <Menu.Button className="flex items-center gap-2 px-2 py-1.5 hover:bg-zinc-100 transition-colors">
               <div className="h-8 w-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center">
                 <User className="h-4 w-4 text-zinc-600" />
               </div>
@@ -151,12 +151,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg bg-white shadow-lg ring-1 ring-zinc-200 focus:outline-none z-50">
+              <Menu.Items className="absolute right-0 mt-2 w-64 origin-top-right bg-white shadow-lg ring-1 ring-zinc-200 focus:outline-none z-50">
                 {/* Profile Header */}
                 <div className="px-4 py-3 border-b border-zinc-100">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-white">
+                    <div className="h-10 w-10 bg-zinc-100 border border-zinc-200 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-zinc-900">
                         {user ? getInitials(user.nombres, user.apellidos) : 'U'}
                       </span>
                     </div>
@@ -222,4 +222,3 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick, onToggleCollapse, isCollap
 }
 
 export default Header
-

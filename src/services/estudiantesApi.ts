@@ -45,10 +45,17 @@ export const estudiantesApi = {
     return response.data;
   },
 
+  // Matrícula masiva
+  matricularMasivo: async (data: { idsCursos: number[]; idPeriodo: number }): Promise<Matricula[]> => {
+    const response = await axios.post('/estudiantes/matricular-masivo', data);
+    return response.data;
+  },
+
   // Verificar si el estudiante ha pagado la matrícula
   verificarMatriculaPagada: async (idPeriodo: number): Promise<boolean> => {
     try {
-      const response = await paymentApi.get(`/payments/verificar-matricula-pagada/${idPeriodo}`);
+      // Importante: validar desde el backend principal (maneja auth/refresh y centraliza la lógica)
+      const response = await axios.get('/estudiantes/matricula-pagada', { params: { idPeriodo } });
       return response.data.pagado || false;
     } catch {
       return false;
@@ -58,6 +65,10 @@ export const estudiantesApi = {
   // Retirarse de un curso
   retirar: async (idMatricula: number): Promise<void> => {
     await axios.delete(`/estudiantes/retirar/${idMatricula}`);
+  },
+
+  retirarMasivo: async (idsMatriculas: number[]): Promise<void> => {
+    await axios.post('/estudiantes/retirar-masivo', { idsMatriculas });
   },
 
   // Obtener notas

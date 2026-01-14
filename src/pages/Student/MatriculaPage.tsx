@@ -33,7 +33,7 @@ const MatriculaPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-zinc-900 mb-1">Cursos Matriculados</h2>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <span className="flex items-center gap-1.5">
-               
+
                 <span>Ciclo</span>
                 <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs font-medium font-mono">{perfil?.cicloActual}</span>
               </span>
@@ -50,7 +50,7 @@ const MatriculaPage: React.FC = () => {
               </p>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="text-center px-4 py-2 bg-zinc-50 rounded-lg border border-zinc-200">
               <p className="text-xl font-semibold text-zinc-900 tabular-nums">{cursosMatriculados.length}</p>
@@ -68,12 +68,13 @@ const MatriculaPage: React.FC = () => {
       <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            
+
             <h3 className="text-sm font-medium text-zinc-900">Mis Cursos del Período Actual</h3>
           </div>
         </div>
 
-        {isLoading ? (
+        {/* Spinner SOLO cuando no hay datos en cache */}
+        {isLoading && !misCursos ? (
           <div className="p-12 text-center">
             <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-zinc-500 text-sm">Cargando cursos...</p>
@@ -142,7 +143,7 @@ const MatriculaPage: React.FC = () => {
             <BookOpen className="h-12 w-12 text-zinc-300 mx-auto mb-3" />
             <p className="text-sm text-zinc-500 mb-1">No tienes cursos matriculados</p>
             <p className="text-xs text-zinc-400 mb-4">Ve a "Aumento de Cursos" para matricularte</p>
-            <Link 
+            <Link
               to="/estudiante/aumento-cursos"
               className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
             >

@@ -112,13 +112,13 @@ export const PerfilDocentePage = () => {
     return nombre?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'DC';
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -132,7 +132,7 @@ export const PerfilDocentePage = () => {
         </div>
       </header>
 
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="px-0 pt-8 pb-6 max-w-1xl mx-auto">
         {/* Profile Header */}
         <div className="border border-zinc-200 rounded-lg bg-white p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -226,9 +226,9 @@ export const PerfilDocentePage = () => {
               <div className="bg-white">
                 <StatCard label="Total estudiantes" value={totalEstudiantes} />
               </div>
-              <div className="bg-white">
+              {/* <div className="bg-white">
                 <StatCard label="Promedio general" value={promedioGeneral.toFixed(2)} />
-              </div>
+              </div> */}
               <div className="bg-white">
                 <StatCard label="Asistencia promedio" value={asistenciaPromedio.toFixed(1)} suffix="%" />
               </div>

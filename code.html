@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sharp Executive ERP Dashboard</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"IBM Plex Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: "#bef264", // Lime-300ish
+                        secondary: "#fb7185", // Coral
+                        "cyber-lime": "#ccff00",
+                        "deep-coral": "#ff6b6b",
+                        "background-light": "#f8fafc", // Slate 50
+                        "background-dark": "#020617", // Slate 950 - darker for high contrast
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#0f172a", // Slate 900
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#1e293b",
+                    },
+                    borderRadius: {
+                        DEFAULT: "0px",
+                        'none': '0px',
+                        'sm': '0px',
+                        'md': '0px',
+                        'lg': '0px',
+                        'xl': '0px',
+                        '2xl': '0px',
+                        '3xl': '0px',
+                        'full': '9999px', // Exception for avatars/circular charts
+                    },
+                    boxShadow: {
+                        'glow': '0 0 10px rgba(204, 255, 0, 0.2)',
+                        'sharp': '4px 4px 0px 0px rgba(0,0,0,0.1)', // Technical shadow
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 font-sans transition-colors duration-300 selection:bg-cyber-lime selection:text-slate-900 overflow-hidden">
+    <div class="flex h-screen w-full">
+        <aside
+            class="w-64 hidden md:flex flex-col border-r border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark z-20">
+            <div
+                class="h-16 flex items-center px-6 border-b border-border-light dark:border-border-dark bg-slate-50 dark:bg-[#0B1120]">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-slate-900 dark:bg-cyber-lime flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white dark:text-slate-900 text-xl">grid_view</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm tracking-widest uppercase text-slate-900 dark:text-white">ERP<span
+                                class="text-primary">.SYS</span></h1>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 overflow-y-auto py-4">
+                <div class="px-3 mb-2">
+                    <p class="text-[10px] uppercase tracking-widest text-slate-400 font-mono mb-2 pl-3">Main Module</p>
+                    <a class="flex items-center gap-3 px-3 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-cyber-lime border-l-2 border-slate-900 dark:border-cyber-lime transition-all group hover:bg-slate-200 dark:hover:bg-slate-700"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">dashboard</span>
+                        <span class="font-medium text-sm">Dashboard</span>
+                    </a>
+                </div>
+                <div class="space-y-0.5 px-3">
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">badge</span>
+                        <span class="font-medium text-sm">Credenciales</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">school</span>
+                        <span class="font-medium text-sm">Cursos</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">schedule</span>
+                        <span class="font-medium text-sm">Horarios</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">checklist</span>
+                        <span class="font-medium text-sm">Asistencias</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">group</span>
+                        <span class="font-medium text-sm">Estudiantes</span>
+                    </a>
+                </div>
+                <div class="px-3 mt-6 mb-2">
+                    <p class="text-[10px] uppercase tracking-widest text-slate-400 font-mono mb-2 pl-3">System</p>
+                    <a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 border-l-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                        href="#">
+                        <span class="material-symbols-outlined text-xl">settings</span>
+                        <span class="font-medium text-sm">Configuración</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="p-4 border-t border-border-light dark:border-border-dark">
+                <div class="bg-slate-900 dark:bg-black border border-slate-700 p-3 flex items-center gap-3">
+                    <div class="w-1.5 h-1.5 bg-green-500"></div>
+                    <span class="text-[10px] font-mono text-slate-300">V.2.4.0 STABLE</span>
+                </div>
+            </div>
+        </aside>
+        <main class="flex-1 flex flex-col h-full relative overflow-y-auto bg-background-light dark:bg-background-dark">
+            <header
+                class="h-16 flex items-center justify-between px-6 bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark sticky top-0 z-30">
+                <div class="flex items-center gap-4">
+                    <button class="md:hidden text-slate-500">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div class="flex flex-col">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-tight font-sans">
+                            Executive Command</h2>
+                        <div class="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                            <span>SYS</span>
+                            <span class="text-slate-300">/</span>
+                            <span>ADMIN</span>
+                            <span class="text-slate-300">/</span>
+                            <span class="text-primary">DASHBOARD</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div
+                        class="flex items-center border border-border-light dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 h-9 px-3 w-64 hidden sm:flex">
+                        <span class="material-symbols-outlined text-slate-400 text-sm">search</span>
+                        <input
+                            class="bg-transparent border-none text-xs focus:ring-0 w-full text-slate-200 placeholder-slate-500 font-mono"
+                            placeholder="Search system..." type="text" />
+                    </div>
+                    <button
+                        class="w-9 h-9 border border-border-light dark:border-slate-700 flex items-center justify-center text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <span class="material-symbols-outlined text-xl">notifications</span>
+                    </button>
+                    <div class="h-6 w-[1px] bg-border-light dark:border-slate-700 mx-1"></div>
+                    <button
+                        class="h-9 px-4 bg-primary hover:bg-cyber-lime text-slate-900 text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                        <span>Report</span>
+                    </button>
+                    <div class="flex items-center gap-3 pl-2 border-l border-transparent">
+                        <img alt="User" class="w-8 h-8 rounded-full border border-slate-600"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq-upf2wnDr_EUfTGIuc_TR1ZOAm38yd6AzM_nB4r8LjZbicasNAb56fk2hytD5h2eX_3uu7TY6cYWSQZ0a8fPW2I5crWgkkYfpEUAYUV6m1nL9CqWxSGZQeCxkId5BwXLB9IiXbyXWoDxRW3GaS_4_ENZ5TtEHuogSqBGnLZ0akM5inOztFWrngo0VY6HneCpkmNBOVYEwVbk1bsTt-9Exa1XeJ-9QYrTPbUhBmeEqS2AhKZn9asIn_wHXB4DKve0ed43kb6FaJw" />
+                    </div>
+                </div>
+            </header>
+            <div class="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-primary/50 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total
+                                Docentes</span>
+                            <span class="material-symbols-outlined text-slate-600 text-lg">groups</span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-3xl font-bold text-slate-900 dark:text-white font-mono">33</p>
+                                <span class="text-[10px] text-green-500 font-mono flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 12% vs last
+                                    month
+                                </span>
+                            </div>
+                            <div class="w-24 h-10">
+                                <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                    <path
+                                        d="M0 35 L10 32 L20 34 L30 25 L40 28 L50 20 L60 22 L70 15 L80 18 L90 10 L100 15 V40 H0 Z"
+                                        fill="rgba(190, 242, 100, 0.2)"></path>
+                                    <path
+                                        d="M0 35 L10 32 L20 34 L30 25 L40 28 L50 20 L60 22 L70 15 L80 18 L90 10 L100 15"
+                                        fill="none" stroke="#bef264" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-primary/50 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total Cursos</span>
+                            <span class="material-symbols-outlined text-slate-600 text-lg">library_books</span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-3xl font-bold text-slate-900 dark:text-white font-mono">60</p>
+                                <span class="text-[10px] text-green-500 font-mono flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 8% vs last
+                                    month
+                                </span>
+                            </div>
+                            <div class="w-24 h-10">
+                                <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                    <path d="M0 30 L15 32 L30 25 L45 28 L60 15 L75 20 L90 5 L100 10 V40 H0 Z"
+                                        fill="rgba(251, 113, 133, 0.2)"></path>
+                                    <path d="M0 30 L15 32 L30 25 L45 28 L60 15 L75 20 L90 5 L100 10" fill="none"
+                                        stroke="#fb7185" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-primary/50 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Total
+                                Créditos</span>
+                            <span class="material-symbols-outlined text-slate-600 text-lg">workspace_premium</span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-3xl font-bold text-slate-900 dark:text-white font-mono">219</p>
+                                <span class="text-[10px] text-green-500 font-mono flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 5% vs last
+                                    month
+                                </span>
+                            </div>
+                            <div class="w-24 h-10">
+                                <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                    <rect fill="#334155" height="20" width="8" x="0" y="20"></rect>
+                                    <rect fill="#334155" height="25" width="8" x="12" y="15"></rect>
+                                    <rect fill="#334155" height="15" width="8" x="24" y="25"></rect>
+                                    <rect fill="#334155" height="30" width="8" x="36" y="10"></rect>
+                                    <rect fill="#334155" height="22" width="8" x="48" y="18"></rect>
+                                    <rect fill="#bef264" height="28" width="8" x="60" y="12"></rect>
+                                    <rect fill="#334155" height="18" width="8" x="72" y="22"></rect>
+                                    <rect fill="#334155" height="32" width="8" x="84" y="8"></rect>
+                                    <rect fill="#334155" height="25" width="4" x="96" y="15"></rect>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-primary/50 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Horas
+                                Semanales</span>
+                            <span class="material-symbols-outlined text-slate-600 text-lg">watch_later</span>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-3xl font-bold text-slate-900 dark:text-white font-mono">288</p>
+                                <span class="text-[10px] text-green-500 font-mono flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 15% vs last
+                                    month
+                                </span>
+                            </div>
+                            <div class="w-24 h-10">
+                                <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                    <path d="M0 38 L15 35 L30 36 L45 20 L60 25 L75 10 L90 15 L100 5 V40 H0 Z"
+                                        fill="rgba(14, 165, 233, 0.2)"></path>
+                                    <path d="M0 38 L15 35 L30 36 L45 20 L60 25 L75 10 L90 15 L100 5" fill="none"
+                                        stroke="#0ea5e9" stroke-width="1.5"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-12 gap-4">
+                    <div
+                        class="col-span-12 lg:col-span-4 bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-6 flex flex-col h-[400px]">
+                        <div
+                            class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                            <h3 class="font-bold text-slate-900 dark:text-white uppercase tracking-tight text-sm">
+                                Rendimiento Académico</h3>
+                            <button class="text-slate-400 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">more_horiz</span>
+                            </button>
+                        </div>
+                        <div class="flex-1 w-full h-full relative">
+                            <svg class="w-full h-full overflow-visible" viewBox="0 0 300 200">
+                                <defs>
+                                    <linearGradient id="sharpGradient" x1="0" x2="0" y1="0" y2="1">
+                                        <stop offset="0%" stop-color="#bef264" stop-opacity="0.2"></stop>
+                                        <stop offset="100%" stop-color="#bef264" stop-opacity="0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <line stroke="#334155" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="300" y1="50"
+                                    y2="50"></line>
+                                <line stroke="#334155" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="300"
+                                    y1="100" y2="100"></line>
+                                <line stroke="#334155" stroke-dasharray="2 2" stroke-width="0.5" x1="0" x2="300"
+                                    y1="150" y2="150"></line>
+                                <path
+                                    d="M0 160 L40 140 L80 150 L120 90 L160 100 L200 60 L240 70 L280 40 L300 30 V200 H0 Z"
+                                    fill="url(#sharpGradient)"></path>
+                                <path d="M0 160 L40 140 L80 150 L120 90 L160 100 L200 60 L240 70 L280 40 L300 30"
+                                    fill="none" stroke="#bef264" stroke-width="2" vector-effect="non-scaling-stroke">
+                                </path>
+                                <rect fill="#1e293b" height="4" stroke="#bef264" stroke-width="1" width="4" x="118"
+                                    y="88"></rect>
+                                <rect fill="#1e293b" height="4" stroke="#bef264" stroke-width="1" width="4" x="238"
+                                    y="68"></rect>
+                            </svg>
+                            <div
+                                class="absolute bottom-0 left-0 w-full flex justify-between text-[10px] text-slate-500 font-mono pt-2 border-t border-slate-800">
+                                <span>WK01</span>
+                                <span>WK05</span>
+                                <span>WK10</span>
+                                <span>WK15</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="col-span-12 lg:col-span-4 bg-slate-950 border border-slate-700 p-0 relative flex flex-col h-[400px]">
+                        <div
+                            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none">
+                        </div>
+                        <div class="absolute top-0 right-0 p-2">
+                            <div class="w-3 h-3 bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                        </div>
+                        <div
+                            class="h-12 border-b border-slate-800 flex items-center px-4 justify-between bg-slate-900/50 backdrop-blur">
+                            <h3 class="text-white font-bold uppercase text-xs tracking-wider">Performance Monitor</h3>
+                            <span class="text-[10px] text-cyber-lime font-mono">LIVE_FEED</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center relative">
+                            <div class="absolute w-full h-[1px] bg-slate-800"></div>
+                            <div class="absolute h-full w-[1px] bg-slate-800"></div>
+                            <div class="relative w-64 h-64 flex items-center justify-center z-10">
+                                <svg class="absolute w-full h-full -rotate-90">
+                                    <circle cx="128" cy="128" fill="transparent" r="110" stroke="#1e293b"
+                                        stroke-width="2"></circle>
+                                    <circle cx="128" cy="128" fill="transparent" r="90" stroke="#1e293b"
+                                        stroke-width="2"></circle>
+                                    <circle cx="128" cy="128" fill="transparent" r="70" stroke="#1e293b"
+                                        stroke-width="2"></circle>
+                                </svg>
+                                <svg class="absolute w-full h-full -rotate-90">
+                                    <circle class="text-deep-coral" cx="128" cy="128" fill="transparent" r="110"
+                                        stroke="currentColor" stroke-dasharray="690" stroke-dashoffset="180"
+                                        stroke-linecap="square" stroke-width="4"></circle>
+                                </svg>
+                                <svg class="absolute w-full h-full -rotate-90">
+                                    <circle class="text-cyber-lime" cx="128" cy="128" fill="transparent" r="90"
+                                        stroke="currentColor" stroke-dasharray="565" stroke-dashoffset="120"
+                                        stroke-linecap="square" stroke-width="4"></circle>
+                                </svg>
+                                <svg class="absolute w-full h-full -rotate-90">
+                                    <circle class="text-blue-500" cx="128" cy="128" fill="transparent" r="70"
+                                        stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="100"
+                                        stroke-linecap="square" stroke-width="4"></circle>
+                                </svg>
+                                <div
+                                    class="absolute flex flex-col items-center bg-slate-950 p-4 border border-slate-800">
+                                    <span class="text-5xl font-bold text-white tracking-tighter font-mono">98<span
+                                            class="text-lg text-cyber-lime">%</span></span>
+                                    <span
+                                        class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Efficiency</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="h-16 border-t border-slate-800 grid grid-cols-3 divide-x divide-slate-800 bg-slate-900/30">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-deep-coral font-bold text-lg font-mono">82%</span>
+                                <span class="text-[9px] text-slate-500 uppercase">Enroll</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-cyber-lime font-bold text-lg font-mono">94%</span>
+                                <span class="text-[9px] text-slate-500 uppercase">Credits</span>
+                            </div>
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-blue-500 font-bold text-lg font-mono">88%</span>
+                                <span class="text-[9px] text-slate-500 uppercase">Hours</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 lg:col-span-4 flex flex-col h-[400px]">
+                        <div
+                            class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 h-full p-6 flex flex-col">
+                            <h3 class="font-bold text-slate-900 dark:text-white mb-6 uppercase tracking-tight text-sm">
+                                Acciones Rápidas</h3>
+                            <div class="grid grid-cols-1 gap-3 flex-1">
+                                <button
+                                    class="group relative flex items-center p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary transition-all text-left overflow-hidden">
+                                    <div
+                                        class="absolute inset-0 bg-primary/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300">
+                                    </div>
+                                    <div
+                                        class="w-10 h-10 border border-slate-300 dark:border-slate-600 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-primary group-hover:border-primary transition-colors z-10">
+                                        <span class="material-symbols-outlined">person_add</span>
+                                    </div>
+                                    <div class="ml-4 z-10">
+                                        <p class="font-bold text-slate-900 dark:text-white text-sm">Nuevo Docente</p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">CMD:
+                                            /add_teacher</p>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined ml-auto text-slate-300 group-hover:text-primary transition-colors z-10">arrow_forward</span>
+                                </button>
+                                <button
+                                    class="group relative flex items-center p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary transition-all text-left overflow-hidden">
+                                    <div
+                                        class="absolute inset-0 bg-primary/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300">
+                                    </div>
+                                    <div
+                                        class="w-10 h-10 border border-slate-300 dark:border-slate-600 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-primary group-hover:border-primary transition-colors z-10">
+                                        <span class="material-symbols-outlined">post_add</span>
+                                    </div>
+                                    <div class="ml-4 z-10">
+                                        <p class="font-bold text-slate-900 dark:text-white text-sm">Nuevo Curso</p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">CMD:
+                                            /create_course</p>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined ml-auto text-slate-300 group-hover:text-primary transition-colors z-10">arrow_forward</span>
+                                </button>
+                                <button
+                                    class="group relative flex items-center p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary transition-all text-left overflow-hidden">
+                                    <div
+                                        class="absolute inset-0 bg-primary/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300">
+                                    </div>
+                                    <div
+                                        class="w-10 h-10 border border-slate-300 dark:border-slate-600 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:text-primary group-hover:border-primary transition-colors z-10">
+                                        <span class="material-symbols-outlined">analytics</span>
+                                    </div>
+                                    <div class="ml-4 z-10">
+                                        <p class="font-bold text-slate-900 dark:text-white text-sm">Ver Estadísticas</p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">CMD:
+                                            /view_stats</p>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined ml-auto text-slate-300 group-hover:text-primary transition-colors z-10">arrow_forward</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-slate-900 dark:text-white uppercase text-sm">Carga Docente</h3>
+                            <button
+                                class="text-[10px] font-bold text-primary hover:text-cyber-lime uppercase tracking-wider border border-primary px-2 py-1 hover:bg-primary hover:text-slate-900 transition-colors">Ver
+                                Todo</button>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5 font-mono">
+                                    <span class="text-slate-700 dark:text-slate-300 uppercase">Rannoverng Yanac</span>
+                                    <span class="text-slate-900 dark:text-white font-bold">75%</span>
+                                </div>
+                                <div
+                                    class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 border border-slate-200 dark:border-slate-700 p-[1px]">
+                                    <div class="bg-orange-400 h-full w-[75%]"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5 font-mono">
+                                    <span class="text-slate-700 dark:text-slate-300 uppercase">William George</span>
+                                    <span class="text-slate-900 dark:text-white font-bold">70%</span>
+                                </div>
+                                <div
+                                    class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 border border-slate-200 dark:border-slate-700 p-[1px]">
+                                    <div class="bg-orange-400 h-full w-[70%]"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5 font-mono">
+                                    <span class="text-slate-700 dark:text-slate-300 uppercase">Christian Garcia</span>
+                                    <span class="text-slate-900 dark:text-white font-bold">75%</span>
+                                </div>
+                                <div
+                                    class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 border border-slate-200 dark:border-slate-700 p-[1px]">
+                                    <div class="bg-orange-400 h-full w-[75%]"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1.5 font-mono">
+                                    <span class="text-slate-700 dark:text-slate-300 uppercase">Edwin Jesus</span>
+                                    <span class="text-slate-900 dark:text-white font-bold">50%</span>
+                                </div>
+                                <div
+                                    class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 border border-slate-200 dark:border-slate-700 p-[1px]">
+                                    <div class="bg-green-500 h-full w-[50%]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-800 p-6 flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-900 dark:text-white uppercase text-sm">System Logs</h3>
+                            <button class="text-slate-400 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">filter_list</span>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto pr-2 space-y-0">
+                            <div
+                                class="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer border-b border-dashed border-slate-200 dark:border-slate-800 group">
+                                <div
+                                    class="w-6 h-6 border border-blue-500/50 bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                                    <span class="material-symbols-outlined text-[14px]">info</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
+                                            MAINTENANCE_SCHED</p>
+                                        <span class="text-[9px] text-slate-400 font-mono">14:00</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">System update pending.
+                                        Reboot required.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer border-b border-dashed border-slate-200 dark:border-slate-800 group">
+                                <div
+                                    class="w-6 h-6 border border-deep-coral/50 bg-deep-coral/10 flex items-center justify-center text-deep-coral shrink-0">
+                                    <span class="material-symbols-outlined text-[14px]">warning</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
+                                            HIGH_LOAD_CPU</p>
+                                        <span class="text-[9px] text-slate-400 font-mono">11:00</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Server load &gt; 85%.
+                                        Investigating processes.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex gap-4 items-start p-3 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer group">
+                                <div
+                                    class="w-6 h-6 border border-green-500/50 bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
+                                    <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <p class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">
+                                            BACKUP_COMPLETE</p>
+                                        <span class="text-[9px] text-slate-400 font-mono">YESTERDAY</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Daily snapshot saved
+                                        successfully.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer
+                class="mt-auto py-4 px-6 border-t border-border-light dark:border-border-dark flex flex-col md:flex-row justify-between items-center bg-slate-50 dark:bg-slate-900/50 text-[10px] uppercase font-mono tracking-wide">
+                <p class="text-slate-500">© 2026 Executive ERP System. Build v.4.0.2</p>
+                <div class="flex items-center gap-6 mt-2 md:mt-0">
+                    <span class="text-slate-400 cursor-pointer hover:text-primary">Privacy Protocol</span>
+                    <span class="text-slate-400 cursor-pointer hover:text-primary">Terms of Use</span>
+                    <div class="flex items-center gap-2 border border-green-900/50 bg-green-900/10 px-2 py-0.5">
+                        <div class="w-1.5 h-1.5 bg-green-500 animate-pulse"></div>
+                        <span class="text-green-500 font-bold">SYSTEM ONLINE</span>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <button
+        class="fixed bottom-6 right-6 w-12 h-12 border border-slate-200 dark:border-slate-700 bg-surface-light dark:bg-surface-dark text-slate-900 dark:text-white shadow-sharp hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] transition-all z-50 flex items-center justify-center"
+        onclick="document.documentElement.classList.toggle('dark')">
+        <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+    </button>
+
+</body>
+
+</html>

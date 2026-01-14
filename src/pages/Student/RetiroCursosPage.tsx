@@ -20,11 +20,11 @@ const ConfirmModal: React.FC<{
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={!isLoading && !isSuccess ? onClose : undefined}
       />
-      
+
       {/* Modal */}
       <div className={`relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all duration-300 ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
         {!isSuccess ? (
@@ -46,7 +46,7 @@ const ConfirmModal: React.FC<{
                 {isLoading ? 'Procesando retiro...' : '¿Confirmar retiro?'}
               </h3>
               <p className="text-zinc-500 text-sm">
-                {isLoading 
+                {isLoading
                   ? 'Por favor espera mientras procesamos tu solicitud'
                   : `Estás a punto de retirar ${cursosCount} curso${cursosCount > 1 ? 's' : ''}. Esta acción no se puede deshacer.`
                 }
@@ -96,7 +96,7 @@ const ConfirmModal: React.FC<{
                   />
                 </svg>
                 {/* Check animado */}
-                <Check 
+                <Check
                   className="w-12 h-12 text-emerald-600 relative z-10"
                   style={{
                     animation: 'popIn 0.3s ease-out 0.4s both'
@@ -105,12 +105,12 @@ const ConfirmModal: React.FC<{
               </div>
             </div>
             <h3 className="text-xl font-bold text-zinc-900 mb-2"
-                style={{ animation: 'fadeInUp 0.3s ease-out 0.5s both' }}>
+              style={{ animation: 'fadeInUp 0.3s ease-out 0.5s both' }}>
               ¡Retiro exitoso!
             </h3>
             <p className="text-zinc-500 text-sm mb-6"
-               style={{ animation: 'fadeInUp 0.3s ease-out 0.6s both' }}>
-              {cursosCount > 1 
+              style={{ animation: 'fadeInUp 0.3s ease-out 0.6s both' }}>
+              {cursosCount > 1
                 ? `Se han retirado ${cursosCount} cursos correctamente`
                 : 'El curso ha sido retirado correctamente'
               }
@@ -184,10 +184,12 @@ const RetiroCursosPage: React.FC = () => {
     queryKey: ['mis-cursos', periodoActivo?.id],
     queryFn: () => estudiantesApi.getMisCursos(periodoActivo?.id),
     enabled: !!periodoActivo?.id,
+    staleTime: 0, // Datos siempre frescos
+    refetchOnMount: 'always', // Recargar siempre al entrar
   });
 
-  const retirarMutation = useMutation({
-    mutationFn: (idMatricula: number) => estudiantesApi.retirar(idMatricula),
+  const retirarMasivoMutation = useMutation({
+    mutationFn: (idsMatriculas: number[]) => estudiantesApi.retirarMasivo(idsMatriculas),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
       queryClient.invalidateQueries({ queryKey: ['mis-cursos'] });
@@ -197,7 +199,7 @@ const RetiroCursosPage: React.FC = () => {
   const cursosMatriculados = misCursos?.filter(c => c.estado === 'Matriculado') || [];
 
   const handleToggleRetiro = (idMatricula: number) => {
-    setCursosParaRetirar(prev => 
+    setCursosParaRetirar(prev =>
       prev.includes(idMatricula) ? prev.filter(id => id !== idMatricula) : [...prev, idMatricula]
     );
   };
@@ -225,13 +227,11 @@ const RetiroCursosPage: React.FC = () => {
   const handleConfirmRetiro = async () => {
     setIsProcessing(true);
 
-    let exitosos = 0;
-    let fallidos = 0;
+    try {
+      await retirarMasivoMutation.mutateAsync(cursosParaRetirar);
 
-    for (const idMatricula of cursosParaRetirar) {
-      try {
-        await retirarMutation.mutateAsync(idMatricula);
-        exitosos++;
+      // Notificaciones locales para UX
+      cursosParaRetirar.forEach(idMatricula => {
         const curso = misCursos?.find(c => c.id === idMatricula);
         if (curso) {
           addNotification({
@@ -245,22 +245,14 @@ const RetiroCursosPage: React.FC = () => {
             }
           });
         }
-      } catch {
-        fallidos++;
-      }
-    }
+      });
 
-    setIsProcessing(false);
-
-    if (exitosos > 0) {
       setIsSuccess(true);
-    } else {
+    } catch {
+      toast.error('Error al procesar el retiro de cursos');
       setShowConfirmModal(false);
-      toast.error('No se pudo retirar ningún curso');
-    }
-
-    if (fallidos > 0 && exitosos > 0) {
-      toast.error(`${fallidos} curso(s) no pudieron ser retirados`);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -273,7 +265,7 @@ const RetiroCursosPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-zinc-900 mb-1">Retiro de Cursos</h2>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <span className="flex items-center gap-1.5">
-                
+
                 <span>Ciclo</span>
                 <span className="px-1.5 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs font-medium font-mono">{perfil?.cicloActual}</span>
               </span>
@@ -290,7 +282,7 @@ const RetiroCursosPage: React.FC = () => {
               </p>
             )}
           </div>
-          
+
 
         </div>
       </div>
@@ -324,7 +316,8 @@ const RetiroCursosPage: React.FC = () => {
           )}
         </div>
 
-        {isLoading ? (
+        {/* Spinner SOLO cuando no hay datos en cache */}
+        {isLoading && !misCursos ? (
           <div className="p-12 text-center">
             <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-zinc-500 text-sm">Cargando cursos matriculados...</p>
@@ -336,8 +329,8 @@ const RetiroCursosPage: React.FC = () => {
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50/50">
                     <th className="w-10 px-4 py-3 text-center">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="rounded border-zinc-300 text-red-600 focus:ring-red-500"
                         checked={cursosParaRetirar.length === cursosMatriculados.length && cursosMatriculados.length > 0}
                         onChange={(e) => {
@@ -360,18 +353,18 @@ const RetiroCursosPage: React.FC = () => {
                   {cursosMatriculados.map((curso) => {
                     const isSelected = cursosParaRetirar.includes(curso.id);
                     return (
-                      <tr 
-                        key={curso.id} 
+                      <tr
+                        key={curso.id}
                         className={`hover:bg-red-50/50 transition-colors cursor-pointer ${isSelected ? 'bg-red-50' : ''}`}
                         onClick={() => handleToggleRetiro(curso.id)}
                       >
                         <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             className="rounded border-zinc-300 text-red-600 focus:ring-red-500"
                             checked={isSelected}
                             onChange={() => handleToggleRetiro(curso.id)}
-                            disabled={retirarMutation.isPending}
+                            disabled={retirarMasivoMutation.isPending}
                           />
                         </td>
                         <td className="px-4 py-3">

@@ -378,18 +378,18 @@ interface NextClassWidgetProps {
 const NextClassWidget = ({ horarios, cursos, onTomarAsistencia, isLoading }: NextClassWidgetProps) => {
   const nextClass = useMemo(() => getNextClass(horarios), [horarios]);
 
-  if (isLoading) {
-    return (
-      <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-zinc-700 rounded w-24" />
-          <div className="h-6 bg-zinc-700 rounded w-3/4" />
-          <div className="h-4 bg-zinc-700 rounded w-1/2" />
-          <div className="h-12 bg-zinc-800 rounded" />
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="bg-zinc-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+  //       <div className="animate-pulse space-y-4">
+  //         <div className="h-4 bg-zinc-700 rounded w-24" />
+  //         <div className="h-6 bg-zinc-700 rounded w-3/4" />
+  //         <div className="h-4 bg-zinc-700 rounded w-1/2" />
+  //         <div className="h-12 bg-zinc-800 rounded" />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Buscar el curso completo para el botón de asistencia
   const cursoCompleto = nextClass ? cursos.find(c => c.id === nextClass.idCurso) : null;
@@ -534,13 +534,13 @@ export const DashboardDocentePage = () => {
   };
 
   // Loading state minimalista
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
+  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -561,16 +561,16 @@ export const DashboardDocentePage = () => {
 
       <div className="px-0 pt-6 pb-6 max-w-8xl mx-auto">
         {/* ========== STATS ROW ========== */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-200 border border-zinc-200 rounded-lg overflow-hidden mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-200 border border-zinc-200 rounded-lg overflow-hidden mb-6">
           <div className="bg-white">
             <StatCard label="Cursos asignados" value={cursos.length} />
           </div>
           <div className="bg-white">
             <StatCard label="Total estudiantes" value={totalEstudiantes} />
           </div>
-          <div className="bg-white">
+          {/* <div className="bg-white">
             <StatCard label="Promedio general" value={promedioGeneral.toFixed(2)} />
-          </div>
+          </div> */}
           <div className="bg-white">
             <StatCard label="Asistencia promedio" value={asistenciaPromedio.toFixed(1)} suffix="%" />
           </div>
@@ -594,11 +594,12 @@ export const DashboardDocentePage = () => {
               <p className="text-xs text-zinc-500 uppercase tracking-wide">Tareas pendientes</p>
               <span className="text-xs text-zinc-400">Hoy</span>
             </div>
-            {isLoadingTrabajos ? (
+            {/* {isLoadingTrabajos ? (
               <div className="py-12 text-center">
                 <div className="animate-pulse text-zinc-400 text-sm">Cargando tareas...</div>
               </div>
-            ) : trabajosPendientesFiltrados.length === 0 ? (
+            ) :  */}
+            {trabajosPendientesFiltrados.length === 0 ? (
               <EmptyState 
                 icon={InboxIcon}
                 title="Todo al día"
@@ -713,7 +714,7 @@ export const DashboardDocentePage = () => {
                       <StatusBadge value={curso.porcentajeAsistenciaPromedio} type="attendance" />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      {/* <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleTomarAsistencia(curso)}
                           className="px-2.5 py-1.5 border border-zinc-200 text-zinc-600 text-xs font-medium rounded
@@ -731,7 +732,7 @@ export const DashboardDocentePage = () => {
                           Gestionar
                           <ChevronRightIcon className="h-3 w-3 stroke-[2]" />
                         </button>
-                      </div>
+                      </div> */}
                     </td>
                   </tr>
                 ))}
