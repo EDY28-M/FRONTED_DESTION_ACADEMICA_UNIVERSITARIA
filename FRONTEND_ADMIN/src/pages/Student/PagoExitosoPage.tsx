@@ -288,45 +288,17 @@ const PagoExitosoPage: React.FC = () => {
         </div>
       </div>
 
-      <style>{`
-        @media print {
-          /* Hide the entire app: sidebar, header, buttons, everything */
-          body > #root > * {
-            display: none !important;
-          }
-
-          /* Re-render only the receipt as a standalone element */
-          body::after {
-            content: '';
-            display: block;
-          }
-
-          @page {
-            margin: 0;
-            size: A4;
-          }
-
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-        }
-      `}</style>
-
-      {/* Print-only version: a clean standalone copy of the receipt */}
-      <div id="print-receipt" className="print-only">
-        <div className="print-receipt-inner">
+      {/* Print-only version rendered outside the .no-print wrapper */}
+      <div id="print-receipt" style={{ display: 'none' }}>
+        <div style={{ maxWidth: '360px', margin: '30px auto', padding: '24px', fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif' }}>
           {/* Header institucional */}
           <div style={{ textAlign: 'center', paddingBottom: '12px', borderBottom: '1px solid #e4e4e7' }}>
             <img
               src="/images/fondouni.svg"
               alt="Escudo"
-              style={{ width: '50px', height: '58px', margin: '0 auto 10px', display: 'block', objectFit: 'contain' }}
+              style={{ width: '50px', height: '58px', margin: '0 auto 10px', display: 'block', objectFit: 'contain' as const }}
             />
-            <div style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#18181b' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: '#18181b' }}>
               {receipt.universityName}
             </div>
             <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px' }}>{receipt.facultyName}</div>
@@ -335,7 +307,7 @@ const PagoExitosoPage: React.FC = () => {
 
           {/* Título */}
           <div style={{ textAlign: 'center', padding: '10px 0', borderBottom: '1px solid #e4e4e7', background: '#fafafa' }}>
-            <div style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#27272a' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' as const, letterSpacing: '0.15em', color: '#27272a' }}>
               Boleta de Pago Electrónica
             </div>
             <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#52525b', marginTop: '4px' }}>
@@ -361,12 +333,12 @@ const PagoExitosoPage: React.FC = () => {
 
           {/* Detalle */}
           <div style={{ padding: '12px 0', borderBottom: '1px solid #e4e4e7' }}>
-            <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' as const }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #d4d4d8' }}>
-                  <th style={{ textAlign: 'left', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a', letterSpacing: '0.05em' }}>Descripción</th>
-                  <th style={{ textAlign: 'center', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a', width: '40px' }}>Cant.</th>
-                  <th style={{ textAlign: 'right', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a' }}>Importe</th>
+                  <th style={{ textAlign: 'left', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' as const, color: '#71717a' }}>Descripción</th>
+                  <th style={{ textAlign: 'center', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' as const, color: '#71717a', width: '40px' }}>Cant.</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase' as const, color: '#71717a' }}>Importe</th>
                 </tr>
               </thead>
               <tbody>
@@ -401,7 +373,7 @@ const PagoExitosoPage: React.FC = () => {
 
           {/* Estado */}
           <div style={{ textAlign: 'center', padding: '14px 0' }}>
-            <span style={{ display: 'inline-block', padding: '3px 12px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', border: '1px solid #d4d4d8', color: '#52525b' }}>
+            <span style={{ display: 'inline-block', padding: '3px 12px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' as const, letterSpacing: '0.1em', border: '1px solid #d4d4d8', color: '#52525b' }}>
               Pagado
             </span>
             <div style={{ fontSize: '9px', color: '#a1a1aa', marginTop: '10px' }}>
@@ -415,45 +387,9 @@ const PagoExitosoPage: React.FC = () => {
       </div>
 
       <style>{`
-        /* Hide print-only div on screen */
-        .print-only {
-          display: none;
-        }
-
         @media print {
-          /* Hide everything in the app */
-          .no-print,
-          header,
-          nav,
-          aside,
-          [class*="lg:fixed"],
-          [class*="lg:w-60"],
-          [class*="sidebar"],
-          [class*="z-40"] {
-            display: none !important;
-          }
-
-          /* Show the print-only receipt */
-          .print-only {
-            display: block !important;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: auto;
-            z-index: 99999;
-            background: white;
-          }
-
-          .print-receipt-inner {
-            max-width: 340px;
-            margin: 20px auto;
-            padding: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          }
-
           @page {
-            margin: 10mm;
+            margin: 15mm;
             size: A4;
           }
 
@@ -461,23 +397,36 @@ const PagoExitosoPage: React.FC = () => {
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
-            overflow: visible !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
 
-          /* Kill all fixed positioning from layout */
-          body * {
-            position: static !important;
-            float: none !important;
+          /* Hide the on screen receipt + buttons */
+          .no-print {
+            display: none !important;
           }
 
-          .print-only, .print-only * {
-            position: static !important;
+          /* Hide StudentLayout sidebar (desktop + mobile) and header */
+          .lg\\:fixed,
+          .lg\\:inset-y-0,
+          header,
+          nav,
+          aside,
+          [class*="lg:w-60"],
+          [class*="z-40"] {
+            display: none !important;
           }
 
-          .print-only {
-            position: fixed !important;
+          /* Remove the left padding from layout content area */
+          .lg\\:pl-60,
+          [class*="lg:pl-60"] {
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+          }
+
+          /* Show ONLY the print receipt */
+          #print-receipt {
+            display: block !important;
           }
         }
       `}</style>
