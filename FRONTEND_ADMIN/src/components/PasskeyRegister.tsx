@@ -160,7 +160,7 @@ export const PasskeyRegister: React.FC<PasskeyRegisterProps> = ({ email, display
       </button>
 
       <p className="text-xs text-zinc-500 text-center">
-        Usa tu huella dactilar, Face ID, PIN o llave de seguridad para crear una passkey
+        Usa tu huella dactilar, PIN o llave de seguridad para crear una passkey
       </p>
     </div>
   );

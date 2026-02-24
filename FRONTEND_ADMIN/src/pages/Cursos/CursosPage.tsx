@@ -1,19 +1,22 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { 
-  Plus, 
-  Search, 
-  Eye, 
-  Pencil, 
+import {
+  Plus,
+  Search,
+  Eye,
+  Pencil,
   Trash2,
   BookOpen,
   Clock,
-  Award
+  Award,
+  X as XIcon
 } from 'lucide-react'
 import { cursosApi } from '../../services/cursosService'
 import { docentesApi } from '../../services/docentesService'
-import { Curso } from '../../types'
+import { facultadesApi } from '../../services/facultadesApi'
+import { escuelasApi } from '../../services/escuelasApi'
+import { Curso, Facultad, Escuela } from '../../types'
 import CursoModal from '../../components/Cursos/CursoModal'
 import ConfirmModal from '../../components/Common/ConfirmModal'
 import { useNotifications } from '../../contexts/NotificationContext'
@@ -26,6 +29,8 @@ const CursosPage = () => {
   const [cursoToDelete, setCursoToDelete] = useState<Curso | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
   const [selectedCiclo, setSelectedCiclo] = useState<string>('')
+  const [selectedFacultadId, setSelectedFacultadId] = useState<number | ''>('')
+  const [selectedEscuelaId, setSelectedEscuelaId] = useState<number | ''>('')
 
   const queryClient = useQueryClient()
   const { createNotification } = useNotifications()
@@ -39,6 +44,49 @@ const CursosPage = () => {
     queryKey: ['docentes'],
     queryFn: docentesApi.getAll,
   })
+
+  // Nuevas consultas para Facultades y Escuelas
+  const { data: facultades } = useQuery({
+    queryKey: ['facultades'],
+    queryFn: facultadesApi.getAll,
+  })
+
+  const { data: escuelas } = useQuery({
+    queryKey: ['escuelas'],
+    queryFn: escuelasApi.getAll,
+  })
+
+  // Filtrar escuelas por facultad seleccionada
+  const escuelasFiltradas = escuelas?.filter(escuela => 
+    !selectedFacultadId || escuela.facultadId === selectedFacultadId
+  ) || []
+
+  // Función para obtener el nombre de la facultad por ID
+  const getFacultadNombre = (facultadId?: number): string => {
+    if (!facultadId || !facultades) return ''
+    const facultad = facultades.find(f => f.id === facultadId)
+    return facultad?.nombre || ''
+  }
+
+  // Función para obtener el nombre de la escuela por ID
+  const getEscuelaNombre = (escuelaId?: number): string => {
+    if (!escuelaId || !escuelas) return ''
+    const escuela = escuelas.find(e => e.id === escuelaId)
+    return escuela?.nombre || ''
+  }
+
+  // Función para limpiar todos los filtros
+  const limpiarFiltros = () => {
+    setSelectedCiclo('')
+    setSelectedFacultadId('')
+    setSelectedEscuelaId('')
+    setSearchTerm('')
+  }
+
+  // Verificar si hay filtros activos
+  const hayFiltrosActivos = useMemo(() => {
+    return selectedCiclo !== '' || selectedFacultadId !== '' || selectedEscuelaId !== '' || searchTerm !== ''
+  }, [selectedCiclo, selectedFacultadId, selectedEscuelaId, searchTerm])
 
   const deleteCursoMutation = useMutation({
     mutationFn: cursosApi.delete,
@@ -60,13 +108,20 @@ const CursosPage = () => {
   })
 
   const filteredCursos = cursos?.filter(curso => {
+    const facultadNombre = getFacultadNombre(curso.idFacultad)
+    const escuelaNombre = getEscuelaNombre(curso.idEscuela)
+    
     const matchesSearch = curso.nombreCurso.toLowerCase().includes(searchTerm.toLowerCase()) ||
       curso.docente?.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      curso.docente?.apellidos.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      curso.docente?.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      facultadNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      escuelaNombre.toLowerCase().includes(searchTerm.toLowerCase())
+
     const matchesCiclo = selectedCiclo === '' || curso.ciclo.toString() === selectedCiclo
-    
-    return matchesSearch && matchesCiclo
+    const matchesFacultad = selectedFacultadId === '' || curso.idFacultad === selectedFacultadId
+    const matchesEscuela = selectedEscuelaId === '' || curso.idEscuela === selectedEscuelaId
+
+    return matchesSearch && matchesCiclo && matchesFacultad && matchesEscuela
   }) || []
 
   const ciclos = Array.from(new Set(cursos?.map(curso => curso.ciclo) || [])).sort()
@@ -105,8 +160,8 @@ const CursosPage = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="text-red-500 text-lg">Error al cargar los cursos</div>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
           >
             Reintentar
@@ -139,36 +194,155 @@ const CursosPage = () => {
 
       {/* Search and Filters */}
       <div className="bg-white rounded-xl border border-zinc-200 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <input
-              type="text"
-              className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-              placeholder="Buscar cursos o docentes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div className="space-y-4">
+          {/* Filtros principales */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+              <input
+                type="text"
+                className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                placeholder="Buscar cursos, docentes, facultades o escuelas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              {hayFiltrosActivos && (
+                <button
+                  type="button"
+                  onClick={limpiarFiltros}
+                  className="inline-flex items-center gap-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                >
+                  <XIcon className="h-4 w-4" />
+                  <span>Limpiar filtros</span>
+                </button>
+              )}
+              
+              <span className="text-sm text-zinc-500 whitespace-nowrap">
+                {filteredCursos.length} curso{filteredCursos.length !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <select
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-              value={selectedCiclo}
-              onChange={(e) => setSelectedCiclo(e.target.value)}
-            >
-              <option value="">Todos los ciclos</option>
-              {ciclos.map((ciclo) => (
-                <option key={ciclo} value={ciclo.toString()}>
-                  Ciclo {ciclo}
+
+          {/* Filtros específicos */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="text-sm text-zinc-700 font-medium">Filtrar por:</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                value={selectedCiclo}
+                onChange={(e) => setSelectedCiclo(e.target.value)}
+              >
+                <option value="">Todos los ciclos</option>
+                {ciclos.map((ciclo) => (
+                  <option key={ciclo} value={ciclo.toString()}>
+                    Ciclo {ciclo}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 min-w-[180px]"
+                value={selectedFacultadId}
+                onChange={(e) => {
+                  setSelectedFacultadId(e.target.value === '' ? '' : Number(e.target.value))
+                  setSelectedEscuelaId('') // Reset escuela cuando cambia facultad
+                }}
+              >
+              <option value="">Todas las facultades</option>
+              {facultades && facultades.length > 0 ? (
+                facultades.map((facultad) => (
+                  <option key={facultad.id} value={facultad.id}>
+                    {facultad.nombre}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  No hay facultades disponibles
                 </option>
-              ))}
-            </select>
-            
-            <span className="text-sm text-zinc-500 whitespace-nowrap">
-              {filteredCursos.length} resultado{filteredCursos.length !== 1 ? 's' : ''}
-            </span>
+              )}
+              </select>
+
+              <select
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 min-w-[180px]"
+                value={selectedEscuelaId}
+                onChange={(e) => setSelectedEscuelaId(e.target.value === '' ? '' : Number(e.target.value))}
+                disabled={!selectedFacultadId}
+              >
+              <option value="">{selectedFacultadId ? 'Todas las escuelas' : 'Selecciona facultad primero'}</option>
+              {escuelasFiltradas.length > 0 ? (
+                escuelasFiltradas.map((escuela) => (
+                  <option key={escuela.id} value={escuela.id}>
+                    {escuela.nombre}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  {selectedFacultadId ? 'No hay escuelas para esta facultad' : 'Selecciona una facultad'}
+                </option>
+              )}
+              </select>
+            </div>
           </div>
+
+          {/* Indicadores de filtros activos */}
+          {hayFiltrosActivos && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-100">
+              {selectedCiclo !== '' && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                  Ciclo {selectedCiclo}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCiclo('')}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {selectedFacultadId !== '' && facultades && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700 border border-green-200">
+                  {facultades.find(f => f.id === selectedFacultadId)?.nombre}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedFacultadId('')
+                      setSelectedEscuelaId('')
+                    }}
+                    className="text-green-500 hover:text-green-700"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {selectedEscuelaId !== '' && escuelasFiltradas && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
+                  {escuelasFiltradas.find(e => e.id === selectedEscuelaId)?.nombre}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEscuelaId('')}
+                    className="text-purple-500 hover:text-purple-700"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {searchTerm !== '' && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 border border-orange-200">
+                  "{searchTerm}"
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="text-orange-500 hover:text-orange-700"
+                  >
+                    <XIcon className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -195,7 +369,9 @@ const CursosPage = () => {
             </div>
             <h3 className="mt-4 text-sm font-medium text-zinc-900">No se encontraron cursos</h3>
             <p className="mt-1 text-sm text-zinc-500">
-              {searchTerm || selectedCiclo ? 'Intenta con otros filtros' : 'Comienza agregando un nuevo curso'}
+              {searchTerm || selectedCiclo || selectedFacultadId !== '' || selectedEscuelaId !== '' 
+                ? 'Intenta con otros filtros o limpia los filtros actuales' 
+                : 'Comienza agregando un nuevo curso'}
             </p>
             {!searchTerm && !selectedCiclo && (
               <button
@@ -214,6 +390,7 @@ const CursosPage = () => {
                 <tr className="border-b border-zinc-200 bg-zinc-50/50">
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Facultad/Escuela</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Detalles</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Ciclo</th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Acciones</th>
@@ -238,6 +415,29 @@ const CursosPage = () => {
                       ) : (
                         <span className="text-sm text-zinc-400">Sin asignar</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1 text-sm text-zinc-600">
+                        {curso.idFacultad && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-zinc-500 font-medium">Facultad:</span>
+                            <span className="text-zinc-800">
+                              {curso.facultadNombre || getFacultadNombre(curso.idFacultad) || 'Sin nombre'}
+                            </span>
+                          </div>
+                        )}
+                        {curso.idEscuela && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-zinc-500 font-medium">Escuela:</span>
+                            <span className="text-zinc-800">
+                              {curso.escuelaNombre || getEscuelaNombre(curso.idEscuela) || 'Sin nombre'}
+                            </span>
+                          </div>
+                        )}
+                        {!curso.idFacultad && !curso.idEscuela && (
+                          <span className="text-zinc-400 text-xs">Sin asignar</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-4 text-sm text-zinc-600">
@@ -296,6 +496,8 @@ const CursosPage = () => {
         curso={selectedCurso}
         mode={modalMode}
         docentes={docentes || []}
+        facultades={facultades || []}
+        escuelas={escuelas || []}
       />
 
       <ConfirmModal

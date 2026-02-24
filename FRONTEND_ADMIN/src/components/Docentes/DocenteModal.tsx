@@ -1,10 +1,12 @@
 import { Fragment, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { X, User, Mail, Briefcase, Calendar, BookOpen } from 'lucide-react'
+import { X, User, Mail, Briefcase, Calendar, BookOpen, Building2, GraduationCap } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { docentesApi } from '../../services/docentesService'
+import { facultadesApi } from '../../services/facultadesApi'
+import { escuelasApi } from '../../services/escuelasApi'
 import { Docente, DocenteCreate, DocenteUpdate } from '../../types'
 import { useNotifications } from '../../contexts/NotificationContext'
 
@@ -27,13 +29,29 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
   const isEditMode = mode === 'edit'
   const isCreateMode = mode === 'create'
 
+  const { data: facultades } = useQuery({
+    queryKey: ['facultades'],
+    queryFn: facultadesApi.getAll
+  })
+
+  const { data: escuelas } = useQuery({
+    queryKey: ['escuelas'],
+    queryFn: escuelasApi.getAll
+  })
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<DocenteCreate | DocenteUpdate>()
+
+  const selectedFacultadId = watch('idFacultad')
+  const escuelasFiltradas = escuelas?.filter(e =>
+    !selectedFacultadId || e.facultadId === Number(selectedFacultadId)
+  )
 
   useEffect(() => {
     if (isOpen && docente && (isEditMode || isViewMode)) {
@@ -42,6 +60,8 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
       setValue('profesion', docente.profesion || '')
       setValue('correo', docente.correo || '')
       setValue('fechaNacimiento', docente.fechaNacimiento ? docente.fechaNacimiento.split('T')[0] : '')
+      setValue('idFacultad', docente.idFacultad)
+      setValue('idEscuela', docente.idEscuela)
     } else if (isOpen && isCreateMode) {
       reset()
     }
@@ -152,11 +172,10 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
                         <input
                           type="text"
                           {...register('apellidos', { required: 'Los apellidos son requeridos' })}
-                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${
-                            errors.apellidos 
-                              ? 'border-red-300 focus:border-red-500' 
-                              : 'border-zinc-200 focus:border-zinc-900'
-                          }`}
+                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${errors.apellidos
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
                           placeholder="Ej: García López"
                           disabled={isViewMode}
                         />
@@ -172,11 +191,10 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
                         <input
                           type="text"
                           {...register('nombres', { required: 'Los nombres son requeridos' })}
-                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${
-                            errors.nombres 
-                              ? 'border-red-300 focus:border-red-500' 
-                              : 'border-zinc-200 focus:border-zinc-900'
-                          }`}
+                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${errors.nombres
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
                           placeholder="Ej: Juan Carlos"
                           disabled={isViewMode}
                         />
@@ -220,11 +238,10 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
                               message: 'Correo inválido'
                             }
                           })}
-                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${
-                            errors.correo 
-                              ? 'border-red-300 focus:border-red-500' 
-                              : 'border-zinc-200 focus:border-zinc-900'
-                          }`}
+                          className={`w-full rounded-lg border bg-white px-3 py-2.5 text-sm shadow-sm transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 ${errors.correo
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-zinc-200 focus:border-zinc-900'
+                            }`}
                           placeholder="ejemplo@email.com"
                           disabled={isViewMode}
                         />
@@ -246,6 +263,47 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
                           className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
                           disabled={isViewMode}
                         />
+                      </div>
+                    </div>
+
+                    {/* Facultad y Escuela */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <Building2 className="h-3.5 w-3.5" />
+                            Facultad
+                          </span>
+                        </label>
+                        <select
+                          {...register('idFacultad')}
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                          disabled={isViewMode}
+                        >
+                          <option value="">Seleccione Facultad</option>
+                          {facultades?.map(f => (
+                            <option key={f.id} value={f.id}>{f.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <GraduationCap className="h-3.5 w-3.5" />
+                            Escuela
+                          </span>
+                        </label>
+                        <select
+                          {...register('idEscuela')}
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm shadow-sm transition-colors focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                          disabled={isViewMode || !selectedFacultadId}
+                        >
+                          <option value="">Seleccione Escuela</option>
+                          {escuelasFiltradas?.map(e => (
+                            <option key={e.id} value={e.id}>{e.nombre}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
@@ -298,8 +356,8 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
                         {createMutation.isPending || updateMutation.isPending
                           ? 'Guardando...'
                           : isCreateMode
-                          ? 'Crear Docente'
-                          : 'Actualizar'}
+                            ? 'Crear Docente'
+                            : 'Actualizar'}
                       </button>
                     </div>
                   )}

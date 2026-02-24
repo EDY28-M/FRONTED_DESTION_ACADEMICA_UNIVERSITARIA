@@ -154,7 +154,7 @@ const LoginAdminPage: React.FC = () => {
           localStorage.setItem('last_login_email', response.usuario.email);
         }
 
-        toast.success('¡Bienvenido! Inicio de sesión con Huella/FaceID exitoso');
+        toast.success('¡Bienvenido! Inicio de sesión con Huella exitoso');
         window.location.href = '/admin/dashboard';
       }
     } catch (error: any) {
@@ -173,7 +173,7 @@ const LoginAdminPage: React.FC = () => {
         // Error de validación de rol del backend
         toast.error(error.message);
       } else {
-        toast.error(error?.message || 'Error al iniciar sesión con huella/FaceID');
+        toast.error(error?.message || 'Error al iniciar sesión con huella');
       }
     }
   }
@@ -407,7 +407,7 @@ const LoginAdminPage: React.FC = () => {
           className="w-full py-3 px-4 rounded-none font-medium text-zinc-700 border-2 border-zinc-300 hover:bg-zinc-50 hover:border-zinc-400 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FingerPrintIcon className="h-6 w-6" />
-          {isPasskeyLoading ? 'Verificando...' : 'Huella / FaceID'}
+          {isPasskeyLoading ? 'Verificando...' : 'Huella'}
         </button>
 
         {/* Link para recuperar contraseña */}

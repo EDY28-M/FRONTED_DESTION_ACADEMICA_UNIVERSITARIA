@@ -224,13 +224,7 @@ export default function NotasConsolidadasAdminPage() {
         <div className="px-4 sm:px-6 lg:px-0">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <nav className="flex text-xs text-slate-500 font-mono uppercase tracking-tight mb-1">
-                <span className="hover:text-slate-900 cursor-pointer transition-colors">Inicio</span>
-                <span className="mx-2 text-slate-300">/</span>
-                <span className="hover:text-slate-900 cursor-pointer transition-colors">Académico</span>
-                <span className="mx-2 text-slate-300">/</span>
-                <span className="font-semibold text-slate-900">Lista de Registros</span>
-              </nav>
+
               <h1 className="text-xl font-bold text-slate-900 tracking-tight uppercase">REGISTROS ACADÉMICOS</h1>
               <p className="text-xs text-slate-500">Descarga y gestiona los reportes de notas consolidados.</p>
             </div>

@@ -41,7 +41,7 @@ export default function ActivacionCursosPage() {
 
   const { data: cursosActivados = [], isLoading: cargandoActivados } = useQuery<CursoActivacionPeriodo[]>({
     queryKey: ['cursos-activados', periodoSeleccionado],
-    queryFn: () => periodoSeleccionado 
+    queryFn: () => periodoSeleccionado
       ? adminCursosApi.getCursosActivadosPeriodo(periodoSeleccionado)
       : adminCursosApi.getCursosActivados(),
     enabled: !!periodoSeleccionado || periodos.length > 0,
@@ -332,7 +332,7 @@ export default function ActivacionCursosPage() {
                         Buscar Curso
                       </label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -tranzinc-y-1/2 h-4 w-4 text-zinc-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                         <input
                           type="text"
                           className="w-full rounded-lg border border-zinc-300 bg-white pl-10 pr-4 py-2 text-sm focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
@@ -358,11 +358,10 @@ export default function ActivacionCursosPage() {
                             <button
                               key={curso.id}
                               onClick={() => setCursoSeleccionado(curso)}
-                              className={`w-full p-3 text-left hover:bg-zinc-50 transition-colors ${
-                                cursoSeleccionado?.id === curso.id
+                              className={`w-full p-3 text-left hover:bg-zinc-50 transition-colors ${cursoSeleccionado?.id === curso.id
                                   ? 'bg-zinc-100 border-l-4 border-zinc-900'
                                   : ''
-                              }`}
+                                }`}
                             >
                               <div className="font-medium text-zinc-900">
                                 {curso.nombreCurso}

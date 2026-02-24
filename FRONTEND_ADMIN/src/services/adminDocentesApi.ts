@@ -8,6 +8,10 @@ export interface DocenteAdmin {
   profesion: string | null;
   fechaNacimiento: string | null;
   correo: string | null;
+  idFacultad: number | null;
+  idEscuela: number | null;
+  facultadNombre: string | null;
+  escuelaNombre: string | null;
   tienePassword: boolean;
   totalCursos: number;
   fechaCreacion: string;
@@ -19,6 +23,8 @@ export interface CrearDocenteConPasswordRequest {
   profesion?: string;
   fechaNacimiento?: string;
   correo?: string;
+  idFacultad?: number;
+  idEscuela?: number;
   emailUsuario: string; // Email para la cuenta de usuario (Gmail u otro)
   password: string;
 }
@@ -33,6 +39,8 @@ export interface ActualizarDocenteRequest {
   profesion?: string;
   fechaNacimiento?: string;
   correo?: string;
+  idFacultad?: number | null;
+  idEscuela?: number | null;
 }
 
 export const adminDocentesApi = {

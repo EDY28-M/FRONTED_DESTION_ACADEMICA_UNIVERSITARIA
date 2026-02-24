@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { estudiantesApi } from '../../services/estudiantesApi';
+import { facultadesApi } from '../../services/facultadesApi';
+import { escuelasApi } from '../../services/escuelasApi';
 import {
-  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard, Fingerprint, ShieldCheck
+  Mail, Calendar, Eye, EyeOff, X, Edit2, Save, Phone, MapPin, CreditCard, Fingerprint, ShieldCheck,
+  Building2, GraduationCap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWebAuthnRegister } from '../../hooks/useWebAuthnRegister';
@@ -18,6 +21,20 @@ const PerfilEstudiantePage: React.FC = () => {
     queryFn: estudiantesApi.getPerfil,
   });
 
+  // Obtener catálogos
+  const { data: facultades } = useQuery({
+    queryKey: ['facultades'],
+    queryFn: facultadesApi.getAll,
+  });
+
+  const { data: escuelas } = useQuery({
+    queryKey: ['escuelas'],
+    queryFn: escuelasApi.getAll,
+  });
+
+  const facultadNombre = facultades?.find(f => f.id === perfil?.idFacultad)?.nombre || '—';
+  const escuelaNombre = escuelas?.find(e => e.id === perfil?.idEscuela)?.nombre || '—';
+
   const handleRegisterPasskey = async () => {
     if (!perfil?.email) {
       toast.error('No se pudo obtener el correo del usuario');
@@ -25,7 +42,7 @@ const PerfilEstudiantePage: React.FC = () => {
     }
     const result = await registerPasskey(perfil.email);
     if (result.success) {
-      toast.success('Huella/FaceID registrada exitosamente');
+      toast.success('Huella registrada exitosamente');
     } else if (result.errorMessage) {
       toast.error(result.errorMessage);
     }
@@ -142,6 +159,8 @@ const PerfilEstudiantePage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <Campo icon={CreditCard} label="DNI" value={perfil?.dni} />
                 <Campo icon={Calendar} label="Fecha de Nacimiento" value={perfil?.fechaNacimiento?.split('T')[0]} />
+                <Campo icon={Building2} label="Facultad" value={facultadNombre} />
+                <Campo icon={GraduationCap} label="Escuela Profesional" value={escuelaNombre} />
                 <Campo icon={Mail} label="Correo Institucional" value={perfil?.email} className="sm:col-span-2" />
               </div>
             </div>
@@ -167,7 +186,7 @@ const PerfilEstudiantePage: React.FC = () => {
                   <div>
                     <h4 className="text-sm font-medium text-zinc-900">Autenticación Biométrica</h4>
                     <p className="text-xs text-zinc-500 mt-1">
-                      Vincula tu huella o reconocimiento facial para iniciar sesión de forma rápida y segura.
+                      Vincula tu huella para iniciar sesión de forma rápida y segura.
                     </p>
                   </div>
                 </div>
@@ -183,7 +202,7 @@ const PerfilEstudiantePage: React.FC = () => {
                 ) : (
                   <>
                     <Fingerprint className="h-4 w-4" />
-                    Registrar Huella / FaceID
+                    Registrar Huella
                   </>
                 )}
               </button>

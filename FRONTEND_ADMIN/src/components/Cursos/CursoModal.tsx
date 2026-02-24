@@ -1,11 +1,13 @@
 import { Fragment, useEffect, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { X, BookOpen, Clock, Award, User, GitBranch } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
 import { cursosApi } from '../../services/cursosService'
 import { Curso, CursoCreate, CursoUpdate, Docente } from '../../types'
+import { Facultad } from '../../types/facultad'
+import { Escuela } from '../../types/escuela'
 import { useNotifications } from '../../contexts/NotificationContext'
 
 interface CursoModalProps {
@@ -14,6 +16,8 @@ interface CursoModalProps {
   curso?: Curso | null
   mode: 'create' | 'edit' | 'view'
   docentes: Docente[]
+  facultades: Facultad[]
+  escuelas: Escuela[]
 }
 
 const CursoModal: React.FC<CursoModalProps> = ({
@@ -22,6 +26,8 @@ const CursoModal: React.FC<CursoModalProps> = ({
   curso,
   mode,
   docentes,
+  facultades,
+  escuelas,
 }) => {
   const queryClient = useQueryClient()
   const { createNotification } = useNotifications()
@@ -42,10 +48,11 @@ const CursoModal: React.FC<CursoModalProps> = ({
   const cicloActual = watch('ciclo')
 
   // Obtener lista de cursos para prerequisitos
-  const { data: cursosDisponibles = [] } = useQuery({
+  const { data: cursosDisponiblesResponse } = useQuery({
     queryKey: ['cursos'],
     queryFn: cursosApi.getAll,
   })
+  const cursosDisponibles: Curso[] = Array.isArray(cursosDisponiblesResponse) ? cursosDisponiblesResponse : [];
 
   useEffect(() => {
     if (isOpen && curso && (isEditMode || isViewMode)) {
@@ -54,10 +61,11 @@ const CursoModal: React.FC<CursoModalProps> = ({
       setValue('creditos', curso.creditos)
       setValue('horasSemanal', curso.horasSemanal)
       setValue('horasTeoria', curso.horasTeoria || undefined)
-      setValue('horasPractica', curso.horasPractica || undefined)
       setValue('horasTotales', curso.horasTotales || undefined)
       setValue('ciclo', curso.ciclo)
       setValue('idDocente', curso.idDocente || undefined)
+      setValue('idFacultad', curso.idFacultad || undefined)
+      setValue('idEscuela', curso.idEscuela || undefined)
       setSelectedPrerequisitos(curso.prerequisitosIds || [])
     } else if (isOpen && isCreateMode) {
       reset()
@@ -105,7 +113,9 @@ const CursoModal: React.FC<CursoModalProps> = ({
   const onSubmit = (data: CursoCreate | CursoUpdate) => {
     const formData = {
       ...data,
-      idDocente: data.idDocente || undefined,
+      idDocente: data.idDocente ? Number(data.idDocente) : undefined,
+      idFacultad: data.idFacultad ? Number(data.idFacultad) : undefined,
+      idEscuela: data.idEscuela ? Number(data.idEscuela) : undefined,
       prerequisitosIds: selectedPrerequisitos,
     }
 
@@ -117,12 +127,18 @@ const CursoModal: React.FC<CursoModalProps> = ({
   }
 
   const handlePrerequisitosChange = (cursoId: number) => {
-    setSelectedPrerequisitos(prev => 
-      prev.includes(cursoId) 
+    setSelectedPrerequisitos(prev =>
+      prev.includes(cursoId)
         ? prev.filter(id => id !== cursoId)
         : [...prev, cursoId]
     )
   }
+
+  // Filtrar escuelas por la facultad seleccionada
+  const selectedFacultadId = watch('idFacultad')
+  const filteredEscuelas = escuelas.filter(
+    (escuela: any) => !selectedFacultadId || escuela.facultadId === Number(selectedFacultadId)
+  )
 
   // Filtrar cursos para prerequisitos (solo cursos de ciclos anteriores)
   const cursosParaPrerequisitos = cursosDisponibles.filter(c => {
@@ -170,9 +186,6 @@ const CursoModal: React.FC<CursoModalProps> = ({
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100">
-                      <BookOpen className="h-4 w-4 text-zinc-600" />
-                    </div>
                     <Dialog.Title as="h3" className="text-lg font-semibold text-zinc-900">
                       {title}
                     </Dialog.Title>
@@ -224,16 +237,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                          <span className="flex items-center gap-1.5">
-                            <Award className="h-3.5 w-3.5" />
-                            Créditos <span className="text-red-500">*</span>
-                          </span>
+                          Créditos <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
                           min="1"
                           max="10"
-                          {...register('creditos', { 
+                          {...register('creditos', {
                             required: 'Requerido',
                             min: { value: 1, message: 'Mín. 1' },
                             max: { value: 10, message: 'Máx. 10' }
@@ -248,16 +258,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
 
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" />
-                            Horas/Semana <span className="text-red-500">*</span>
-                          </span>
+                          Horas/Semana <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
                           min="1"
                           max="40"
-                          {...register('horasSemanal', { 
+                          {...register('horasSemanal', {
                             required: 'Requerido',
                             min: { value: 1, message: 'Mín. 1' },
                             max: { value: 40, message: 'Máx. 40' }
@@ -337,45 +344,80 @@ const CursoModal: React.FC<CursoModalProps> = ({
                       </div>
                     </div>
 
-                    {/* Docente */}
-                    <div>
-                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                        <span className="flex items-center gap-1.5">
-                          <User className="h-3.5 w-3.5" />
+                    {/* Docente, Facultad y Escuela */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Docente */}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
                           Docente Asignado
-                        </span>
-                      </label>
-                      <select
-                        {...register('idDocente')}
-                        className={inputClasses()}
-                        disabled={isViewMode}
-                      >
-                        <option value="">Sin asignar</option>
-                        {docentes.map((docente) => (
-                          <option key={docente.id} value={docente.id}>
-                            {docente.nombres} {docente.apellidos} - {docente.profesion}
-                          </option>
-                        ))}
-                      </select>
+                        </label>
+                        <select
+                          {...register('idDocente')}
+                          className={inputClasses()}
+                          disabled={isViewMode}
+                        >
+                          <option value="">Sin asignar</option>
+                          {docentes.map((docente) => (
+                            <option key={docente.id} value={docente.id}>
+                              {docente.nombres} {docente.apellidos}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Facultad */}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Facultad
+                        </label>
+                        <select
+                          {...register('idFacultad')}
+                          className={inputClasses()}
+                          disabled={isViewMode}
+                        >
+                          <option value="">General (Todas)</option>
+                          {facultades.map((facultad) => (
+                            <option key={facultad.id} value={facultad.id}>
+                              {facultad.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Escuela */}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1.5">
+                          Escuela Profesional
+                        </label>
+                        <select
+                          {...register('idEscuela')}
+                          className={inputClasses()}
+                          disabled={isViewMode || (!selectedFacultadId && filteredEscuelas.length === 0)}
+                        >
+                          <option value="">General (Todas)</option>
+                          {filteredEscuelas.map((escuela) => (
+                            <option key={escuela.id} value={escuela.id}>
+                              {escuela.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     {/* Prerequisitos - Edit/Create mode */}
                     {!isViewMode && cicloActual && Number(cicloActual) > 1 && (
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                          <span className="flex items-center gap-1.5">
-                            <GitBranch className="h-3.5 w-3.5" />
-                            Prerequisitos
-                          </span>
+                          Prerequisitos
                         </label>
-                        
+
                         {/* Selected pills */}
                         {selectedPrerequisitos.length > 0 && (
                           <div className="flex flex-wrap gap-2 mb-3">
                             {selectedPrerequisitos.map(id => {
-                              const c = cursosDisponibles.find(curso => curso.id === id)
+                              const c = cursosDisponibles.find((curso: Curso) => curso.id === id)
                               return c ? (
-                                <span 
+                                <span
                                   key={id}
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700"
                                 >
@@ -428,14 +470,11 @@ const CursoModal: React.FC<CursoModalProps> = ({
                     {isViewMode && curso?.prerequisitos && curso.prerequisitos.length > 0 && (
                       <div>
                         <label className="block text-sm font-medium text-zinc-700 mb-1.5">
-                          <span className="flex items-center gap-1.5">
-                            <GitBranch className="h-3.5 w-3.5" />
-                            Prerequisitos
-                          </span>
+                          Prerequisitos
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {curso.prerequisitos.map((p) => (
-                            <span 
+                          {curso.prerequisitos.map((p: any) => (
+                            <span
                               key={p.id}
                               className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm bg-zinc-100 text-zinc-700 border border-zinc-200"
                             >
@@ -466,8 +505,8 @@ const CursoModal: React.FC<CursoModalProps> = ({
                         {createMutation.isPending || updateMutation.isPending
                           ? 'Guardando...'
                           : isCreateMode
-                          ? 'Crear Curso'
-                          : 'Actualizar'}
+                            ? 'Crear Curso'
+                            : 'Actualizar'}
                       </button>
                     </div>
                   )}

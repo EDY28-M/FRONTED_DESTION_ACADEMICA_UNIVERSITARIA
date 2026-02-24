@@ -25,11 +25,11 @@ export default function PerfilPage() {
     const result = await registerPasskey(user.email, user.nombreCompleto || user.email);
 
     if (result.success) {
-      setMessage({ type: 'success', text: '✅ Huella / FaceID registrada correctamente. Ahora puedes usarla para iniciar sesión.' });
+      setMessage({ type: 'success', text: '✅ Huella registrada correctamente. Ahora puedes usarla para iniciar sesión.' });
       setTimeout(() => setMessage(null), 5000);
     } else {
       // Usar el errorMessage directamente del resultado
-      const errorMessage = result.errorMessage || 'Error al registrar Huella / FaceID';
+      const errorMessage = result.errorMessage || 'Error al registrar Huella';
       setMessage({ type: 'error', text: `⚠️ ${errorMessage}` });
     }
   };
@@ -189,7 +189,7 @@ export default function PerfilPage() {
                 </div>
                 <div className="text-left">
                   <div className="text-sm font-medium text-zinc-900">
-                    {registeringPasskey ? 'Registrando...' : 'Huella / FaceID'}
+                    {registeringPasskey ? 'Registrando...' : 'Huella'}
                   </div>
                   <div className="text-xs text-zinc-500">Configurar acceso biométrico</div>
                 </div>

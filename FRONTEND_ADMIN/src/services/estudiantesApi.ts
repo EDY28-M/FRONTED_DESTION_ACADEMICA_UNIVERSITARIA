@@ -105,6 +105,8 @@ export const estudiantesApi = {
     apellidos: string;
     numeroDocumento: string;
     ciclo: number;
+    idFacultad?: number;
+    idEscuela?: number;
   }): Promise<{
     mensaje: string;
     estudiante: {
@@ -117,6 +119,25 @@ export const estudiantesApi = {
     };
   }> => {
     const response = await axios.post('/admin/estudiantes', data);
+    return response.data;
+  },
+
+  // Actualizar estudiante (solo admin)
+  actualizarEstudiante: async (id: number, data: {
+    email?: string;
+    password?: string;
+    nombres?: string;
+    apellidos?: string;
+    numeroDocumento?: string;
+    ciclo?: number;
+    estado?: string;
+    idFacultad?: number;
+    idEscuela?: number;
+  }): Promise<{
+    mensaje: string;
+    estudiante: any;
+  }> => {
+    const response = await axios.put(`/admin/estudiantes/${id}`, data);
     return response.data;
   },
 
