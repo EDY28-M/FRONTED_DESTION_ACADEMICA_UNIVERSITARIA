@@ -291,8 +291,17 @@ const PagoExitosoPage: React.FC = () => {
       <style>{`
         @media print {
           @page {
-            margin: 10mm;
-            size: A4;
+            margin: 5mm;
+            size: 80mm 220mm;
+          }
+          html, body {
+            width: 80mm;
+            height: auto;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           /* Hide everything */
           body * {
@@ -307,18 +316,15 @@ const PagoExitosoPage: React.FC = () => {
             position: fixed;
             left: 0;
             top: 0;
-            width: 100%;
-            max-width: 100%;
+            width: 80mm;
+            max-width: 80mm;
             border: none !important;
             box-shadow: none !important;
             margin: 0;
             padding: 0;
-          }
-          /* Force colors */
-          body {
-            background: white !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            page-break-inside: avoid;
+            overflow: hidden;
+            font-size: 11px;
           }
         }
       `}</style>
