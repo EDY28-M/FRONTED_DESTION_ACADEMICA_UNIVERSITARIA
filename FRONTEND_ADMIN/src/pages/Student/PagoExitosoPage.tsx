@@ -84,7 +84,7 @@ const PagoExitosoPage: React.FC = () => {
     navigate('/estudiante/inicio');
   };
 
-  const formatShortDate = (dateString: string) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-PE', {
       day: '2-digit',
@@ -97,8 +97,7 @@ const PagoExitosoPage: React.FC = () => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('es-PE', {
       hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      minute: '2-digit'
     });
   };
 
@@ -112,24 +111,12 @@ const PagoExitosoPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
-            <svg className="w-8 h-8 text-emerald-500 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Procesando tu pago</h3>
-          <p className="text-sm text-gray-500">
-            {retryCount > 0 ? `Verificando comprobante... (${retryCount}/${MAX_RETRIES})` : 'Por favor, espere un momento...'}
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+        <div className="bg-white border border-zinc-200 max-w-sm w-full p-8 text-center">
+          <p className="text-sm text-zinc-600 mb-1">
+            {retryCount > 0 ? `Verificando pago... (${retryCount}/${MAX_RETRIES})` : 'Verificando pago...'}
           </p>
-          <div className="mt-4 w-full bg-gray-200 rounded-full h-1.5">
-            <div
-              className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min((retryCount / MAX_RETRIES) * 100, 95)}%` }}
-            />
-          </div>
+          <p className="text-xs text-zinc-400">Por favor, espere un momento</p>
         </div>
       </div>
     );
@@ -137,25 +124,19 @@ const PagoExitosoPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Error al procesar</h3>
-          <p className="text-sm text-gray-500 mb-6">{error}</p>
-          <div className="space-y-3">
+      <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+        <div className="bg-white border border-zinc-200 max-w-sm w-full p-8 text-center">
+          <p className="text-sm text-zinc-700 mb-6">{error}</p>
+          <div className="space-y-2">
             <button
               onClick={() => navigate('/estudiante/pago-matricula-inicial')}
-              className="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl transition-all"
+              className="w-full py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors"
             >
               Intentar de nuevo
             </button>
             <button
               onClick={handleGoHome}
-              className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-xl transition-all"
+              className="w-full py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium transition-colors"
             >
               Volver al inicio
             </button>
@@ -171,169 +152,134 @@ const PagoExitosoPage: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100 py-8 px-4 print:bg-white print:py-0">
+      <div className="min-h-screen bg-zinc-50 py-8 px-4 print:bg-white print:py-0">
         <div className="max-w-md mx-auto">
 
-          {/* ✅ Badge de éxito */}
-          <div className="text-center mb-6 print:hidden">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center shadow-lg shadow-emerald-100">
-              <svg className="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-800">¡Pago Exitoso!</h2>
-            <p className="text-sm text-gray-500 mt-1">Tu comprobante ha sido generado</p>
-          </div>
-
-          {/* 🧾 Recibo Ticket */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden print:rounded-none print:shadow-none" id="receipt-ticket">
-
-            {/* Borde decorativo superior */}
-            <div className="h-2 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600" />
+          {/* Boleta de Venta */}
+          <div className="bg-white border border-zinc-300 print:border-none" id="receipt-ticket">
 
             {/* Header institucional */}
-            <div className="px-8 pt-8 pb-5 text-center">
-              {/* Logo/Sello */}
-              <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-gray-900 flex items-center justify-center">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />
-                </svg>
-              </div>
-              <h1 className="text-base font-bold text-gray-900 uppercase tracking-wide">
+            <div className="px-6 pt-6 pb-4 text-center border-b border-zinc-200">
+              <img
+                src="/images/fondouni.svg"
+                alt="Escudo Universitario"
+                className="w-14 h-16 mx-auto mb-3 object-contain"
+              />
+              <h1 className="text-sm font-bold text-zinc-900 uppercase tracking-wide">
                 {receipt.universityName}
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">{receipt.facultyName}</p>
+              <p className="text-xs text-zinc-500 mt-0.5">{receipt.facultyName}</p>
+              <p className="text-[11px] text-zinc-400 mt-1">RUC: 20000000001</p>
             </div>
 
-            {/* Separador */}
-            <div className="border-t-2 border-dashed border-gray-200 mx-6" />
-
-            {/* Título del recibo */}
-            <div className="px-8 py-4 text-center">
-              <span className="inline-block px-4 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-widest rounded-full">
-                Comprobante de Pago
-              </span>
+            {/* Título */}
+            <div className="px-6 py-3 bg-zinc-50 border-b border-zinc-200 text-center print:bg-white">
+              <p className="text-xs font-bold text-zinc-800 uppercase tracking-[0.15em]">
+                Boleta de Pago Electrónica
+              </p>
+              <p className="text-xs font-mono text-zinc-600 mt-1">{receipt.receiptCode}</p>
             </div>
 
-            {/* Número de recibo */}
-            <div className="mx-6 px-4 py-3 bg-gray-50 rounded-xl flex items-center justify-between">
-              <span className="text-xs text-gray-500 font-medium">N° Comprobante</span>
-              <span className="text-sm font-mono font-bold text-gray-900 tracking-wider">{receipt.receiptCode}</span>
-            </div>
-
-            {/* Info del estudiante */}
-            <div className="px-8 pt-5 pb-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Estudiante</p>
-                  <p className="text-sm font-semibold text-gray-900">{receipt.studentName}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Código</p>
-                  <p className="text-sm font-mono font-semibold text-gray-900">{receipt.studentCode}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Periodo</p>
-                  <p className="text-sm font-medium text-gray-800">{receipt.period}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Año Académico</p>
-                  <p className="text-sm font-medium text-gray-800">{receipt.academicYear}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Fecha</p>
-                  <p className="text-sm font-medium text-gray-800">{formatShortDate(receipt.paidAt)}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Hora</p>
-                  <p className="text-sm font-mono font-medium text-gray-800">{formatTime(receipt.paidAt)}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-0.5">Método de Pago</p>
-                <p className="text-sm font-medium text-gray-800">Tarjeta de Crédito / Débito</p>
-              </div>
-            </div>
-
-            {/* Separador */}
-            <div className="border-t-2 border-dashed border-gray-200 mx-6" />
-
-            {/* Detalle del pago */}
-            <div className="px-8 py-5">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-3">Detalle</p>
-
+            {/* Datos del estudiante */}
+            <div className="px-6 py-4 border-b border-zinc-200 text-xs">
               <div className="space-y-2">
-                <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-sm text-gray-700">{receipt.concept}</span>
-                  </div>
-                  <span className="text-sm font-mono font-medium text-gray-800">
-                    {formatCurrency(receipt.amount, receipt.currency)}
-                  </span>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Fecha:</span>
+                  <span className="text-zinc-800 font-medium">{formatDate(receipt.paidAt)} - {formatTime(receipt.paidAt)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Estudiante:</span>
+                  <span className="text-zinc-800 font-medium">{receipt.studentName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Código:</span>
+                  <span className="text-zinc-800 font-mono font-medium">{receipt.studentCode}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Año académico:</span>
+                  <span className="text-zinc-800 font-medium">{receipt.academicYear}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Forma de pago:</span>
+                  <span className="text-zinc-800 font-medium">Tarjeta</span>
                 </div>
               </div>
+            </div>
 
-              {/* Total */}
-              <div className="mt-4 pt-4 border-t-2 border-gray-800">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-900 uppercase">Total Pagado</span>
-                  <span className="text-xl font-bold font-mono text-emerald-600">
+            {/* Tabla de detalle */}
+            <div className="px-6 py-4 border-b border-zinc-200">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-zinc-300">
+                    <th className="text-left py-2 text-zinc-500 font-semibold uppercase text-[10px] tracking-wider">Descripción</th>
+                    <th className="text-center py-2 text-zinc-500 font-semibold uppercase text-[10px] tracking-wider w-12">Cant.</th>
+                    <th className="text-right py-2 text-zinc-500 font-semibold uppercase text-[10px] tracking-wider">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-zinc-100">
+                    <td className="py-3 text-zinc-800">{receipt.concept}</td>
+                    <td className="py-3 text-center text-zinc-800">1</td>
+                    <td className="py-3 text-right font-mono text-zinc-800">
+                      {formatCurrency(receipt.amount, receipt.currency)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Totales */}
+            <div className="px-6 py-4 border-b border-zinc-300">
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between text-zinc-500">
+                  <span>Subtotal</span>
+                  <span className="font-mono">{formatCurrency(receipt.amount * 0.82, receipt.currency)}</span>
+                </div>
+                <div className="flex justify-between text-zinc-500">
+                  <span>IGV (18%)</span>
+                  <span className="font-mono">{formatCurrency(receipt.amount * 0.18, receipt.currency)}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-zinc-200 text-sm">
+                  <span className="font-bold text-zinc-900">TOTAL</span>
+                  <span className="font-bold font-mono text-zinc-900">
                     {formatCurrency(receipt.amount, receipt.currency)}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Separador */}
-            <div className="border-t-2 border-dashed border-gray-200 mx-6" />
-
-            {/* Estado y verificación */}
-            <div className="px-8 py-5 text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-full mb-3">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs font-semibold text-emerald-700">PAGADO</span>
-              </div>
-              <p className="text-[11px] text-gray-400 mt-2">
-                Documento válido como comprobante de pago
+            {/* Estado */}
+            <div className="px-6 py-4 text-center">
+              <span className="inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-wider border border-zinc-300 text-zinc-600">
+                Pagado
+              </span>
+              <p className="text-[10px] text-zinc-400 mt-3">
+                Comprobante de pago electrónico
               </p>
-              <p className="text-[10px] text-gray-300 font-mono mt-1">
-                Ref: {receipt.receiptCode}
+              <p className="text-[10px] text-zinc-400">
+                Conserve este documento para cualquier reclamo
               </p>
             </div>
-
-            {/* Borde decorativo inferior */}
-            <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600" />
           </div>
 
-          {/* Botones de Acción */}
-          <div className="mt-6 space-y-3 print:hidden">
+          {/* Botones */}
+          <div className="mt-5 space-y-2 print:hidden">
             <button
               onClick={handlePrint}
-              className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.75 12h.008v.008h-.008V12zm-3 0h.008v.008h-.008V12z" />
-              </svg>
-              Imprimir Comprobante
+              Imprimir / Guardar
             </button>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleGoToCourses}
-                className="py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl transition-all border border-gray-200 shadow-sm"
+                className="py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium transition-colors"
               >
                 Matricular Cursos
               </button>
               <button
                 onClick={handleGoHome}
-                className="py-3 px-4 bg-white hover:bg-gray-50 text-gray-700 text-sm font-semibold rounded-xl transition-all border border-gray-200 shadow-sm"
+                className="py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium transition-colors"
               >
                 Volver al Inicio
               </button>
@@ -342,12 +288,10 @@ const PagoExitosoPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Estilos para impresión */}
       <style>{`
         @media print {
           @page {
             margin: 1cm;
-            size: 80mm auto;
           }
           body {
             background: white !important;
@@ -360,19 +304,14 @@ const PagoExitosoPage: React.FC = () => {
           .print\\:bg-white {
             background: white !important;
           }
-          .print\\:rounded-none {
-            border-radius: 0 !important;
-          }
-          .print\\:shadow-none {
-            box-shadow: none !important;
+          .print\\:border-none {
+            border: none !important;
           }
           .print\\:py-0 {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
           }
           #receipt-ticket {
-            box-shadow: none !important;
-            border-radius: 0 !important;
             max-width: 100% !important;
           }
         }
