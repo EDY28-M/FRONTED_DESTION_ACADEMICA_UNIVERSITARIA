@@ -152,11 +152,11 @@ const PagoExitosoPage: React.FC = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-zinc-50 py-8 px-4 print:bg-white print:py-0">
+      <div className="bg-zinc-50 py-6 px-4 no-print">
         <div className="max-w-md mx-auto">
 
           {/* Boleta de Venta */}
-          <div className="bg-white border border-zinc-300 print:border-none" id="receipt-ticket">
+          <div className="bg-white border border-zinc-300" id="receipt-ticket">
 
             {/* Header institucional */}
             <div className="px-6 pt-6 pb-4 text-center border-b border-zinc-200">
@@ -173,7 +173,7 @@ const PagoExitosoPage: React.FC = () => {
             </div>
 
             {/* Título */}
-            <div className="px-6 py-3 bg-zinc-50 border-b border-zinc-200 text-center print:bg-white">
+            <div className="px-6 py-3 bg-zinc-50 border-b border-zinc-200 text-center">
               <p className="text-xs font-bold text-zinc-800 uppercase tracking-[0.15em]">
                 Boleta de Pago Electrónica
               </p>
@@ -263,7 +263,7 @@ const PagoExitosoPage: React.FC = () => {
           </div>
 
           {/* Botones */}
-          <div className="mt-5 space-y-2 print:hidden">
+          <div className="mt-5 space-y-2">
             <button
               onClick={handlePrint}
               className="w-full py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors"
@@ -290,41 +290,194 @@ const PagoExitosoPage: React.FC = () => {
 
       <style>{`
         @media print {
-          @page {
-            margin: 5mm;
-            size: 80mm 220mm;
+          /* Hide the entire app: sidebar, header, buttons, everything */
+          body > #root > * {
+            display: none !important;
           }
+
+          /* Re-render only the receipt as a standalone element */
+          body::after {
+            content: '';
+            display: block;
+          }
+
+          @page {
+            margin: 0;
+            size: A4;
+          }
+
           html, body {
-            width: 80mm;
-            height: auto;
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          /* Hide everything */
-          body * {
-            visibility: hidden;
+        }
+      `}</style>
+
+      {/* Print-only version: a clean standalone copy of the receipt */}
+      <div id="print-receipt" className="print-only">
+        <div className="print-receipt-inner">
+          {/* Header institucional */}
+          <div style={{ textAlign: 'center', paddingBottom: '12px', borderBottom: '1px solid #e4e4e7' }}>
+            <img
+              src="/images/fondouni.svg"
+              alt="Escudo"
+              style={{ width: '50px', height: '58px', margin: '0 auto 10px', display: 'block', objectFit: 'contain' }}
+            />
+            <div style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#18181b' }}>
+              {receipt.universityName}
+            </div>
+            <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px' }}>{receipt.facultyName}</div>
+            <div style={{ fontSize: '10px', color: '#a1a1aa', marginTop: '4px' }}>RUC: 20000000001</div>
+          </div>
+
+          {/* Título */}
+          <div style={{ textAlign: 'center', padding: '10px 0', borderBottom: '1px solid #e4e4e7', background: '#fafafa' }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#27272a' }}>
+              Boleta de Pago Electrónica
+            </div>
+            <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#52525b', marginTop: '4px' }}>
+              {receipt.receiptCode}
+            </div>
+          </div>
+
+          {/* Datos */}
+          <div style={{ padding: '12px 0', borderBottom: '1px solid #e4e4e7', fontSize: '11px' }}>
+            {[
+              ['Fecha:', `${formatDate(receipt.paidAt)} - ${formatTime(receipt.paidAt)}`],
+              ['Estudiante:', receipt.studentName],
+              ['Código:', receipt.studentCode],
+              ['Año académico:', String(receipt.academicYear)],
+              ['Forma de pago:', 'Tarjeta'],
+            ].map(([label, value], i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: '#27272a' }}>
+                <span style={{ color: '#71717a' }}>{label}</span>
+                <span style={{ fontWeight: 500 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Detalle */}
+          <div style={{ padding: '12px 0', borderBottom: '1px solid #e4e4e7' }}>
+            <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #d4d4d8' }}>
+                  <th style={{ textAlign: 'left', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a', letterSpacing: '0.05em' }}>Descripción</th>
+                  <th style={{ textAlign: 'center', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a', width: '40px' }}>Cant.</th>
+                  <th style={{ textAlign: 'right', padding: '4px 0', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', color: '#71717a' }}>Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '8px 0', color: '#27272a' }}>{receipt.concept}</td>
+                  <td style={{ padding: '8px 0', textAlign: 'center', color: '#27272a' }}>1</td>
+                  <td style={{ padding: '8px 0', textAlign: 'right', fontFamily: 'monospace', color: '#27272a' }}>
+                    {formatCurrency(receipt.amount, receipt.currency)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totales */}
+          <div style={{ padding: '12px 0', borderBottom: '1px solid #d4d4d8', fontSize: '11px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#71717a', padding: '2px 0' }}>
+              <span>Subtotal</span>
+              <span style={{ fontFamily: 'monospace' }}>{formatCurrency(receipt.amount * 0.82, receipt.currency)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#71717a', padding: '2px 0' }}>
+              <span>IGV (18%)</span>
+              <span style={{ fontFamily: 'monospace' }}>{formatCurrency(receipt.amount * 0.18, receipt.currency)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0 0', borderTop: '1px solid #e4e4e7', marginTop: '6px', fontSize: '13px' }}>
+              <span style={{ fontWeight: 'bold', color: '#18181b' }}>TOTAL</span>
+              <span style={{ fontWeight: 'bold', fontFamily: 'monospace', color: '#18181b' }}>
+                {formatCurrency(receipt.amount, receipt.currency)}
+              </span>
+            </div>
+          </div>
+
+          {/* Estado */}
+          <div style={{ textAlign: 'center', padding: '14px 0' }}>
+            <span style={{ display: 'inline-block', padding: '3px 12px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', border: '1px solid #d4d4d8', color: '#52525b' }}>
+              Pagado
+            </span>
+            <div style={{ fontSize: '9px', color: '#a1a1aa', marginTop: '10px' }}>
+              Comprobante de pago electrónico
+            </div>
+            <div style={{ fontSize: '9px', color: '#a1a1aa' }}>
+              Conserve este documento para cualquier reclamo
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        /* Hide print-only div on screen */
+        .print-only {
+          display: none;
+        }
+
+        @media print {
+          /* Hide everything in the app */
+          .no-print,
+          header,
+          nav,
+          aside,
+          [class*="lg:fixed"],
+          [class*="lg:w-60"],
+          [class*="sidebar"],
+          [class*="z-40"] {
+            display: none !important;
           }
-          /* Show only the receipt */
-          #receipt-ticket,
-          #receipt-ticket * {
-            visibility: visible;
-          }
-          #receipt-ticket {
+
+          /* Show the print-only receipt */
+          .print-only {
+            display: block !important;
             position: fixed;
-            left: 0;
             top: 0;
-            width: 80mm;
-            max-width: 80mm;
-            border: none !important;
-            box-shadow: none !important;
-            margin: 0;
-            padding: 0;
-            page-break-inside: avoid;
-            overflow: hidden;
-            font-size: 11px;
+            left: 0;
+            width: 100%;
+            height: auto;
+            z-index: 99999;
+            background: white;
+          }
+
+          .print-receipt-inner {
+            max-width: 340px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          }
+
+          @page {
+            margin: 10mm;
+            size: A4;
+          }
+
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            overflow: visible !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          /* Kill all fixed positioning from layout */
+          body * {
+            position: static !important;
+            float: none !important;
+          }
+
+          .print-only, .print-only * {
+            position: static !important;
+          }
+
+          .print-only {
+            position: fixed !important;
           }
         }
       `}</style>
