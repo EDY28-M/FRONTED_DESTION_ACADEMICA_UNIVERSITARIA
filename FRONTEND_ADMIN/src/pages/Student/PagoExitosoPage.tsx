@@ -291,28 +291,34 @@ const PagoExitosoPage: React.FC = () => {
       <style>{`
         @media print {
           @page {
-            margin: 1cm;
+            margin: 10mm;
+            size: A4;
           }
+          /* Hide everything */
+          body * {
+            visibility: hidden;
+          }
+          /* Show only the receipt */
+          #receipt-ticket,
+          #receipt-ticket * {
+            visibility: visible;
+          }
+          #receipt-ticket {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0;
+            padding: 0;
+          }
+          /* Force colors */
           body {
             background: white !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-          }
-          .print\\:hidden {
-            display: none !important;
-          }
-          .print\\:bg-white {
-            background: white !important;
-          }
-          .print\\:border-none {
-            border: none !important;
-          }
-          .print\\:py-0 {
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-          }
-          #receipt-ticket {
-            max-width: 100% !important;
           }
         }
       `}</style>
