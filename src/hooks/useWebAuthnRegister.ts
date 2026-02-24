@@ -81,9 +81,9 @@ export const useWebAuthnRegister = () => {
             let errorMessage = err.message;
 
             if (err.name === 'NotReadableError' || errorMessage.includes('credential manager')) {
-                errorMessage = 'Esta huella/FaceID ya está registrada en este dispositivo. Usa el botón de login para ingresar.';
+                errorMessage = 'Esta huella ya está registrada en este dispositivo. Usa el botón de login para ingresar.';
             } else if (err.name === 'InvalidStateError' || errorMessage.includes('already registered')) {
-                errorMessage = 'Ya tienes una credencial registrada. Usa el login con huella/FaceID.';
+                errorMessage = 'Ya tienes una credencial registrada. Usa el login con huella.';
             } else if (err.name === 'NotAllowedError') {
                 errorMessage = 'Operación cancelada o no permitida por el usuario.';
             } else if (err.name === 'SecurityError') {

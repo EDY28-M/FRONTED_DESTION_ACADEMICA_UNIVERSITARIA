@@ -177,7 +177,7 @@ const LoginEstudiantePage: React.FC = () => {
         // Error de validación de rol del backend
         toast.error(error.message);
       } else {
-        toast.error(error?.message || 'Error al iniciar sesión con huella/FaceID');
+        toast.error(error?.message || 'Error al iniciar sesión con huella');
       }
     }
   }
@@ -414,7 +414,7 @@ const LoginEstudiantePage: React.FC = () => {
           className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-zinc-300 text-zinc-700 font-medium rounded hover:bg-zinc-50 transition-all duration-200 hover:shadow-sm"
         >
           <FingerPrintIcon className="h-5 w-5" />
-          Huella / FaceID
+          Huella
         </button>
 
         {/* Link para recuperar contraseña */}

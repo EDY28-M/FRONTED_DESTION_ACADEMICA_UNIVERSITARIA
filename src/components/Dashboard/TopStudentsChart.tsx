@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts'
-import { Trophy } from 'lucide-react'
 import { estudiantesApi, OrdenMerito } from '../../services/estudiantesApi'
 
 type TopStudentDatum = {
@@ -33,14 +32,9 @@ const TopStudentsChart: React.FC = () => {
   return (
     <div className="bg-gradient-to-b from-white to-slate-50/60 border border-zinc-200 p-6 flex flex-col h-[400px]">
       <div className="flex items-center justify-between mb-4 border-b border-zinc-200 pb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 border border-zinc-200 bg-white flex items-center justify-center">
-            <Trophy className="w-4 h-4 text-sky-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-zinc-900 uppercase tracking-tight text-sm">Mejores Estudiantes</h3>
-            <p className="text-[10px] text-zinc-500 font-mono">TOP {Math.min(5, chartData.length || 5)} • PPA</p>
-          </div>
+        <div>
+          <h3 className="font-bold text-zinc-900 uppercase tracking-tight text-sm">Mejores Estudiantes</h3>
+          <p className="text-[10px] text-zinc-500 font-mono">TOP {Math.min(5, chartData.length || 5)} • PPA</p>
         </div>
       </div>
 

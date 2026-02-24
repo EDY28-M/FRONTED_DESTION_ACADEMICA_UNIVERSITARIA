@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { docenteAuthApi, AuthDocenteResponse } from '../services/docenteApi';
+import { queryClient } from '../lib/queryClient';
 
 interface DocenteAuthContextType {
   docente: AuthDocenteResponse | null;
@@ -47,6 +48,7 @@ export const DocenteAuthProvider: React.FC<DocenteAuthProviderProps> = ({ childr
   const logout = () => {
     docenteAuthApi.logout();
     setDocente(null);
+    queryClient.clear();
   };
 
   const value: DocenteAuthContextType = {

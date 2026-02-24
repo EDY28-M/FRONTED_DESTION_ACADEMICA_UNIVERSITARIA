@@ -3,18 +3,18 @@ import { Dialog, Transition } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import {
-  Trash2,
-  X,
-  Users,
-  Book,
-  Calendar,
-  Clock,
-  AlertCircle,
-  ChevronRight,
-  Settings,
-  Eye,
-  Plus
-} from 'lucide-react';
+  FaTrash,
+  FaTimes,
+  FaChalkboardTeacher,
+  FaBook,
+  FaCalendarAlt,
+  FaClock,
+  FaExclamationCircle,
+  FaChevronRight,
+  FaCog,
+  FaEye,
+  FaPlus
+} from 'react-icons/fa';
 import { horariosApi } from '../../services/horariosApi';
 import {
   DocenteConCursos,
@@ -58,11 +58,11 @@ export default function GestionHorariosPage() {
 
   // Categorizar docentes por estado de horarios
   const categorizeDocentes = () => {
-    const filtered = searchTerm 
+    const filtered = searchTerm
       ? docentes.filter(d =>
-          d.nombreDocente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          d.cursos.some(c => c.nombreCurso.toLowerCase().includes(searchTerm.toLowerCase()))
-        )
+        d.nombreDocente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        d.cursos.some(c => c.nombreCurso.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
       : docentes;
 
     const sinHorarios = filtered.filter(d => d.totalHorariosAsignados === 0);
@@ -104,7 +104,7 @@ export default function GestionHorariosPage() {
           onClick={cargarDocentes}
           className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition-colors"
         >
-          <Clock className="h-4 w-4" />
+          <FaClock className="h-4 w-4" />
           Actualizar
         </button>
       </div>
@@ -112,50 +112,50 @@ export default function GestionHorariosPage() {
       {/* Estadísticas y búsqueda */}
       <div className="bg-white rounded-xl border border-zinc-200 p-4">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            {/* Stats compactas */}
-            <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg border border-zinc-200">
-                  <Users className="h-4 w-4 text-zinc-600" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-zinc-900">{totalDocentes}</p>
-                  <p className="text-xs text-zinc-500">Docentes</p>
-                </div>
+          {/* Stats compactas */}
+          <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg border border-zinc-200">
+                <FaChalkboardTeacher className="h-4 w-4 text-zinc-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-zinc-900">{totalDocentes}</p>
+                <p className="text-xs text-zinc-500">Docentes</p>
               </div>
             </div>
-            <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg border border-zinc-200">
-                  <Book className="h-4 w-4 text-zinc-600" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-zinc-900">{totalCursos}</p>
-                  <p className="text-xs text-zinc-500">Cursos</p>
-                </div>
+          </div>
+          <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg border border-zinc-200">
+                <FaBook className="h-4 w-4 text-zinc-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-zinc-900">{totalCursos}</p>
+                <p className="text-xs text-zinc-500">Cursos</p>
               </div>
             </div>
-            <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-lg border border-zinc-200">
-                  <Calendar className="h-4 w-4 text-zinc-600" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-zinc-900">{totalHorarios}</p>
-                  <p className="text-xs text-zinc-500">Sesiones</p>
-                </div>
+          </div>
+          <div className="bg-zinc-50 rounded-lg px-4 py-3 border border-zinc-200">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg border border-zinc-200">
+                <FaCalendarAlt className="h-4 w-4 text-zinc-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-zinc-900">{totalHorarios}</p>
+                <p className="text-xs text-zinc-500">Sesiones</p>
               </div>
             </div>
-            {/* Búsqueda */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar docente o curso..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-              />
-            </div>
+          </div>
+          {/* Búsqueda */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar docente o curso..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+            />
+          </div>
         </div>
       </div>
 
@@ -273,8 +273,8 @@ interface DocenteKanbanCardProps {
 
 function DocenteKanbanCard({ docente, status, onClick }: DocenteKanbanCardProps) {
   const cursosConHorarios = docente.cursos.filter(c => c.horarios.length > 0).length;
-  const progreso = docente.totalCursos > 0 
-    ? (cursosConHorarios / docente.totalCursos) * 100 
+  const progreso = docente.totalCursos > 0
+    ? (cursosConHorarios / docente.totalCursos) * 100
     : 0;
 
   const statusConfig = {
@@ -311,11 +311,11 @@ function DocenteKanbanCard({ docente, status, onClick }: DocenteKanbanCardProps)
       {/* Chips informativos */}
       <div className="flex items-center gap-2 mb-3">
         <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-zinc-100 text-zinc-600 rounded-md">
-          <Book className="h-3 w-3" />
+          <FaBook className="h-3 w-3" />
           {docente.totalCursos} {docente.totalCursos === 1 ? 'curso' : 'cursos'}
         </span>
         <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-zinc-100 text-zinc-600 rounded-md">
-          <Clock className="h-3 w-3" />
+          <FaClock className="h-3 w-3" />
           {docente.totalHorariosAsignados} {docente.totalHorariosAsignados === 1 ? 'sesión' : 'sesiones'}
         </span>
       </div>
@@ -335,7 +335,7 @@ function DocenteKanbanCard({ docente, status, onClick }: DocenteKanbanCardProps)
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig.badge}`}>
           {cursosConHorarios}/{docente.totalCursos} completos
         </span>
-        <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 group-hover:tranzinc-x-0.5 transition-all" />
+        <FaChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 group-hover:translate-x-0.5 transition-all" />
       </div>
     </button>
   );
@@ -394,7 +394,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
 
   const handleDelete = async (id: number) => {
     if (!confirm('¿Eliminar este horario?')) return;
-    
+
     try {
       await horariosApi.deleteHorario(id);
       toast.success('Horario eliminado');
@@ -479,11 +479,11 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
               <Transition.Child
                 as={Fragment}
                 enter="transform transition ease-in-out duration-300"
-                enterFrom="tranzinc-x-full"
-                enterTo="tranzinc-x-0"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
                 leave="transform transition ease-in-out duration-300"
-                leaveFrom="tranzinc-x-0"
-                leaveTo="tranzinc-x-full"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
               >
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-2xl">
                   <div className="flex h-full flex-col bg-white shadow-2xl">
@@ -497,12 +497,12 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                           onClick={onClose}
                           className="text-zinc-400 hover:text-zinc-600 transition-colors"
                         >
-                          <X className="h-5 w-5" />
+                          <FaTimes className="h-5 w-5" />
                         </button>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-zinc-500">
                         <span className="flex items-center gap-1.5">
-                          <Users className="h-4 w-4" />
+                          <FaChalkboardTeacher className="h-4 w-4" />
                           {docente.profesion}
                         </span>
                         {docente.correo && (
@@ -517,24 +517,22 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                       <div className="flex gap-2 mt-4">
                         <button
                           onClick={() => setActiveTab('cursos')}
-                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                            activeTab === 'cursos'
-                              ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
-                              : 'text-zinc-500 hover:text-zinc-700'
-                          }`}
+                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${activeTab === 'cursos'
+                            ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                            : 'text-zinc-500 hover:text-zinc-700'
+                            }`}
                         >
-                          <Eye className="h-4 w-4 inline mr-1.5" />
+                          <FaEye className="h-4 w-4 inline mr-1.5" />
                           Ver detalle
                         </button>
                         <button
                           onClick={() => setActiveTab('configurar')}
-                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${
-                            activeTab === 'configurar'
-                              ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
-                              : 'text-zinc-500 hover:text-zinc-700'
-                          }`}
+                          className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-colors ${activeTab === 'configurar'
+                            ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                            : 'text-zinc-500 hover:text-zinc-700'
+                            }`}
                         >
-                          <Settings className="h-4 w-4 inline mr-1.5" />
+                          <FaCog className="h-4 w-4 inline mr-1.5" />
                           Configurar horarios
                         </button>
                       </div>
@@ -563,7 +561,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                                 </div>
                                 {curso.horarios.length === 0 && (
                                   <span className="inline-flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full border border-amber-200">
-                                    <AlertCircle className="h-3 w-3" />
+                                    <FaExclamationCircle className="h-3 w-3" />
                                     Sin horario
                                   </span>
                                 )}
@@ -583,11 +581,10 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                                         <span className="text-zinc-500 font-mono text-xs">
                                           {horario.horaInicio} - {horario.horaFin}
                                         </span>
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                          horario.tipo === 'Teoría' 
-                                            ? 'bg-zinc-100 text-zinc-700' 
-                                            : 'bg-zinc-800 text-white'
-                                        }`}>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${horario.tipo === 'Teoría'
+                                          ? 'bg-zinc-100 text-zinc-700'
+                                          : 'bg-zinc-800 text-white'
+                                          }`}>
                                           {horario.tipo}
                                         </span>
                                         {horario.aula && (
@@ -633,7 +630,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                             <h4 className="text-sm font-medium text-zinc-900 mb-3">
                               Horarios actuales
                             </h4>
-                            
+
                             {isLoading ? (
                               <div className="py-8 text-center">
                                 <div className="h-5 w-5 mx-auto animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600"></div>
@@ -656,11 +653,10 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                                       <span className="text-zinc-600 font-mono">
                                         {horario.horaInicio} - {horario.horaFin}
                                       </span>
-                                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                        horario.tipo === 'Teoría' 
-                                          ? 'bg-white text-zinc-700 border border-zinc-200' 
-                                          : 'bg-zinc-800 text-white'
-                                      }`}>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full ${horario.tipo === 'Teoría'
+                                        ? 'bg-white text-zinc-700 border border-zinc-200'
+                                        : 'bg-zinc-800 text-white'
+                                        }`}>
                                         {horario.tipo}
                                       </span>
                                       {horario.aula && (
@@ -673,7 +669,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                                       onClick={() => handleDelete(horario.id)}
                                       className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                     >
-                                      <Trash2 className="h-4 w-4" />
+                                      <FaTrash className="h-4 w-4" />
                                     </button>
                                   </div>
                                 ))}
@@ -684,7 +680,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                           {/* Formulario de nueva sesión */}
                           <div className="bg-zinc-50 rounded-lg border border-zinc-200 p-5">
                             <div className="flex items-center gap-2 mb-4">
-                              <Plus className="h-4 w-4 text-zinc-600" />
+                              <FaPlus className="h-4 w-4 text-zinc-600" />
                               <h4 className="text-sm font-medium text-zinc-900">
                                 Agregar nueva sesión
                               </h4>
@@ -693,7 +689,7 @@ function DrawerPanel({ isOpen, onClose, docente, onSuccess }: DrawerPanelProps) 
                             {conflictoError && (
                               <div className="mb-4 rounded-lg bg-amber-50 p-3 border border-amber-200">
                                 <div className="flex gap-2">
-                                  <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                  <FaExclamationCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
                                   <div>
                                     <p className="text-sm font-medium text-amber-800">Conflicto detectado</p>
                                     <p className="text-xs text-amber-700 mt-0.5">{conflictoError}</p>

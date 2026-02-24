@@ -12,6 +12,8 @@ export interface Estudiante {
   correo?: string;
   telefono?: string;
   direccion?: string;
+  idFacultad?: number;
+  idEscuela?: number;
 
   // Información académica
   cicloActual: number;

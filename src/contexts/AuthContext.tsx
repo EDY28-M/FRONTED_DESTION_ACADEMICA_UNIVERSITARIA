@@ -4,6 +4,7 @@ import type { User, LoginRequest } from '../types'
 import { getDeviceInfo, getLocationInfo, isNewDevice, isNewLocation, registerDevice, registerLocation } from '../utils/deviceDetection'
 import { useNotifications } from './NotificationContext'
 import { startSignalRConnection, stopSignalRConnection } from '../lib/signalr'
+import { queryClient } from '../lib/queryClient'
 
 interface AuthContextType {
   user: User | null
@@ -193,6 +194,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setUser(null)
       authService.clearAuthData()
+      // Limpiar toda la caché de React Query para evitar datos de sesiones anteriores
+      queryClient.clear()
     }
   }
 

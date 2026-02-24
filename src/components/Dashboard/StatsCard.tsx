@@ -1,9 +1,8 @@
-import { ArrowUp } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 
 interface StatsCardProps {
   name: string
   value: number
-  icon: React.ComponentType<{ className?: string }>
   change: string
   changeType: 'positive' | 'negative'
   isLoading?: boolean
@@ -13,7 +12,6 @@ interface StatsCardProps {
 const StatsCard: React.FC<StatsCardProps> = ({
   name,
   value,
-  icon: Icon,
   change,
   changeType,
   isLoading = false,
@@ -29,12 +27,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
   }
 
   const sparklinePath = generateSparklineData()
+  const isPositive = changeType === 'positive'
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 relative overflow-hidden group hover:border-sky-400/50 dark:hover:border-sky-400/50 transition-colors">
-      <div className="flex justify-between items-start mb-2">
+      <div className="mb-2">
         <span className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">{name}</span>
-        <Icon className="text-slate-600 dark:text-slate-500 w-5 h-5" />
       </div>
 
       <div className="flex items-end justify-between">
@@ -44,8 +42,17 @@ const StatsCard: React.FC<StatsCardProps> = ({
           ) : (
             <p className="text-3xl font-bold text-slate-900 dark:text-white font-mono">{value}</p>
           )}
-          <span className="text-[10px] text-sky-600 font-mono flex items-center gap-1 mt-1">
-            <ArrowUp className="w-3 h-3" /> {change} vs mes anterior
+          <span
+            className={`text-[10px] font-mono flex items-center gap-1 mt-1 ${
+              isPositive ? 'text-sky-600' : 'text-rose-600'
+            }`}
+          >
+            {isPositive ? (
+              <ArrowUp className="w-3 h-3" />
+            ) : (
+              <ArrowDown className="w-3 h-3" />
+            )}
+            {change} vs mes anterior
           </span>
         </div>
 

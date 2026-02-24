@@ -59,6 +59,8 @@ export interface EstudianteDetalle {
     promedioAcumulado?: number;
     promedioSemestral?: number;
     fechaIngreso: string;
+    facultadNombre?: string;
+    escuelaNombre?: string;
   };
   cursosActuales: Array<{
     idMatricula: number;
@@ -120,6 +122,14 @@ export interface EstudianteDetalle {
     creditosAcumulados: number;
     promedioAcumulado?: number;
     promedioSemestral?: number;
+    // Campos adicionales del backend
+    totalCursosHistorico: number;
+    cursosAprobadosHistorico: number;
+    cursosDesaprobadosHistorico: number;
+    creditosTotales: number;
+    creditosAprobados: number;
+    creditosPendientes: number;
+    porcentajeAprobacion: number;
   };
 }
 
@@ -225,7 +235,7 @@ export const adminCursosApi = {
   },
 
   // === GESTIÓN DE PERÍODOS ===
-  
+
   // Obtener todos los períodos
   getPeriodos: async (): Promise<PeriodoAdmin[]> => {
     const response = await axios.get('/admin/periodos');
@@ -293,7 +303,7 @@ export const adminCursosApi = {
     const params = new URLSearchParams();
     if (idPeriodo) params.append('idPeriodo', idPeriodo.toString());
     if (idCurso) params.append('idCurso', idCurso.toString());
-    
+
     const queryString = params.toString();
     const url = `/admin/cursos/activados${queryString ? `?${queryString}` : ''}`;
     const response = await axios.get(url);

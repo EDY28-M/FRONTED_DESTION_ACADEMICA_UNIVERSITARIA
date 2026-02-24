@@ -1,12 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import {
-  Users,
-  BookOpen,
-  Clock,
-  Award,
-  Download,
-  FileText
-} from 'lucide-react'
+import { Download, FileText } from 'lucide-react'
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
 import StatsCard from '../components/Dashboard/StatsCard'
@@ -187,7 +180,6 @@ const Dashboard = () => {
     {
       name: 'Total Docentes',
       value: docentes?.length || 0,
-      icon: Users,
       change: '+12%',
       changeType: 'positive' as const,
       chartType: 'line' as const,
@@ -195,7 +187,6 @@ const Dashboard = () => {
     {
       name: 'Total Cursos',
       value: cursos?.length || 0,
-      icon: BookOpen,
       change: '+8%',
       changeType: 'positive' as const,
       chartType: 'line' as const,
@@ -203,7 +194,6 @@ const Dashboard = () => {
     {
       name: 'Total Créditos',
       value: cursos?.reduce((sum, curso) => sum + curso.creditos, 0) || 0,
-      icon: Award,
       change: '+5%',
       changeType: 'positive' as const,
       chartType: 'bar' as const,
@@ -211,7 +201,6 @@ const Dashboard = () => {
     {
       name: 'Horas Semanales',
       value: cursos?.reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0,
-      icon: Clock,
       change: '+15%',
       changeType: 'positive' as const,
       chartType: 'line' as const,
@@ -226,7 +215,7 @@ const Dashboard = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">
-            DASHBOARD GESTION ACADEMICA
+            DASHBOARD
           </h1>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">

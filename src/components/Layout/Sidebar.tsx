@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, memo } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import {
   Home,
@@ -12,6 +12,8 @@ import {
   X,
   Clock,
   ClipboardCheck,
+  Landmark,
+  School,
 } from 'lucide-react'
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
 import { Link, useLocation } from 'react-router-dom'
@@ -82,6 +84,18 @@ const navigation = [
     name: 'Activación de Cursos',
     href: '/admin/activacion-cursos',
     icon: BookOpenCheck,
+    navigation: 'system'
+  },
+  {
+    name: 'Facultades',
+    href: '/admin/facultades',
+    icon: Landmark,
+    section: 'system'
+  },
+  {
+    name: 'Escuelas',
+    href: '/admin/escuelas',
+    icon: School,
     section: 'system'
   },
   {
@@ -98,7 +112,8 @@ const navigation = [
   },
 ]
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false }) => {
+// Extracted SidebarContent to prevent re-creation on every render
+const SidebarContent = memo(({ collapsed = false, onClose }: { collapsed?: boolean; onClose: () => void }) => {
   const location = useLocation()
 
   const isActive = (path: string) => {
@@ -111,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
-  const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
+  return (
     <div className="flex flex-col h-full bg-white border-r border-zinc-200">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-zinc-200 bg-white">
@@ -162,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
         {/* System */}
         <div className="px-3 mt-6 mb-2">
           <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono mb-2 pl-3">Sistema</p>
-          {navigation.filter(item => item.section === 'system').map((item) => {
+          {navigation.filter(item => item.section === 'system' || item.navigation === 'system').map((item) => {
             const active = isActive(item.href)
             return (
               <Link
@@ -192,7 +207,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
       </div>
     </div>
   )
+})
 
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false }) => {
   return (
     <>
       {/* Mobile sidebar */}
@@ -242,7 +259,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
                   </div>
                 </Transition.Child>
                 <div className="flex grow flex-col overflow-y-auto bg-white">
-                  <SidebarContent collapsed={false} />
+                  <SidebarContent collapsed={false} onClose={onClose} />
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -253,7 +270,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed = false 
       {/* Desktop sidebar */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:flex-col transition-all duration-300 ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
         <div className="flex grow flex-col overflow-y-auto border-r border-zinc-200 bg-white">
-          <SidebarContent collapsed={isCollapsed} />
+          <SidebarContent collapsed={isCollapsed} onClose={onClose} />
         </div>
       </div>
     </>

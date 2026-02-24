@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDocenteAuth } from '../../contexts/DocenteAuthContext';
 import { docenteCursosApi, CursoDocente } from '../../services/docenteApi';
+import { docentesApi } from '../../services/docentesService';
+import { facultadesApi } from '../../services/facultadesApi';
+import { escuelasApi } from '../../services/escuelasApi';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import {
@@ -9,17 +12,15 @@ import {
   XMarkIcon,
   EyeIcon,
   EyeSlashIcon,
-
   BookOpenIcon,
   FingerPrintIcon,
   ShieldCheckIcon,
+  BuildingLibraryIcon,
+  AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 import { useWebAuthnRegister } from '../../hooks/useWebAuthnRegister';
 
-// ============================================
-// COMPONENTES PEQUEÑOS Y FUNCIONALES
-// ============================================
-
+// ... (Rest of components: StatCard, InfoItem, StatusBadge, EmptyState) ...
 // Stat Card - Minimalista
 const StatCard = ({ label, value, suffix = '' }: { label: string; value: string | number; suffix?: string }) => (
   <div className="px-4 py-3">
@@ -72,23 +73,40 @@ const EmptyState = ({ icon: Icon, title, description }: { icon: React.ElementTyp
   </div>
 );
 
-// ============================================
-// COMPONENTE PRINCIPAL
-// ============================================
-
 export const PerfilDocentePage = () => {
-  const { docente } = useDocenteAuth();
+  const { docente: authDocente } = useDocenteAuth();
   const [modalAbierto, setModalAbierto] = useState(false);
   const { register: registerPasskey, loading: isRegisterLoading } = useWebAuthnRegister();
 
+  // Obtener perfil completo del docente para tener idFacultad e idEscuela
+  const { data: docenteCompleto } = useQuery({
+    queryKey: ['docente-full', authDocente?.id],
+    queryFn: () => docentesApi.getById(authDocente!.id),
+    enabled: !!authDocente?.id,
+  });
+
+  // Obtener catálogos
+  const { data: facultades } = useQuery({
+    queryKey: ['facultades'],
+    queryFn: facultadesApi.getAll,
+  });
+
+  const { data: escuelas } = useQuery({
+    queryKey: ['escuelas'],
+    queryFn: escuelasApi.getAll,
+  });
+
+  const facultadNombre = facultades?.find(f => f.id === docenteCompleto?.idFacultad)?.nombre || '—';
+  const escuelaNombre = escuelas?.find(e => e.id === docenteCompleto?.idEscuela)?.nombre || '—';
+
   const handleRegisterPasskey = async () => {
-    if (!docente?.correo) {
+    if (!authDocente?.correo) {
       toast.error('No se pudo obtener el correo del usuario');
       return;
     }
-    const result = await registerPasskey(docente.correo);
+    const result = await registerPasskey(authDocente.correo);
     if (result.success) {
-      toast.success('Huella/FaceID registrada exitosamente');
+      toast.success('Huella registrada exitosamente');
     } else if (result.errorMessage) {
       toast.error(result.errorMessage);
     }
@@ -101,9 +119,9 @@ export const PerfilDocentePage = () => {
   });
 
   const totalEstudiantes = cursos.reduce((sum: number, c: CursoDocente) => sum + c.totalEstudiantes, 0);
-  const promedioGeneral = cursos.length > 0
-    ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.promedioGeneral, 0) / cursos.length
-    : 0;
+  // const promedioGeneral = cursos.length > 0
+  //   ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.promedioGeneral, 0) / cursos.length
+  //   : 0;
   const asistenciaPromedio = cursos.length > 0
     ? cursos.reduce((sum: number, c: CursoDocente) => sum + c.porcentajeAsistenciaPromedio, 0) / cursos.length
     : 0;
@@ -111,14 +129,6 @@ export const PerfilDocentePage = () => {
   const getInitials = (nombre?: string) => {
     return nombre?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'DC';
   };
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-  //       <div className="animate-pulse text-zinc-400 text-sm">Cargando...</div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -138,11 +148,11 @@ export const PerfilDocentePage = () => {
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-zinc-900 rounded-full flex items-center justify-center text-white text-lg font-semibold">
-                {getInitials(docente?.nombreCompleto)}
+                {getInitials(authDocente?.nombreCompleto)}
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-zinc-900">{docente?.nombreCompleto}</h2>
-                <p className="text-sm text-zinc-500">{docente?.correo}</p>
+                <h2 className="text-lg font-semibold text-zinc-900">{authDocente?.nombreCompleto}</h2>
+                <p className="text-sm text-zinc-500">{authDocente?.correo}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-700">
                     Docente
@@ -175,7 +185,7 @@ export const PerfilDocentePage = () => {
                 <div>
                   <h4 className="text-sm font-medium text-zinc-900">Autenticación Biométrica</h4>
                   <p className="text-xs text-zinc-500 mt-1">
-                    Vincula tu huella o reconocimiento facial para iniciar sesión de forma rápida y segura sin contraseña.
+                    Vincula tu huella para iniciar sesión de forma rápida y segura sin contraseña.
                   </p>
                 </div>
               </div>
@@ -194,7 +204,7 @@ export const PerfilDocentePage = () => {
               ) : (
                 <>
                   <FingerPrintIcon className="h-4 w-4" />
-                  Registrar Huella / FaceID
+                  Registrar Huella
                 </>
               )}
             </button>
@@ -208,8 +218,10 @@ export const PerfilDocentePage = () => {
               <h3 className="text-sm font-medium text-zinc-900">Información Personal</h3>
             </div>
             <div className="px-5 py-2">
-              <InfoItem icon={UserIcon} label="Nombre completo" value={docente?.nombreCompleto || '—'} />
-              <InfoItem icon={EnvelopeIcon} label="Correo institucional" value={docente?.correo || '—'} />
+              <InfoItem icon={UserIcon} label="Nombre completo" value={authDocente?.nombreCompleto || '—'} />
+              <InfoItem icon={EnvelopeIcon} label="Correo institucional" value={authDocente?.correo || '—'} />
+              <InfoItem icon={BuildingLibraryIcon} label="Facultad" value={facultadNombre} />
+              <InfoItem icon={AcademicCapIcon} label="Escuela Profesional" value={escuelaNombre} />
               <InfoItem icon={BookOpenIcon} label="Período activo" value={cursos[0]?.periodoNombre || 'N/A'} />
             </div>
           </div>

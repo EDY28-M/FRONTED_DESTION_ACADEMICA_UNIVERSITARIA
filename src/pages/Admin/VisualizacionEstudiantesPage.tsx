@@ -3,36 +3,52 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, Transition } from '@headlessui/react';
 import { adminCursosApi, EstudianteAdmin, EstudianteDetalle } from '../../services/adminCursosApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
+import { facultadesApi } from '../../services/facultadesApi';
+import { escuelasApi } from '../../services/escuelasApi';
 import { toast } from 'react-hot-toast';
 import {
   Users,
   Search,
   Eye,
   X,
-  User,
   BookOpen,
   History,
-  BarChart3,
   CheckCircle,
   XCircle,
   Award,
   TrendingUp,
-  Calendar,
   Clock,
   Trash2,
   AlertTriangle,
-  GraduationCap,
-  Mail,
   CreditCard,
-  MoreHorizontal,
-  FileText
+  Mail,
+  Edit3,
+  Save,
+  KeyRound
 } from 'lucide-react';
+
+interface EditarEstudianteForm {
+  nombres: string;
+  apellidos: string;
+  email: string;
+  numeroDocumento: string;
+  ciclo: number;
+  estado: string;
+  idFacultad: number;
+  idEscuela: number;
+  password: string;
+}
 
 export default function VisualizacionEstudiantesPage() {
   const [busqueda, setBusqueda] = useState('');
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<number | null>(null);
   const [tabActiva, setTabActiva] = useState<'datos' | 'actuales' | 'historial' | 'estadisticas'>('datos');
   const [estudianteAEliminar, setEstudianteAEliminar] = useState<EstudianteAdmin | null>(null);
+  const [estudianteAEditar, setEstudianteAEditar] = useState<EstudianteAdmin | null>(null);
+  const [editForm, setEditForm] = useState<EditarEstudianteForm>({
+    nombres: '', apellidos: '', email: '', numeroDocumento: '',
+    ciclo: 1, estado: 'Activo', idFacultad: 0, idEscuela: 0, password: ''
+  });
 
   const queryClient = useQueryClient();
 
@@ -50,6 +66,20 @@ export default function VisualizacionEstudiantesPage() {
     retry: 1,
   });
 
+  const { data: facultades = [] } = useQuery({
+    queryKey: ['facultades'],
+    queryFn: facultadesApi.getAll,
+  });
+
+  const { data: escuelas = [] } = useQuery({
+    queryKey: ['escuelas'],
+    queryFn: escuelasApi.getAll,
+  });
+
+  const escuelasFiltradas = escuelas.filter((e: any) =>
+    !editForm.idFacultad || e.facultadId === Number(editForm.idFacultad)
+  );
+
   // Mutation para eliminar estudiante
   const eliminarMutation = useMutation({
     mutationFn: (id: number) => estudiantesApi.eliminarEstudiante(id),
@@ -62,6 +92,53 @@ export default function VisualizacionEstudiantesPage() {
       toast.error(error.response?.data?.mensaje || 'Error al eliminar estudiante');
     },
   });
+
+  // Mutation para actualizar estudiante
+  const actualizarMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => estudiantesApi.actualizarEstudiante(id, data),
+    onSuccess: (data) => {
+      toast.success(data.mensaje);
+      queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
+      queryClient.invalidateQueries({ queryKey: ['estudiante-detalle'] });
+      setEstudianteAEditar(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.mensaje || 'Error al actualizar estudiante');
+    },
+  });
+
+  const abrirEditar = (est: EstudianteAdmin) => {
+    setEstudianteAEditar(est);
+    setEditForm({
+      nombres: est.nombres || est.nombreCompleto.split(' ')[0] || '',
+      apellidos: est.apellidos || est.nombreCompleto.split(' ').slice(1).join(' ') || '',
+      email: est.email,
+      numeroDocumento: est.dni,
+      ciclo: est.cicloActual,
+      estado: est.estado,
+      idFacultad: 0,
+      idEscuela: 0,
+      password: ''
+    });
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!estudianteAEditar) return;
+
+    const data: any = {};
+    if (editForm.nombres) data.nombres = editForm.nombres;
+    if (editForm.apellidos) data.apellidos = editForm.apellidos;
+    if (editForm.email) data.email = editForm.email;
+    if (editForm.numeroDocumento) data.numeroDocumento = editForm.numeroDocumento;
+    if (editForm.ciclo) data.ciclo = editForm.ciclo;
+    if (editForm.estado) data.estado = editForm.estado;
+    if (editForm.idFacultad) data.idFacultad = editForm.idFacultad;
+    if (editForm.idEscuela) data.idEscuela = editForm.idEscuela;
+    if (editForm.password && editForm.password.length >= 6) data.password = editForm.password;
+
+    actualizarMutation.mutate({ id: estudianteAEditar.id, data });
+  };
 
   // Filtrar estudiantes
   const estudiantesFiltrados = estudiantes.filter(
@@ -125,7 +202,7 @@ export default function VisualizacionEstudiantesPage() {
       {/* Buscador */}
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -tranzinc-y-1/2 text-zinc-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
           <input
             type="text"
             placeholder="Buscar por nombre, código, email o DNI..."
@@ -224,8 +301,8 @@ export default function VisualizacionEstudiantesPage() {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${estudiante.estado === 'Activo'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                            : 'bg-red-50 text-red-700 border-red-200'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-red-50 text-red-700 border-red-200'
                           }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full ${estudiante.estado === 'Activo' ? 'bg-emerald-500' : 'bg-red-500'
@@ -241,6 +318,13 @@ export default function VisualizacionEstudiantesPage() {
                           title="Ver detalles"
                         >
                           <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => abrirEditar(estudiante)}
+                          className="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Editar estudiante"
+                        >
+                          <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setEstudianteAEliminar(estudiante)}
@@ -354,6 +438,420 @@ export default function VisualizacionEstudiantesPage() {
       {/* Modal de Detalle */}
       <Transition appear show={!!estudianteSeleccionado} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={cerrarModal}>
+          <div className="fixed inset-0 bg-black/30" />
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Dialog.Panel className="w-full max-w-[1200px] overflow-hidden bg-white text-left align-middle rounded-xl border border-zinc-200 shadow-xl">
+                {loadingDetalle ? (
+                  <div className="p-12 text-center">
+                    <div className="animate-spin w-6 h-6 border-2 border-zinc-800 border-t-transparent rounded-full mx-auto mb-4" />
+                    <p className="text-zinc-500 text-sm font-mono uppercase tracking-widest">Cargando información...</p>
+                  </div>
+                ) : estudianteDetalle ? (
+                  <>
+                    {/* Header Monolith */}
+                    <header className="px-6 py-4 border-b border-zinc-200 bg-white">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-mono text-[10px] font-bold bg-zinc-800 text-white px-2 py-0.5 rounded inline-block w-fit">
+                              EST-{new Date().getFullYear()} // ID:{estudianteDetalle.datosPersonales.codigo}
+                            </span>
+                            <h1 className="text-2xl md:text-3xl font-black tracking-tight leading-tight text-zinc-900">
+                              {estudianteDetalle.datosPersonales.nombreCompleto}
+                            </h1>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="hidden md:flex w-14 h-14 rounded-lg border border-zinc-200 items-center justify-center bg-zinc-50">
+                              <span className="text-lg font-black tracking-tighter">
+                                {estudianteDetalle.datosPersonales.nombreCompleto.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                              </span>
+                            </div>
+                            <button onClick={cerrarModal} className="p-1.5 hover:bg-zinc-100 rounded-lg text-zinc-400 hover:text-zinc-700">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-t border-zinc-200 pt-3">
+                          <div className="flex flex-col">
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 mb-0.5">Facultad</span>
+                            <span className="text-sm font-bold leading-tight">{estudianteDetalle.datosPersonales.facultadNombre || 'Sin asignar'}</span>
+                          </div>
+                          <div className="flex flex-col md:text-right">
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-500 mb-0.5">Escuela</span>
+                            <span className="text-sm font-bold leading-tight">{estudianteDetalle.datosPersonales.escuelaNombre || estudianteDetalle.datosPersonales.carrera}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </header>
+
+                    {/* Stats Grid Monolith */}
+                    <div className="grid grid-cols-4 border-b border-zinc-200 bg-zinc-50/50">
+                      {[
+                        { label: 'Créditos', value: estudianteDetalle.datosPersonales.creditosAcumulados },
+                        { label: 'Semestre', value: String(estudianteDetalle.cursosActuales.filter((c: any) => c.estado === 'Matriculado').reduce((s: number, c: any) => s + c.creditos, 0)).padStart(2, '0') },
+                        { label: 'Cursos', value: String(estudianteDetalle.cursosActuales.filter((c: any) => c.estado === 'Matriculado').length).padStart(2, '0') },
+                        { label: 'Promedio', value: estudianteDetalle.datosPersonales.promedioAcumulado?.toFixed(1) || '0.0' },
+                      ].map((stat, i) => (
+                        <div key={i} className={`px-5 py-3 flex flex-col justify-between ${i < 3 ? 'border-r border-zinc-200' : ''} hover:bg-zinc-900 hover:text-white cursor-default group rounded-sm`}>
+                          <p className="font-mono text-[9px] uppercase font-bold tracking-widest mb-1">{stat.label}</p>
+                          <p className="text-3xl font-black tracking-tighter">{stat.value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Tabs Monolith */}
+                    <nav className="border-b border-zinc-200 bg-white overflow-hidden">
+                      <ul className="flex w-full">
+                        {[
+                          { id: 'datos', label: 'Datos Personales' },
+                          { id: 'actuales', label: `Cursos (${estudianteDetalle.cursosActuales.length})` },
+                          { id: 'historial', label: 'Historial' },
+                          { id: 'estadisticas', label: 'Stats' },
+                        ].map((tab) => (
+                          <li key={tab.id} className="flex-1">
+                            <button
+                              onClick={() => setTabActiva(tab.id as any)}
+                              className={`block w-full py-2.5 px-2 text-center font-mono text-[10px] font-bold uppercase tracking-widest ${tabActiva === tab.id ? 'text-zinc-900 border-b-2 border-zinc-900' : 'text-zinc-400 hover:text-zinc-700'}`}
+                            >
+                              {tab.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto bg-white p-5 max-h-[40vh]">
+                      {/* Tab: Datos Personales */}
+                      {tabActiva === 'datos' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                          {/* Info Personal */}
+                          <div className="flex flex-col rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600">Información Personal</h3>
+                            </div>
+                            <div className="p-5 flex-1 bg-white">
+                              <div className="grid grid-cols-1 gap-y-4">
+                                <div className="group">
+                                  <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Nombres Completos</label>
+                                  <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors uppercase">
+                                    {estudianteDetalle.datosPersonales.nombreCompleto}
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-5">
+                                  <div className="group">
+                                    <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">DNI</label>
+                                    <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors font-mono">
+                                      {estudianteDetalle.datosPersonales.dni}
+                                    </div>
+                                  </div>
+                                  <div className="group">
+                                    <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Código</label>
+                                    <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors font-mono">
+                                      {estudianteDetalle.datosPersonales.codigo}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="group">
+                                  <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Email Institucional</label>
+                                  <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors lowercase truncate">
+                                    {estudianteDetalle.datosPersonales.email}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Info Académica */}
+                          <div className="flex flex-col rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-600">Información Académica</h3>
+                            </div>
+                            <div className="p-5 flex-1 bg-white flex flex-col justify-between">
+                              <div className="space-y-4">
+                                <div className="group">
+                                  <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Carrera Profesional</label>
+                                  <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors uppercase">
+                                    {estudianteDetalle.datosPersonales.carrera}
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-5">
+                                  <div className="group">
+                                    <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Ciclo Actual</label>
+                                    <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors uppercase">
+                                      {['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'][estudianteDetalle.datosPersonales.cicloActual - 1] || estudianteDetalle.datosPersonales.cicloActual}
+                                    </div>
+                                  </div>
+                                  <div className="group">
+                                    <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5 group-hover:text-black transition-colors">Situación</label>
+                                    <div className="text-base font-bold border-b-[2px] border-zinc-200 pb-1 group-hover:border-black transition-colors uppercase flex items-center gap-2">
+                                      <span className={`w-2.5 h-2.5 block ${estudianteDetalle.datosPersonales.estado === 'Activo' ? 'bg-black' : 'bg-zinc-300'}`} />
+                                      {estudianteDetalle.datosPersonales.estado}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-4 pt-4 border-t-[2px] border-dashed border-zinc-300">
+                                <div className="flex justify-between items-end">
+                                  <div>
+                                    <label className="block font-mono text-[9px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5">Fecha de Ingreso</label>
+                                    <div className="font-mono font-bold text-sm">
+                                      {new Date(estudianteDetalle.datosPersonales.fechaIngreso).toLocaleDateString('es-ES')}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="block w-16 h-3 bg-zinc-200" />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tab: Cursos Actuales */}
+                      {tabActiva === 'actuales' && (
+                        <div className="space-y-4">
+                          {estudianteDetalle.cursosActuales.length === 0 ? (
+                            <div className="text-center py-12 rounded-lg border border-zinc-200 border-dashed">
+                              <BookOpen className="w-12 h-12 mx-auto mb-3 text-zinc-300" />
+                              <p className="font-mono text-sm uppercase tracking-widest text-zinc-500">No tiene cursos matriculados</p>
+                            </div>
+                          ) : (
+                            estudianteDetalle.cursosActuales.map((curso) => (
+                              <div key={curso.idMatricula} className="rounded-lg border border-zinc-200 hover:shadow-md">
+                                <div className="flex items-center justify-between px-5 py-2.5 bg-zinc-50 rounded-t-lg border-b border-zinc-200">
+                                  <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-700 truncate">{curso.nombreCurso}</h3>
+                                  <div className="flex gap-2">
+                                    {curso.isAutorizado && (
+                                      <span className="font-mono text-[10px] font-bold bg-zinc-800 text-white px-2 py-0.5 rounded">DIRIGIDO</span>
+                                    )}
+                                    <span className="font-mono text-[10px] font-bold bg-zinc-200 text-zinc-700 px-2 py-0.5 rounded">{curso.estado}</span>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-4 border-b border-zinc-200">
+                                  {[
+                                    { label: 'Docente', value: curso.docente },
+                                    { label: 'Ciclo', value: curso.ciclo },
+                                    { label: 'Créditos', value: curso.creditos },
+                                    { label: 'Promedio', value: curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '—' },
+                                  ].map((item, i) => (
+                                    <div key={i} className={`p-4 ${i < 3 ? 'border-r border-zinc-200' : ''}`}>
+                                      <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400 mb-1">{item.label}</p>
+                                      <p className="text-sm font-bold truncate">{item.value}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                {curso.notas.length > 0 && (
+                                  <div className="px-6 py-3 bg-zinc-50">
+                                    <p className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-500 mb-2">Notas</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {curso.notas.map((nota, idx) => (
+                                        <span key={idx} className="inline-flex items-center px-2 py-1 border border-zinc-200 rounded text-xs font-mono font-bold bg-white">
+                                          {nota.tipoEvaluacion}: {nota.notaValor} <span className="text-zinc-400 ml-1">({nota.peso}%)</span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tab: Historial */}
+                      {tabActiva === 'historial' && (
+                        <div className="space-y-6">
+                          {estudianteDetalle.historialPorPeriodo.length === 0 ? (
+                            <div className="text-center py-12 rounded-lg border border-zinc-200 border-dashed">
+                              <History className="w-12 h-12 mx-auto mb-3 text-zinc-300" />
+                              <p className="font-mono text-sm uppercase tracking-widest text-zinc-500">Sin historial académico</p>
+                            </div>
+                          ) : (
+                            estudianteDetalle.historialPorPeriodo.map((periodo) => (
+                              <div key={periodo.idPeriodo} className="rounded-lg border border-zinc-200">
+                                <div className={`px-5 py-3 border-b border-zinc-200 flex items-center justify-between rounded-t-lg ${periodo.esActivo ? 'bg-zinc-800 text-white' : 'bg-zinc-50'}`}>
+                                  <div className="flex items-center gap-3">
+                                    <h3 className="font-mono text-xs font-bold uppercase tracking-widest">{periodo.nombrePeriodo}</h3>
+                                    {periodo.esActivo && (
+                                      <span className="font-mono text-[10px] font-bold bg-white text-zinc-800 px-2 py-0.5 rounded">ACTUAL</span>
+                                    )}
+                                  </div>
+                                  <div className="flex gap-6 font-mono text-xs font-bold uppercase tracking-widest">
+                                    <span>{periodo.totalCursos} cursos</span>
+                                    <span>{periodo.creditosMatriculados} cred</span>
+                                    <span>P: {periodo.promedioGeneral?.toFixed(2) || '0.00'}</span>
+                                  </div>
+                                </div>
+                                <table className="w-full text-sm">
+                                  <thead className="bg-zinc-50 border-b border-zinc-200">
+                                    <tr>
+                                      {['Curso', 'Docente', 'Ciclo', 'Cred', 'Estado', 'Prom', 'Resultado'].map((h) => (
+                                        <th key={h} className="px-4 py-2 text-left font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-500">{h}</th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y-[2px] divide-zinc-100">
+                                    {periodo.cursos.map((curso) => (
+                                      <tr key={curso.idMatricula} className="hover:bg-zinc-50 transition-colors">
+                                        <td className="px-4 py-3 font-bold">
+                                          {curso.nombreCurso}
+                                          {curso.isAutorizado && <span className="ml-2 text-[10px] font-mono bg-zinc-800 text-white px-1 rounded">DIR</span>}
+                                        </td>
+                                        <td className="px-4 py-3 text-zinc-600 text-xs">{curso.docente}</td>
+                                        <td className="px-4 py-3 font-mono font-bold">{curso.ciclo}</td>
+                                        <td className="px-4 py-3 font-mono font-bold">{curso.creditos}</td>
+                                        <td className="px-4 py-3">
+                                          <span className="font-mono text-[10px] font-bold uppercase">{curso.estado}</span>
+                                        </td>
+                                        <td className="px-4 py-3 font-mono font-bold">
+                                          {curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '—'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          {curso.promedioFinal !== null ? (
+                                            curso.aprobado ? (
+                                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">
+                                                <CheckCircle className="w-3 h-3" /> APROBADO
+                                              </span>
+                                            ) : (
+                                              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded">
+                                                <XCircle className="w-3 h-3" /> DESAPROBADO
+                                              </span>
+                                            )
+                                          ) : (
+                                            <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-zinc-400">
+                                              <Clock className="w-3 h-3" /> EN CURSO
+                                            </span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tab: Estadísticas */}
+                      {tabActiva === 'estadisticas' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                          {/* Matrículas */}
+                          <div className="rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-600">Matrículas</h3>
+                              <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                              {[
+                                { label: 'Total Histórico', value: estudianteDetalle.estadisticas.totalMatriculas },
+                                { label: 'Cursos Activos', value: estudianteDetalle.estadisticas.totalCursosActivos },
+                                { label: 'Retirados', value: estudianteDetalle.estadisticas.totalCursosRetirados },
+                                { label: 'Dirigidos', value: estudianteDetalle.estadisticas.totalCursosDirigidos },
+                              ].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center">
+                                  <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400">{item.label}</span>
+                                  <span className="text-lg font-black tracking-tight">{item.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Rendimiento */}
+                          <div className="rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-600">Rendimiento</h3>
+                              <Award className="w-3.5 h-3.5 text-zinc-400" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                              {[
+                                { label: 'Aprobados', value: estudianteDetalle.estadisticas.totalCursosAprobados },
+                                { label: 'Desaprobados', value: estudianteDetalle.estadisticas.totalCursosDesaprobados },
+                                { label: 'Total Evaluados', value: estudianteDetalle.estadisticas.totalCursosHistorico },
+                              ].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center">
+                                  <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400">{item.label}</span>
+                                  <span className="text-lg font-black tracking-tight">{item.value}</span>
+                                </div>
+                              ))}
+                              <div className="pt-2 border-t border-dashed border-zinc-200">
+                                <div className="flex justify-between items-center">
+                                  <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400">Tasa Aprobación</span>
+                                  <span className="text-lg font-black tracking-tight text-emerald-600">
+                                    {estudianteDetalle.estadisticas.porcentajeAprobacion?.toFixed(0) || 0}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Créditos */}
+                          <div className="rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-600">Créditos</h3>
+                              <CheckCircle className="w-3.5 h-3.5 text-zinc-400" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                              {[
+                                { label: 'Acumulados', value: estudianteDetalle.estadisticas.creditosAcumulados },
+                                { label: 'Total Cursados', value: estudianteDetalle.estadisticas.creditosTotales },
+                                { label: 'Aprobados', value: estudianteDetalle.estadisticas.creditosAprobados },
+                                { label: 'Pendientes', value: estudianteDetalle.estadisticas.creditosPendientes },
+                              ].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center">
+                                  <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400">{item.label}</span>
+                                  <span className="text-lg font-black tracking-tight">{item.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Promedios */}
+                          <div className="rounded-lg border border-zinc-200">
+                            <div className="bg-zinc-50 px-4 py-2 flex justify-between items-center rounded-t-lg border-b border-zinc-200">
+                              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-widest text-zinc-600">Promedios</h3>
+                              <TrendingUp className="w-3.5 h-3.5 text-zinc-400" />
+                            </div>
+                            <div className="p-4 space-y-3">
+                              {[
+                                { label: 'Histórico', value: estudianteDetalle.estadisticas.promedioGeneralHistorico?.toFixed(2) || '0.00' },
+                                { label: 'Acumulado', value: estudianteDetalle.estadisticas.promedioAcumulado?.toFixed(2) || '0.00' },
+                                { label: 'Semestral', value: estudianteDetalle.estadisticas.promedioSemestral?.toFixed(2) || '0.00' },
+                              ].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center">
+                                  <span className="font-mono text-[10px] uppercase font-bold tracking-widest text-zinc-400">{item.label}</span>
+                                  <span className="text-lg font-black tracking-tight">{item.value}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Monolith */}
+                    <footer className="border-t border-zinc-200 bg-zinc-50 text-zinc-500 p-3 flex justify-between items-center px-6 font-mono text-[10px] uppercase font-bold tracking-widest rounded-b-xl">
+                      <span>Sistema de Gestión Académica // {estudianteDetalle.datosPersonales.codigo}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 bg-emerald-500 rounded-full block animate-pulse" />
+                        Conectado
+                      </span>
+                    </footer>
+                  </>
+                ) : null}
+              </Dialog.Panel>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Modal de Edición de Estudiante */}
+      <Transition appear show={!!estudianteAEditar} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setEstudianteAEditar(null)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -377,458 +875,190 @@ export default function VisualizacionEstudiantesPage() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-5xl transform overflow-hidden rounded-xl bg-white text-left align-middle shadow-2xl transition-all ring-1 ring-black/5">
-                  {loadingDetalle ? (
-                    <div className="p-12 text-center">
-                      <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />
-                      <p className="text-zinc-500 text-sm">Cargando información...</p>
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-xl bg-white text-left align-middle shadow-xl transition-all ring-1 ring-black/5">
+                  <div className="bg-zinc-900 px-6 py-4 text-white flex items-center justify-between">
+                    <Dialog.Title className="text-lg font-semibold flex items-center gap-2">
+                      <Edit3 className="w-5 h-5" />
+                      Editar Estudiante
+                    </Dialog.Title>
+                    <button
+                      onClick={() => setEstudianteAEditar(null)}
+                      className="text-zinc-400 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleEditSubmit} className="p-6 space-y-5">
+                    {/* Info del estudiante */}
+                    <div className="bg-zinc-50 rounded-lg p-3 border border-zinc-200 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-600 font-medium text-sm">
+                        {estudianteAEditar?.nombreCompleto.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-zinc-900 text-sm">{estudianteAEditar?.nombreCompleto}</p>
+                        <p className="text-xs text-zinc-500 font-mono">{estudianteAEditar?.codigo}</p>
+                      </div>
                     </div>
-                  ) : estudianteDetalle ? (
-                    <>
-                      {/* Header del Modal */}
-                      <div className="bg-zinc-900 px-8 py-6 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                          <GraduationCap className="w-32 h-32" />
-                        </div>
-                        <div className="relative z-10 flex items-start justify-between">
-                          <div className="flex items-center gap-5">
-                            <div className="h-16 w-16 rounded-xl bg-white/10 flex items-center justify-center text-2xl font-bold text-white backdrop-blur-sm border border-white/20">
-                              {estudianteDetalle.datosPersonales.nombreCompleto.charAt(0)}
-                            </div>
-                            <div>
-                              <h2 className="text-2xl font-bold text-white">
-                                {estudianteDetalle.datosPersonales.nombreCompleto}
-                              </h2>
-                              <div className="flex items-center gap-3 mt-1 text-zinc-300">
-                                <span className="font-mono bg-white/10 px-2 py-0.5 rounded text-sm">
-                                  {estudianteDetalle.datosPersonales.codigo}
-                                </span>
-                                <span>•</span>
-                                <span>{estudianteDetalle.datosPersonales.carrera}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={cerrarModal}
-                            className="text-zinc-400 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-                          >
-                            <X className="w-6 h-6" />
-                          </button>
+
+                    {/* Nombres y Apellidos */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Nombres</label>
+                        <input
+                          type="text"
+                          value={editForm.nombres}
+                          onChange={(e) => setEditForm({ ...editForm, nombres: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Apellidos</label>
+                        <input
+                          type="text"
+                          value={editForm.apellidos}
+                          onChange={(e) => setEditForm({ ...editForm, apellidos: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email y DNI */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Email</label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                          <input
+                            type="email"
+                            value={editForm.email}
+                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                            className="w-full pl-9 pr-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+                            required
+                          />
                         </div>
                       </div>
-
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-4 divide-x divide-zinc-100 border-b border-zinc-100 bg-white">
-                        <div className="p-4 text-center">
-                          <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Créditos</p>
-                          <p className="text-2xl font-bold text-zinc-900">{estudianteDetalle.datosPersonales.creditosAcumulados}</p>
-                        </div>
-                        <div className="p-4 text-center">
-                          <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Semestre Actual</p>
-                          <p className="text-2xl font-bold text-zinc-900">
-                            {estudianteDetalle.cursosActuales
-                              .filter(c => c.estado === 'Matriculado')
-                              .reduce((sum, c) => sum + c.creditos, 0)}
-                          </p>
-                        </div>
-                        <div className="p-4 text-center">
-                          <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Cursos Activos</p>
-                          <p className="text-2xl font-bold text-zinc-900">
-                            {estudianteDetalle.cursosActuales.filter(c => c.estado === 'Matriculado').length}
-                          </p>
-                        </div>
-                        <div className="p-4 text-center">
-                          <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Promedio</p>
-                          <p className="text-2xl font-bold text-zinc-900">
-                            {estudianteDetalle.datosPersonales.promedioAcumulado?.toFixed(2) || '0.00'}
-                          </p>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">DNI</label>
+                        <div className="relative">
+                          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                          <input
+                            type="text"
+                            value={editForm.numeroDocumento}
+                            onChange={(e) => setEditForm({ ...editForm, numeroDocumento: e.target.value })}
+                            className="w-full pl-9 pr-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+                            required
+                          />
                         </div>
                       </div>
+                    </div>
 
-                      {/* Tabs */}
-                      <div className="border-b border-zinc-200 bg-zinc-50/50 px-8">
-                        <div className="flex gap-6">
-                          {[
-                            { id: 'datos', label: 'Datos Personales', icon: User },
-                            { id: 'actuales', label: `Cursos Actuales (${estudianteDetalle.cursosActuales.length})`, icon: BookOpen },
-                            { id: 'historial', label: 'Historial', icon: History },
-                            { id: 'estadisticas', label: 'Estadísticas', icon: BarChart3 },
-                          ].map((tab) => (
-                            <button
-                              key={tab.id}
-                              onClick={() => setTabActiva(tab.id as any)}
-                              className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-colors ${tabActiva === tab.id
-                                  ? 'border-zinc-900 text-zinc-900'
-                                  : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300'
-                                }`}
-                            >
-                              <tab.icon className="w-4 h-4" />
-                              {tab.label}
-                            </button>
+                    {/* Ciclo y Estado */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Ciclo Actual</label>
+                        <select
+                          value={editForm.ciclo}
+                          onChange={(e) => setEditForm({ ...editForm, ciclo: parseInt(e.target.value) })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm appearance-none bg-white"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(c => (
+                            <option key={c} value={c}>Ciclo {c}</option>
                           ))}
-                        </div>
+                        </select>
                       </div>
-
-                      {/* Content */}
-                      <div className="p-8 bg-zinc-50/30 min-h-[400px]">
-                        {/* Tab: Datos Personales */}
-                        {tabActiva === 'datos' && (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm space-y-6">
-                              <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                                <User className="w-4 h-4" />
-                                Información Personal
-                              </h3>
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="text-xs font-medium text-zinc-500">Nombres</label>
-                                    <p className="text-sm text-zinc-900 font-medium mt-1">{estudianteDetalle.datosPersonales.nombres}</p>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs font-medium text-zinc-500">Apellidos</label>
-                                    <p className="text-sm text-zinc-900 font-medium mt-1">{estudianteDetalle.datosPersonales.apellidos}</p>
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="text-xs font-medium text-zinc-500">DNI</label>
-                                  <p className="text-sm text-zinc-900 font-medium mt-1">{estudianteDetalle.datosPersonales.dni}</p>
-                                </div>
-                                <div>
-                                  <label className="text-xs font-medium text-zinc-500">Email</label>
-                                  <p className="text-sm text-zinc-900 font-medium mt-1 flex items-center gap-2">
-                                    <Mail className="w-3.5 h-3.5 text-zinc-400" />
-                                    {estudianteDetalle.datosPersonales.email}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm space-y-6">
-                              <h3 className="text-sm font-semibold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                                <GraduationCap className="w-4 h-4" />
-                                Información Académica
-                              </h3>
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="text-xs font-medium text-zinc-500">Carrera</label>
-                                  <p className="text-sm text-zinc-900 font-medium mt-1">{estudianteDetalle.datosPersonales.carrera}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="text-xs font-medium text-zinc-500">Ciclo Actual</label>
-                                    <p className="text-sm text-zinc-900 font-medium mt-1">Ciclo {estudianteDetalle.datosPersonales.cicloActual}</p>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs font-medium text-zinc-500">Estado</label>
-                                    <div className="mt-1">
-                                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${estudianteDetalle.datosPersonales.estado === 'Activo'
-                                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                          : 'bg-red-50 text-red-700 border-red-200'
-                                        }`}>
-                                        {estudianteDetalle.datosPersonales.estado}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <label className="text-xs font-medium text-zinc-500">Fecha de Ingreso</label>
-                                  <p className="text-sm text-zinc-900 font-medium mt-1 flex items-center gap-2">
-                                    <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                                    {new Date(estudianteDetalle.datosPersonales.fechaIngreso).toLocaleDateString('es-ES', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    })}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Tab: Cursos Actuales */}
-                        {tabActiva === 'actuales' && (
-                          <div className="space-y-4">
-                            {estudianteDetalle.cursosActuales.length === 0 ? (
-                              <div className="text-center py-12 bg-white rounded-xl border border-zinc-200 border-dashed">
-                                <BookOpen className="w-12 h-12 mx-auto mb-3 text-zinc-300" />
-                                <p className="text-zinc-500">No tiene cursos matriculados actualmente</p>
-                              </div>
-                            ) : (
-                              estudianteDetalle.cursosActuales.map((curso) => (
-                                <div key={curso.idMatricula} className="bg-white border border-zinc-200 rounded-xl p-5 hover:shadow-md transition-shadow">
-                                  <div className="flex items-start justify-between mb-4">
-                                    <div>
-                                      <h3 className="text-base font-semibold text-zinc-900">{curso.nombreCurso}</h3>
-                                      <p className="text-sm text-zinc-500 flex items-center gap-2 mt-1">
-                                        <User className="w-3.5 h-3.5" />
-                                        {curso.docente}
-                                      </p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                      {curso.isAutorizado && (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                                          Dirigido
-                                        </span>
-                                      )}
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200">
-                                        {curso.estado}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-4 gap-4 py-4 border-t border-zinc-100">
-                                    <div>
-                                      <span className="text-xs text-zinc-500 block mb-1">Ciclo</span>
-                                      <span className="text-sm font-medium text-zinc-900">{curso.ciclo}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-zinc-500 block mb-1">Créditos</span>
-                                      <span className="text-sm font-medium text-zinc-900">{curso.creditos}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-zinc-500 block mb-1">Horas/Sem</span>
-                                      <span className="text-sm font-medium text-zinc-900">{curso.horasSemanal}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-xs text-zinc-500 block mb-1">Promedio</span>
-                                      <span className={`text-sm font-bold ${(curso.promedioFinal || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
-                                        }`}>
-                                        {curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '-'}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {curso.notas.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-zinc-100 bg-zinc-50/50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl">
-                                      <p className="text-xs font-medium text-zinc-500 mb-2 uppercase tracking-wider">Notas Registradas</p>
-                                      <div className="flex flex-wrap gap-2">
-                                        {curso.notas.map((nota, idx) => (
-                                          <div key={idx} className="inline-flex items-center px-2.5 py-1 rounded-lg bg-white border border-zinc-200 text-xs shadow-sm">
-                                            <span className="font-medium text-zinc-700">{nota.tipoEvaluacion}:</span>
-                                            <span className="ml-1.5 font-bold text-zinc-900">{nota.notaValor}</span>
-                                            <span className="ml-1.5 text-zinc-400">({nota.peso}%)</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-
-                        {/* Tab: Historial */}
-                        {tabActiva === 'historial' && (
-                          <div className="space-y-6">
-                            {estudianteDetalle.historialPorPeriodo.length === 0 ? (
-                              <div className="text-center py-12 bg-white rounded-xl border border-zinc-200 border-dashed">
-                                <History className="w-12 h-12 mx-auto mb-3 text-zinc-300" />
-                                <p className="text-zinc-500">No hay historial académico registrado</p>
-                              </div>
-                            ) : (
-                              estudianteDetalle.historialPorPeriodo.map((periodo) => (
-                                <div key={periodo.idPeriodo} className="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
-                                  {/* Header del período */}
-                                  <div className={`px-6 py-4 border-b border-zinc-200 ${periodo.esActivo ? 'bg-zinc-50' : 'bg-white'
-                                    }`}>
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-lg ${periodo.esActivo ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
-                                          <Calendar className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                          <h3 className="font-semibold text-zinc-900">{periodo.nombrePeriodo}</h3>
-                                          <p className="text-sm text-zinc-500">
-                                            Año {periodo.anio} - Ciclo {periodo.cicloAcademico}
-                                          </p>
-                                        </div>
-                                        {periodo.esActivo && (
-                                          <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            Actual
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="flex gap-8 text-sm">
-                                        <div className="text-center">
-                                          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Cursos</p>
-                                          <p className="font-semibold text-zinc-900">{periodo.totalCursos}</p>
-                                        </div>
-                                        <div className="text-center">
-                                          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Créditos</p>
-                                          <p className="font-semibold text-zinc-900">{periodo.creditosMatriculados}</p>
-                                        </div>
-                                        <div className="text-center">
-                                          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-0.5">Promedio</p>
-                                          <p className={`font-bold ${(periodo.promedioGeneral || 0) >= 10.5 ? 'text-emerald-600' : 'text-zinc-900'
-                                            }`}>
-                                            {periodo.promedioGeneral?.toFixed(2) || '0.00'}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Lista de cursos */}
-                                  <div className="overflow-x-auto">
-                                    <table className="min-w-full text-sm">
-                                      <thead className="bg-zinc-50/50 border-b border-zinc-100">
-                                        <tr>
-                                          <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Curso</th>
-                                          <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Docente</th>
-                                          <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Ciclo</th>
-                                          <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Créditos</th>
-                                          <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Estado</th>
-                                          <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Promedio</th>
-                                          <th className="px-6 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Resultado</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-zinc-100">
-                                        {periodo.cursos.map((curso) => (
-                                          <tr key={curso.idMatricula} className="hover:bg-zinc-50/50 transition-colors">
-                                            <td className="px-6 py-3">
-                                              <div>
-                                                <p className="font-medium text-zinc-900">{curso.nombreCurso}</p>
-                                                {curso.isAutorizado && (
-                                                  <span className="text-xs text-purple-600 font-medium">Dirigido</span>
-                                                )}
-                                              </div>
-                                            </td>
-                                            <td className="px-6 py-3 text-zinc-600">{curso.docente}</td>
-                                            <td className="px-6 py-3 text-center text-zinc-900">{curso.ciclo}</td>
-                                            <td className="px-6 py-3 text-center text-zinc-900">{curso.creditos}</td>
-                                            <td className="px-6 py-3 text-center">
-                                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${curso.estado === 'Matriculado'
-                                                  ? 'bg-zinc-100 text-zinc-800'
-                                                  : 'bg-zinc-50 text-zinc-500'
-                                                }`}>
-                                                {curso.estado}
-                                              </span>
-                                            </td>
-                                            <td className="px-6 py-3 text-center font-medium text-zinc-900">
-                                              {curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '-'}
-                                            </td>
-                                            <td className="px-6 py-3 text-center">
-                                              {curso.promedioFinal !== null ? (
-                                                curso.aprobado ? (
-                                                  <span className="inline-flex items-center gap-1 text-emerald-600 text-xs font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                                                    <CheckCircle className="w-3 h-3" /> Aprobado
-                                                  </span>
-                                                ) : (
-                                                  <span className="inline-flex items-center gap-1 text-red-600 text-xs font-medium bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
-                                                    <XCircle className="w-3 h-3" /> Desaprobado
-                                                  </span>
-                                                )
-                                              ) : (
-                                                <span className="inline-flex items-center gap-1 text-zinc-400 text-xs font-medium">
-                                                  <Clock className="w-3 h-3" /> En curso
-                                                </span>
-                                              )}
-                                            </td>
-                                          </tr>
-                                        ))}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-
-                        {/* Tab: Estadísticas */}
-                        {tabActiva === 'estadisticas' && (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-sm">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-zinc-100 rounded-lg">
-                                  <BookOpen className="w-5 h-5 text-zinc-900" />
-                                </div>
-                                <h3 className="font-semibold text-zinc-900">Matrículas</h3>
-                              </div>
-                              <div className="space-y-3 text-sm">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Total Histórico</span>
-                                  <span className="font-semibold text-zinc-900">{estudianteDetalle.estadisticas.totalMatriculas}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Activos</span>
-                                  <span className="font-semibold text-emerald-600">{estudianteDetalle.estadisticas.totalCursosActivos}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Retirados</span>
-                                  <span className="font-semibold text-zinc-500">{estudianteDetalle.estadisticas.totalCursosRetirados}</span>
-                                </div>
-                                <div className="flex justify-between items-center pt-3 border-t border-zinc-100">
-                                  <span className="text-zinc-500">Dirigidos</span>
-                                  <span className="font-semibold text-purple-600">{estudianteDetalle.estadisticas.totalCursosDirigidos}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-sm">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-emerald-50 rounded-lg">
-                                  <Award className="w-5 h-5 text-emerald-600" />
-                                </div>
-                                <h3 className="font-semibold text-zinc-900">Rendimiento</h3>
-                              </div>
-                              <div className="space-y-3 text-sm">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Aprobados</span>
-                                  <span className="font-semibold text-emerald-600">{estudianteDetalle.estadisticas.totalCursosAprobados}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Desaprobados</span>
-                                  <span className="font-semibold text-red-600">{estudianteDetalle.estadisticas.totalCursosDesaprobados}</span>
-                                </div>
-                                <div className="flex justify-between items-center pt-3 border-t border-zinc-100">
-                                  <span className="text-zinc-500">Tasa Aprobación</span>
-                                  <span className="font-bold text-zinc-900">
-                                    {estudianteDetalle.estadisticas.totalCursosAprobados + estudianteDetalle.estadisticas.totalCursosDesaprobados > 0
-                                      ? ((estudianteDetalle.estadisticas.totalCursosAprobados /
-                                        (estudianteDetalle.estadisticas.totalCursosAprobados + estudianteDetalle.estadisticas.totalCursosDesaprobados)) * 100).toFixed(1)
-                                      : 0}%
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl p-6 border border-zinc-200 shadow-sm">
-                              <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-zinc-100 rounded-lg">
-                                  <TrendingUp className="w-5 h-5 text-zinc-900" />
-                                </div>
-                                <h3 className="font-semibold text-zinc-900">Promedios</h3>
-                              </div>
-                              <div className="space-y-3 text-sm">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Histórico</span>
-                                  <span className="font-semibold text-zinc-900">
-                                    {estudianteDetalle.estadisticas.promedioGeneralHistorico?.toFixed(2) || '0.00'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                  <span className="text-zinc-500">Acumulado</span>
-                                  <span className="font-semibold text-zinc-900">
-                                    {estudianteDetalle.estadisticas.promedioAcumulado?.toFixed(2) || '0.00'}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center pt-3 border-t border-zinc-100">
-                                  <span className="text-zinc-500">Créditos Totales</span>
-                                  <span className="font-bold text-zinc-900">
-                                    {estudianteDetalle.estadisticas.creditosAcumulados}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Estado</label>
+                        <select
+                          value={editForm.estado}
+                          onChange={(e) => setEditForm({ ...editForm, estado: e.target.value })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm appearance-none bg-white"
+                        >
+                          <option value="Activo">Activo</option>
+                          <option value="Inactivo">Inactivo</option>
+                          <option value="Suspendido">Suspendido</option>
+                          <option value="Egresado">Egresado</option>
+                        </select>
                       </div>
-                    </>
-                  ) : null}
+                    </div>
+
+                    {/* Facultad y Escuela */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Facultad</label>
+                        <select
+                          value={editForm.idFacultad}
+                          onChange={(e) => setEditForm({ ...editForm, idFacultad: parseInt(e.target.value), idEscuela: 0 })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm appearance-none bg-white"
+                        >
+                          <option value={0}>Sin cambios</option>
+                          {facultades.map((f: any) => (
+                            <option key={f.id} value={f.id}>{f.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-zinc-700 mb-1">Escuela Profesional</label>
+                        <select
+                          value={editForm.idEscuela}
+                          onChange={(e) => setEditForm({ ...editForm, idEscuela: parseInt(e.target.value) })}
+                          className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm appearance-none bg-white"
+                        >
+                          <option value={0}>Sin cambios</option>
+                          {escuelasFiltradas.map((e: any) => (
+                            <option key={e.id} value={e.id}>{e.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Contraseña (opcional) */}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1 flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5" />
+                        Nueva Contraseña <span className="text-zinc-400 font-normal">(opcional, mín. 6 caracteres)</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={editForm.password}
+                        onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                        placeholder="Dejar vacío para no cambiar"
+                        className="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+                        minLength={6}
+                      />
+                    </div>
+
+                    {/* Botones */}
+                    <div className="flex gap-3 justify-end pt-4 border-t border-zinc-100">
+                      <button
+                        type="button"
+                        onClick={() => setEstudianteAEditar(null)}
+                        className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
+                        disabled={actualizarMutation.isPending}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={actualizarMutation.isPending}
+                      >
+                        {actualizarMutation.isPending ? (
+                          <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4" />
+                            Guardar Cambios
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
