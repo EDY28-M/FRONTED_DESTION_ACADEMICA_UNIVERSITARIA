@@ -6,9 +6,48 @@ type TopStudentDatum = {
   name: string
   value: number
   posicion: number
+  promocion: string
+  semestre: number
+  rangoMerito: string
+  creditosAprobados: number
 }
 
 const COLORS = ['#0ea5e9', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa']
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div className="bg-white border border-slate-200 shadow-lg p-3 min-w-[180px]"
+      style={{ borderRadius: 0 }}>
+      <p className="text-xs font-bold text-slate-900 mb-1.5 truncate">{d.name}</p>
+      <div className="space-y-1">
+        <div className="flex justify-between text-[11px]">
+          <span className="text-slate-500">PPA</span>
+          <span className="font-bold font-mono text-slate-900">{d.value.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-[11px]">
+          <span className="text-slate-500">Posición</span>
+          <span className="font-mono text-slate-700">#{d.posicion}</span>
+        </div>
+        <div className="flex justify-between text-[11px]">
+          <span className="text-slate-500">Ciclo</span>
+          <span className="font-mono text-slate-700">{d.semestre}°</span>
+        </div>
+        <div className="flex justify-between text-[11px]">
+          <span className="text-slate-500">Promoción</span>
+          <span className="font-mono text-slate-700">{d.promocion}</span>
+        </div>
+        {d.rangoMerito && (
+          <div className="flex justify-between text-[11px]">
+            <span className="text-slate-500">Mérito</span>
+            <span className="font-mono text-slate-700">{d.rangoMerito}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const TopStudentsChart: React.FC = () => {
   const { data, isLoading } = useQuery<OrdenMerito[]>({
@@ -25,12 +64,16 @@ const TopStudentsChart: React.FC = () => {
       ? s.promedioPonderadoAcumulado
       : (s.promedioPonderadoSemestral ?? 0),
     posicion: s.posicion,
+    promocion: s.promocion || '-',
+    semestre: s.semestre,
+    rangoMerito: s.rangoMerito || '',
+    creditosAprobados: s.totalCreditosAprobados,
   }))
 
   const hasData = chartData.length > 0
 
   return (
-    <div className="bg-gradient-to-b from-white to-slate-50/60 border border-zinc-200 p-6 flex flex-col h-[400px]">
+    <div className="bg-gradient-to-b from-white to-slate-50/60 border border-zinc-200 p-6 flex flex-col h-[400px] overflow-hidden">
       <div className="flex items-center justify-between mb-4 border-b border-zinc-200 pb-4">
         <div>
           <h3 className="font-bold text-zinc-900 uppercase tracking-tight text-sm">Mejores Estudiantes</h3>
@@ -50,60 +93,28 @@ const TopStudentsChart: React.FC = () => {
           <p className="text-zinc-500 text-sm">Sin datos</p>
         </div>
       ) : (
-        <div className="flex-1 grid grid-cols-1 gap-4">
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={55}
-                  outerRadius={78}
-                  paddingAngle={2}
-                  stroke="#ffffff"
-                  strokeWidth={2}
-                >
-                  {chartData.map((_, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 0,
-                    color: '#0f172a',
-                    fontSize: '12px',
-                  }}
-                  formatter={(value: number) => [`${Number(value).toFixed(2)}`, 'PPA']}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="space-y-2">
-            {chartData.map((s, idx) => (
-              <div
-                key={`${s.posicion}-${s.name}`}
-                className="flex items-center justify-between gap-3 px-3 py-2 bg-white border border-zinc-200"
+        <div className="flex-1 flex items-center justify-center overflow-hidden">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius="35%"
+                outerRadius="70%"
+                paddingAngle={2}
+                stroke="#ffffff"
+                strokeWidth={2}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span
-                    className="w-2.5 h-2.5 shrink-0"
-                    style={{ backgroundColor: COLORS[idx % COLORS.length] }}
-                  />
-                  <span className="text-sm font-medium text-zinc-900 truncate">{s.name}</span>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-[10px] font-mono text-zinc-500">#{s.posicion}</span>
-                  <span className="text-sm font-bold text-zinc-900 font-mono tabular-nums">
-                    {s.value.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                {chartData.map((_, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

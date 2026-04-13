@@ -116,7 +116,12 @@ export default function GestionEstudiantesPage() {
       return;
     }
 
-    crearEstudianteMutation.mutate(formData);
+    const datosEnviar = {
+      ...formData,
+      idFacultad: formData.idFacultad && formData.idFacultad > 0 ? formData.idFacultad : undefined,
+      idEscuela: formData.idEscuela && formData.idEscuela > 0 ? formData.idEscuela : undefined,
+    };
+    crearEstudianteMutation.mutate(datosEnviar as any);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

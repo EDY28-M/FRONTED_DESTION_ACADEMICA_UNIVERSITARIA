@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import paymentApi from '../../lib/paymentApi';
@@ -24,51 +24,58 @@ interface PaymentReceipt {
   createdAt: string;
 }
 
+interface PaymentStatus {
+  id: number;
+  status: string;
+  amount: number;
+  currency: string;
+  fechaCreacion: string;
+  fechaPagoExitoso: string | null;
+  procesado: boolean;
+  tipoPago: string | null;
+  items: { idCurso: number; nombreCurso: string | null; cantidad: number; precioUnitario: number; subtotal: number }[];
+}
+
 const PagoExitosoPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const [receipt, setReceipt] = useState<PaymentReceipt | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 5;
+  const fetchedRef = useRef(false);
 
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    if (sessionId) {
-      fetchReceipt();
-    } else {
+    if (!sessionId) {
       setError('No se encontró información del pago');
       setIsLoading(false);
+      return;
     }
-  }, [sessionId]);
 
-  const fetchReceipt = async () => {
-    try {
-      const response = await paymentApi.get(`/receipts/by-session/${sessionId}`);
-      setReceipt(response.data);
+    // Evitar doble ejecución por React StrictMode
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const loadPaymentInfo = async () => {
+      try {
+        // Confirmar pago con Stripe directamente (procesa si webhook no llegó)
+        const confirmResponse = await paymentApi.post(`/payments/confirm-session/${sessionId}`);
+        setPaymentStatus(confirmResponse.data);
+      } catch {
+        setError('No se encontró información del pago');
+      }
+
       setIsLoading(false);
-
       queryClient.invalidateQueries({ queryKey: ['matricula-pagada'] });
       queryClient.invalidateQueries({ queryKey: ['cursos-disponibles'] });
       queryClient.invalidateQueries({ queryKey: ['historial-pagos'] });
-    } catch (err: any) {
-      console.error('Error al obtener recibo:', err);
+    };
 
-      if (err.response?.status === 404 && retryCount < MAX_RETRIES) {
-        setRetryCount(prev => prev + 1);
-        setTimeout(() => {
-          fetchReceipt();
-        }, 2000);
-        return;
-      }
-
-      setError(err.response?.data?.mensaje || 'Error al obtener el recibo de pago');
-      setIsLoading(false);
-    }
-  };
+    loadPaymentInfo();
+  }, [sessionId]);
 
   const handlePrint = () => {
     window.print();
@@ -114,7 +121,7 @@ const PagoExitosoPage: React.FC = () => {
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
         <div className="bg-white border border-zinc-200 max-w-sm w-full p-8 text-center">
           <p className="text-sm text-zinc-600 mb-1">
-            {retryCount > 0 ? `Verificando pago... (${retryCount}/${MAX_RETRIES})` : 'Verificando pago...'}
+            Verificando pago...
           </p>
           <p className="text-xs text-zinc-400">Por favor, espere un momento</p>
         </div>
@@ -146,8 +153,63 @@ const PagoExitosoPage: React.FC = () => {
     );
   }
 
-  if (!receipt) {
+  if (!receipt && !paymentStatus) {
     return null;
+  }
+
+  // Fallback: mostrar info del pago sin recibo completo
+  if (!receipt && paymentStatus) {
+    return (
+      <div className="bg-zinc-50 py-6 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white border border-zinc-200 p-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-50 border border-green-200 flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-zinc-900 mb-2">¡Pago Registrado!</h2>
+            <p className="text-sm text-zinc-500 mb-4">
+              Tu pago de {formatCurrency(paymentStatus.amount, paymentStatus.currency)} ha sido registrado exitosamente.
+            </p>
+            <div className="text-xs text-zinc-400 mb-2">
+              Estado: <span className="font-medium text-zinc-600">{paymentStatus.status === 'Completed' ? 'Completado' : paymentStatus.status === 'Pending' ? 'Pendiente de confirmación' : paymentStatus.status}</span>
+            </div>
+            {paymentStatus.items.length > 0 && (
+              <div className="text-left border-t border-zinc-100 mt-4 pt-4">
+                <p className="text-xs font-semibold text-zinc-600 mb-2">Detalle:</p>
+                {paymentStatus.items.map((item, i) => (
+                  <div key={i} className="flex justify-between text-xs text-zinc-500 py-1">
+                    <span>{item.nombreCurso || 'Servicio'}</span>
+                    <span className="font-mono">{formatCurrency(item.subtotal, paymentStatus.currency)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-[10px] text-zinc-400 mt-4">
+              El recibo detallado estará disponible una vez que Stripe confirme el pago.
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleGoToCourses}
+                className="py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 text-white text-sm font-medium transition-colors"
+              >
+                Matricular Cursos
+              </button>
+              <button
+                onClick={handleGoHome}
+                className="py-2.5 px-4 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-medium transition-colors"
+              >
+                Volver al Inicio
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

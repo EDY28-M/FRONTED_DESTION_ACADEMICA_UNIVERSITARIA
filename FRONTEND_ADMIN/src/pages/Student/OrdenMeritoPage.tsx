@@ -5,7 +5,7 @@ import { Users, Filter, Trophy, TrendingUp } from 'lucide-react';
 import PageHeader from '../../components/Student/PageHeader';
 
 export default function OrdenMeritoPage() {
-  const [promocionSeleccionada, setPromocionSeleccionada] = useState<string>('');
+  const [promocionSeleccionada, setPromocionSeleccionada] = useState<string | null>(null);
 
   const { data: promociones = [] } = useQuery({
     queryKey: ['promociones'],
@@ -13,16 +13,23 @@ export default function OrdenMeritoPage() {
     retry: false,
   });
 
-  const { data: miPosicion } = useQuery({
+  const { data: miPosicion, isLoading: isLoadingMiPosicion, isError: miPosicionNoDisponible } = useQuery({
     queryKey: ['mi-posicion-merito'],
     queryFn: estudiantesApi.getMiPosicionMerito,
     retry: false,
   });
 
+  const promocionBase = miPosicion?.promocion ?? (miPosicionNoDisponible ? (promociones[0] ?? '') : '');
+  const promocionActiva = promocionSeleccionada ?? promocionBase;
+  const promocionesOrdenadas = promocionBase
+    ? [promocionBase, ...promociones.filter((promo) => promo !== promocionBase)]
+    : promociones;
+
   const { data: ordenMerito = [], isLoading } = useQuery({
-    queryKey: ['orden-merito', promocionSeleccionada],
-    queryFn: () => estudiantesApi.getOrdenMerito(promocionSeleccionada || undefined),
+    queryKey: ['orden-merito', promocionActiva],
+    queryFn: () => estudiantesApi.getOrdenMerito(promocionActiva),
     retry: false,
+    enabled: Boolean(promocionActiva),
   });
 
   const getBadgePosicion = (posicion: number) => {
@@ -61,14 +68,16 @@ export default function OrdenMeritoPage() {
     <div className="relative">
       <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
       <select
-        value={promocionSeleccionada}
+        value={promocionActiva}
         onChange={(e) => setPromocionSeleccionada(e.target.value)}
+        disabled={promocionesOrdenadas.length === 0}
         className="pl-9 pr-8 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-shadow appearance-none cursor-pointer"
       >
-        <option value="">Todas las promociones</option>
-        {promociones.map((promo) => (
+        {promocionesOrdenadas.length === 0 ? (
+          <option value="">Sin promociones</option>
+        ) : promocionesOrdenadas.map((promo) => (
           <option key={promo} value={promo}>
-            Promoción {promo}
+            {`Promoción ${promo}`}
           </option>
         ))}
       </select>
@@ -122,7 +131,7 @@ export default function OrdenMeritoPage() {
       )}
 
       {/* Tabla de Orden de Mérito */}
-      {isLoading ? (
+      {isLoadingMiPosicion || isLoading ? (
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin w-6 h-6 border-2 border-zinc-900 border-t-transparent rounded-full mx-auto mb-4" />

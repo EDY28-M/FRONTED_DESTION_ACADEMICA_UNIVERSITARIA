@@ -133,8 +133,8 @@ export default function VisualizacionEstudiantesPage() {
     if (editForm.numeroDocumento) data.numeroDocumento = editForm.numeroDocumento;
     if (editForm.ciclo) data.ciclo = editForm.ciclo;
     if (editForm.estado) data.estado = editForm.estado;
-    if (editForm.idFacultad) data.idFacultad = editForm.idFacultad;
-    if (editForm.idEscuela) data.idEscuela = editForm.idEscuela;
+    if (editForm.idFacultad && editForm.idFacultad > 0) data.idFacultad = editForm.idFacultad;
+    if (editForm.idEscuela && editForm.idEscuela > 0) data.idEscuela = editForm.idEscuela;
     if (editForm.password && editForm.password.length >= 6) data.password = editForm.password;
 
     actualizarMutation.mutate({ id: estudianteAEditar.id, data });
