@@ -30,6 +30,9 @@ dist-ssr
 .env.test.local
 .env.production.local
 
+# Local HTTPS certificates
+.cert/
+
 # Build outputs
 build/
 coverage/

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Download, FileText } from 'lucide-react'
 import { docentesApi } from '../services/docentesService'
 import { cursosApi } from '../services/cursosService'
+import api from '../lib/axios'
 import StatsCard from '../components/Dashboard/StatsCard'
 import ChartsSection from '../components/Dashboard/ChartsSection'
 import PerformanceMonitor from '../components/Dashboard/PerformanceMonitor'
@@ -18,6 +19,14 @@ const Dashboard = () => {
   const { data: cursos, isLoading: loadingCursos } = useQuery({
     queryKey: ['cursos'],
     queryFn: cursosApi.getAll,
+  })
+
+  const { data: estudiantes, isLoading: loadingEstudiantes } = useQuery({
+    queryKey: ['admin-estudiantes'],
+    queryFn: async () => {
+      const res = await api.get('/admin/estudiantes')
+      return res.data
+    },
   })
 
   // Función para exportar datos a CSV
@@ -105,8 +114,8 @@ const Dashboard = () => {
             <div class="stat-label">Total Créditos</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value">${cursos.reduce((sum, c) => sum + c.horasSemanal, 0)}</div>
-            <div class="stat-label">Horas Semanales</div>
+            <div class="stat-value">${estudiantes?.length || 0}</div>
+            <div class="stat-label">Total Estudiantes</div>
           </div>
         </div>
 
@@ -199,15 +208,15 @@ const Dashboard = () => {
       chartType: 'bar' as const,
     },
     {
-      name: 'Horas Semanales',
-      value: cursos?.reduce((sum, curso) => sum + curso.horasSemanal, 0) || 0,
+      name: 'Total Estudiantes',
+      value: estudiantes?.length || 0,
       change: '+15%',
       changeType: 'positive' as const,
       chartType: 'line' as const,
     },
   ]
 
-  const isLoading = loadingDocentes || loadingCursos
+  const isLoading = loadingDocentes || loadingCursos || loadingEstudiantes
 
   return (
     <div className="space-y-6">

@@ -117,14 +117,14 @@ const CursosPage = () => {
       facultadNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       escuelaNombre.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesCiclo = selectedCiclo === '' || curso.ciclo.toString() === selectedCiclo
+    const matchesCiclo = selectedCiclo === '' || (curso.ciclo != null && curso.ciclo.toString() === selectedCiclo)
     const matchesFacultad = selectedFacultadId === '' || curso.idFacultad === selectedFacultadId
     const matchesEscuela = selectedEscuelaId === '' || curso.idEscuela === selectedEscuelaId
 
     return matchesSearch && matchesCiclo && matchesFacultad && matchesEscuela
   }) || []
 
-  const ciclos = Array.from(new Set(cursos?.map(curso => curso.ciclo) || [])).sort()
+  const ciclos = Array.from(new Set(cursos?.map(curso => curso.ciclo).filter((c): c is number => c != null) || [])).sort((a, b) => a - b)
 
   const handleCreate = () => {
     setModalMode('create')
@@ -453,7 +453,7 @@ const CursosPage = () => {
                     </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700">
-                        Ciclo {curso.ciclo}
+                        {curso.ciclo != null ? `Ciclo ${curso.ciclo}` : 'Electivo'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
