@@ -104,11 +104,17 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     },
   })
 
-  const onSubmit = (data: DocenteCreate | DocenteUpdate) => {
+  const onSubmit = (data: any) => {
+    const processedData = {
+      ...data,
+      idFacultad: data.idFacultad !== '' && data.idFacultad != null ? Number(data.idFacultad) : undefined,
+      idEscuela: data.idEscuela !== '' && data.idEscuela != null ? Number(data.idEscuela) : undefined,
+    }
+
     if (isCreateMode) {
-      createMutation.mutate(data as DocenteCreate)
+      createMutation.mutate(processedData as DocenteCreate)
     } else if (isEditMode && docente) {
-      updateMutation.mutate({ id: docente.id, data: data as DocenteUpdate })
+      updateMutation.mutate({ id: docente.id, data: processedData as DocenteUpdate })
     }
   }
 

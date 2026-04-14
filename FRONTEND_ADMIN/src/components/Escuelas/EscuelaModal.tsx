@@ -85,18 +85,23 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
         },
     })
 
-    const onSubmit = (data: CrearEscuela | ActualizarEscuela) => {
-        // Convert numerical values from strings
-        data.facultadId = Number(data.facultadId)
-        // @ts-ignore
-        if (data.duracionAnios) data.duracionAnios = Number(data.duracionAnios)
-        // @ts-ignore
-        if (data.totalCreditos) data.totalCreditos = Number(data.totalCreditos)
+    const onSubmit = (data: any) => {
+        // Safe numerical conversions
+        const parsedFacultadId = data.facultadId !== '' && data.facultadId != null ? Number(data.facultadId) : 0;
+        const parsedDuracion = data.duracionAnios !== '' && data.duracionAnios != null ? Number(data.duracionAnios) : undefined;
+        const parsedTotalCreditos = data.totalCreditos !== '' && data.totalCreditos != null ? Number(data.totalCreditos) : undefined;
+
+        const processedData = {
+           ...data,
+           facultadId: parsedFacultadId,
+           duracionAnios: parsedDuracion,
+           totalCreditos: parsedTotalCreditos
+        };
 
         if (isCreateMode) {
-            createMutation.mutate(data as CrearEscuela)
+            createMutation.mutate(processedData as CrearEscuela)
         } else if (isEditMode && escuela) {
-            const updateData = { ...data, activo: escuela.activo } as ActualizarEscuela
+            const updateData = { ...processedData, activo: escuela.activo } as ActualizarEscuela
             updateMutation.mutate({ id: escuela.id, data: updateData })
         }
     }

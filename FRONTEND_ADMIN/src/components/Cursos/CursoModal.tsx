@@ -110,14 +110,30 @@ const CursoModal: React.FC<CursoModalProps> = ({
     },
   })
 
-  const onSubmit = (data: CursoCreate | CursoUpdate) => {
+  const parseNumberOrNull = (val: any) => {
+    if (val === undefined || val === null || val === '') return null;
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  };
+
+  const onSubmit = (data: any) => {
     const formData = {
-      ...data,
-      idDocente: data.idDocente ? Number(data.idDocente) : undefined,
-      idFacultad: data.idFacultad ? Number(data.idFacultad) : undefined,
-      idEscuela: data.idEscuela ? Number(data.idEscuela) : undefined,
+      codigo: data.codigo || undefined,
+      nombreCurso: data.nombreCurso,
+      creditos: data.creditos ? Number(data.creditos) : 0,
+      horasSemanal: data.horasSemanal ? Number(data.horasSemanal) : 0,
+      horasTeoria: parseNumberOrNull(data.horasTeoria),
+      horasPractica: parseNumberOrNull(data.horasPractica),
+      horasTotales: parseNumberOrNull(data.horasTotales),
+      ciclo: data.ciclo ? Number(data.ciclo) : 0,
+      idDocente: parseNumberOrNull(data.idDocente),
+      idFacultad: parseNumberOrNull(data.idFacultad),
+      idEscuela: parseNumberOrNull(data.idEscuela),
       prerequisitosIds: selectedPrerequisitos,
-    }
+    };
+
+    // Clean up null foreign keys to undefined if backend rejects null directly 
+    // Usually .NET Core accepts null for nullable ints. Let's send null.
 
     if (isCreateMode) {
       createMutation.mutate(formData as CursoCreate)
