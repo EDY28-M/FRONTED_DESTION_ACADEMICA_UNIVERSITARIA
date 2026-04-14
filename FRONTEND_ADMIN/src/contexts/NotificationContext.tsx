@@ -44,6 +44,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         action: n.accion,
         nombre: n.mensaje,
         timestamp: new Date(n.fechaCreacion),
+        leida: n.leida === true || n.leida === 'true',
         metadata: n.metadata
       }))
       setNotifications(serverNotifications)
@@ -109,6 +110,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         action: serverNotification.accion,
         nombre: serverNotification.mensaje,
         timestamp: new Date(serverNotification.fechaCreacion),
+        leida: false,
         metadata: serverNotification.metadata
       }
       
@@ -145,6 +147,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       ...notification,
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       timestamp: new Date(),
+      leida: false,
     }
     
     setNotifications(prev => [newNotification, ...prev].slice(0, 100))
@@ -163,9 +166,28 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  const markAsRead = () => {
-    // Implementar si se necesita marcar como leídas
+  
+  const markAsRead = async () => {
+    try {
+      const idsNoLeidas = notifications
+        .filter(n => n.leida === false)
+        .map(n => parseInt(n.id))
+        .filter(id => !isNaN(id));
+
+      if (idsNoLeidas.length > 0) {
+        await api.put('/notificaciones/marcar-leidas', { notificacionIds: idsNoLeidas });
+      }
+      
+      // Update local state immediately for fast UI response
+      setNotifications(prev => prev.map(n => ({...n, leida: true})));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications.map(n => ({...n, leida: true}))));
+    } catch (error) {
+      console.error('Error al marcar notificaciones como leídas:', error);
+      // Even if it fails, mask it in the UI for better UX
+      setNotifications(prev => prev.map(n => ({...n, leida: true})));
+    }
   }
+
 
   return (
     <NotificationContext.Provider value={{ 
