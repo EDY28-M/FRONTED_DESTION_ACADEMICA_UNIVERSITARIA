@@ -2,8 +2,10 @@ import { Fragment, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { X, User, Mail, Briefcase, Calendar, BookOpen, Building2, GraduationCap } from 'lucide-react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { docentesApi } from '../../services/docentesService'
 import { facultadesApi } from '../../services/facultadesApi'
 import { escuelasApi } from '../../services/escuelasApi'
@@ -16,6 +18,24 @@ interface DocenteModalProps {
   docente?: Docente | null
   mode: 'create' | 'edit' | 'view'
 }
+
+const emptyToNull = z.union([z.number(), z.string(), z.null(), z.undefined()]).transform(v => {
+  if (v === '' || v === null || v === undefined) return null;
+  const num = Number(v);
+  return isNaN(num) ? null : num;
+});
+
+const docenteSchema = z.object({
+  apellidos: z.string().min(1, 'Los apellidos son requeridos'),
+  nombres: z.string().min(1, 'Los nombres son requeridos'),
+  profesion: z.string().optional().transform(v => v === '' ? undefined : v),
+  correo: z.union([z.literal(''), z.string().email('Correo inválido')]).optional().transform(v => v === '' ? undefined : v),
+  fechaNacimiento: z.string().optional().transform(v => v === '' ? undefined : v),
+  idFacultad: emptyToNull,
+  idEscuela: emptyToNull
+});
+
+type DocenteFormValues = z.infer<typeof docenteSchema>;
 
 const DocenteModal: React.FC<DocenteModalProps> = ({
   isOpen,
@@ -46,7 +66,9 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     reset,
     setValue,
     watch,
-  } = useForm<DocenteCreate | DocenteUpdate>()
+  } = useForm<DocenteFormValues>({
+    resolver: zodResolver(docenteSchema)
+  })
 
   const selectedFacultadId = watch('idFacultad')
   const escuelasFiltradas = escuelas?.filter(e =>
@@ -104,17 +126,11 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     },
   })
 
-  const onSubmit = (data: any) => {
-    const processedData = {
-      ...data,
-      idFacultad: data.idFacultad !== '' && data.idFacultad != null ? Number(data.idFacultad) : undefined,
-      idEscuela: data.idEscuela !== '' && data.idEscuela != null ? Number(data.idEscuela) : undefined,
-    }
-
+  const onSubmit = (data: DocenteFormValues) => {
     if (isCreateMode) {
-      createMutation.mutate(processedData as DocenteCreate)
+      createMutation.mutate(data as DocenteCreate)
     } else if (isEditMode && docente) {
-      updateMutation.mutate({ id: docente.id, data: processedData as DocenteUpdate })
+      updateMutation.mutate({ id: docente.id, data: data as DocenteUpdate })
     }
   }
 

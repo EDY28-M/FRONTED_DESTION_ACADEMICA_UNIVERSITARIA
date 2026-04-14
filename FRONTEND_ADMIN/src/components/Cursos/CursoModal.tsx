@@ -4,6 +4,8 @@ import { X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { cursosApi } from '../../services/cursosService'
 import { Curso, CursoCreate, CursoUpdate, Docente } from '../../types'
 import { Facultad } from '../../types/facultad'
@@ -19,6 +21,28 @@ interface CursoModalProps {
   facultades: Facultad[]
   escuelas: Escuela[]
 }
+
+const emptyToNull = z.union([z.number(), z.string(), z.null(), z.undefined()]).transform(v => {
+  if (v === '' || v === null || v === undefined) return null;
+  const num = Number(v);
+  return isNaN(num) ? null : num;
+});
+
+const cursoSchema = z.object({
+  codigo: z.string().optional().transform(v => v === '' ? undefined : v),
+  nombreCurso: z.string().min(1, 'El nombre es requerido'),
+  creditos: z.coerce.number().min(1, 'Mín. 1').max(10, 'Máx. 10'),
+  horasSemanal: z.coerce.number().min(1, 'Mín. 1').max(40, 'Máx. 40'),
+  horasTeoria: emptyToNull,
+  horasPractica: emptyToNull,
+  horasTotales: emptyToNull,
+  ciclo: z.coerce.number().min(1, 'Requerido').max(10, 'Máx. 10'),
+  idDocente: emptyToNull,
+  idFacultad: emptyToNull,
+  idEscuela: emptyToNull,
+});
+
+type CursoFormValues = z.infer<typeof cursoSchema>;
 
 const CursoModal: React.FC<CursoModalProps> = ({
   isOpen,
@@ -43,7 +67,9 @@ const CursoModal: React.FC<CursoModalProps> = ({
     reset,
     setValue,
     watch,
-  } = useForm<CursoCreate | CursoUpdate>()
+  } = useForm<CursoFormValues>({
+    resolver: zodResolver(cursoSchema)
+  })
 
   const cicloActual = watch('ciclo')
 
@@ -110,30 +136,11 @@ const CursoModal: React.FC<CursoModalProps> = ({
     },
   })
 
-  const parseNumberOrNull = (val: any) => {
-    if (val === undefined || val === null || val === '') return null;
-    const num = Number(val);
-    return isNaN(num) ? null : num;
-  };
-
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: CursoFormValues) => {
     const formData = {
-      codigo: data.codigo || undefined,
-      nombreCurso: data.nombreCurso,
-      creditos: data.creditos ? Number(data.creditos) : 0,
-      horasSemanal: data.horasSemanal ? Number(data.horasSemanal) : 0,
-      horasTeoria: parseNumberOrNull(data.horasTeoria),
-      horasPractica: parseNumberOrNull(data.horasPractica),
-      horasTotales: parseNumberOrNull(data.horasTotales),
-      ciclo: data.ciclo ? Number(data.ciclo) : 0,
-      idDocente: parseNumberOrNull(data.idDocente),
-      idFacultad: parseNumberOrNull(data.idFacultad),
-      idEscuela: parseNumberOrNull(data.idEscuela),
+      ...data,
       prerequisitosIds: selectedPrerequisitos,
     };
-
-    // Clean up null foreign keys to undefined if backend rejects null directly 
-    // Usually .NET Core accepts null for nullable ints. Let's send null.
 
     if (isCreateMode) {
       createMutation.mutate(formData as CursoCreate)

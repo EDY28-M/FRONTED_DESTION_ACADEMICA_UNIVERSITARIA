@@ -4,6 +4,8 @@ import { X, GraduationCap, FileText, Code, Clock, BookOpen } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { escuelasApi } from '../../services/escuelasApi'
 import { facultadesApi } from '../../services/facultadesApi'
 import { Escuela, CrearEscuela, ActualizarEscuela } from '../../types/escuela'
@@ -14,6 +16,23 @@ interface EscuelaModalProps {
     escuela?: Escuela | null
     mode: 'create' | 'edit' | 'view'
 }
+
+const emptyToNull = z.union([z.number(), z.string(), z.null(), z.undefined()]).transform(v => {
+  if (v === '' || v === null || v === undefined) return null;
+  const num = Number(v);
+  return isNaN(num) ? null : num;
+});
+
+const escuelaSchema = z.object({
+  facultadId: z.coerce.number().min(1, 'La facultad es requerida'),
+  nombre: z.string().min(1, 'El nombre es requerido'),
+  codigo: z.string().optional().transform(v => v === '' ? undefined : v),
+  duracionAnios: emptyToNull,
+  totalCreditos: emptyToNull,
+  descripcion: z.string().optional().transform(v => v === '' ? undefined : v)
+});
+
+type EscuelaFormValues = z.infer<typeof escuelaSchema>;
 
 const EscuelaModal: React.FC<EscuelaModalProps> = ({
     isOpen,
@@ -37,7 +56,9 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
         formState: { errors },
         reset,
         setValue,
-    } = useForm<CrearEscuela | ActualizarEscuela>()
+    } = useForm<EscuelaFormValues>({
+        resolver: zodResolver(escuelaSchema)
+    })
 
     useEffect(() => {
         if (isOpen && escuela && (isEditMode || isViewMode)) {
@@ -85,23 +106,11 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
         },
     })
 
-    const onSubmit = (data: any) => {
-        // Safe numerical conversions
-        const parsedFacultadId = data.facultadId !== '' && data.facultadId != null ? Number(data.facultadId) : 0;
-        const parsedDuracion = data.duracionAnios !== '' && data.duracionAnios != null ? Number(data.duracionAnios) : undefined;
-        const parsedTotalCreditos = data.totalCreditos !== '' && data.totalCreditos != null ? Number(data.totalCreditos) : undefined;
-
-        const processedData = {
-           ...data,
-           facultadId: parsedFacultadId,
-           duracionAnios: parsedDuracion,
-           totalCreditos: parsedTotalCreditos
-        };
-
+    const onSubmit = (data: EscuelaFormValues) => {
         if (isCreateMode) {
-            createMutation.mutate(processedData as CrearEscuela)
+            createMutation.mutate(data as CrearEscuela)
         } else if (isEditMode && escuela) {
-            const updateData = { ...processedData, activo: escuela.activo } as ActualizarEscuela
+            const updateData = { ...data, activo: escuela.activo } as ActualizarEscuela
             updateMutation.mutate({ id: escuela.id, data: updateData })
         }
     }
