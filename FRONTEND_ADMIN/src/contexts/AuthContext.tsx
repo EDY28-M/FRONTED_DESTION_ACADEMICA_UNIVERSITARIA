@@ -136,10 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Cargar notificaciones desde el servidor
       setTimeout(async () => {
-        const notificationContext = getNotifications()
-        if (notificationContext) {
-          await notificationContext.loadNotifications()
-
+        try {
           // Detectar dispositivo y ubicación
           const deviceInfo = getDeviceInfo()
           const location = await getLocationInfo()
@@ -147,31 +144,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const isNewDev = isNewDevice(deviceInfo.fingerprint)
           const isNewLoc = isNewLocation(location)
 
-          // Si es un nuevo dispositivo o ubicación, crear notificación en el servidor
+          // Registrar dispositivo y ubicación limpia localmente
           if (isNewDev || isNewLoc) {
-            let message = ''
-            if (isNewDev && isNewLoc) {
-              message = 'Nuevo dispositivo y ubicación'
-            } else if (isNewDev) {
-              message = 'Nuevo dispositivo detectado'
-            } else {
-              message = 'Nueva ubicación detectada'
-            }
-
-            await notificationContext.createNotification({
-              type: 'login',
-              action: 'iniciar',
-              nombre: message,
-              metadata: {
-                device: `${deviceInfo.deviceType} - ${deviceInfo.browser} en ${deviceInfo.os}`,
-                location: location
-              }
-            })
+            console.log('Nuevo dispositivo / ubicación en Login');
           }
-
-          // Registrar dispositivo y ubicación
           registerDevice(deviceInfo.fingerprint)
           registerLocation(location)
+        } catch(e) {
+          console.error(e)
         }
       }, 1000)
 

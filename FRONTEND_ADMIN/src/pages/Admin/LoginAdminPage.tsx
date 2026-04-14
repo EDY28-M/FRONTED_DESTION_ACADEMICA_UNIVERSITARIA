@@ -99,9 +99,9 @@ const LoginAdminPage: React.FC = () => {
       // Validación adicional en frontend: asegurar que el rol sea Administrador
       if (loggedUser.rol?.toLowerCase() !== 'administrador') {
         // Limpiar datos de autenticación si el rol no coincide
-        localStorage.removeItem('token')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user_data')
         toast.error('Acceso denegado. Estas credenciales no corresponden a un administrador.')
         setPassword('')
         return
