@@ -58,15 +58,16 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // Cargar notificaciones al montar el componente
   useEffect(() => {
-    // Comentado: no cargar del servidor por problemas de autorización
-    // loadNotifications()
+    // Al fin solucionado el problema de aislamiento de SignalR y BD.
+    // Ahora podemos cargar historial de la DB (Persistencia)
+    loadNotifications()
     
-    // Recargar notificaciones cada 30 segundos (menos frecuente)
-    // const interval = setInterval(() => {
-    //   loadNotifications()
-    // }, 30000)
+    // Recargar notificaciones cada 5 minutos por si acaso (fallback robusto)
+    const interval = setInterval(() => {
+      loadNotifications()
+    }, 5 * 60 * 1000)
 
-    // return () => clearInterval(interval)
+    return () => clearInterval(interval)
   }, [])
 
   // Crear notificación en el servidor (se distribuirá vía SignalR)
