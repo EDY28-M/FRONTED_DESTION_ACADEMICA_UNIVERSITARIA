@@ -225,6 +225,8 @@ export const adminCursosApi = {
 
       const url = `/admin/estudiantes${params.toString() ? `?${params.toString()}` : ''}`;
       const response = await axios.get(url);
+      return response.data;
+    },
 
   // Obtener detalle completo de un estudiante
   getEstudianteDetalle: async (id: number): Promise<EstudianteDetalle> => {
