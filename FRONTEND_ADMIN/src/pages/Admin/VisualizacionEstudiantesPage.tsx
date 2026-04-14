@@ -41,6 +41,9 @@ interface EditarEstudianteForm {
 
 export default function VisualizacionEstudiantesPage() {
   const [busqueda, setBusqueda] = useState('');
+  const [filtroFacultad, setFiltroFacultad] = useState<number | ''>('');
+  const [filtroEscuela, setFiltroEscuela] = useState<number | ''>('');
+  const [filtroCiclo, setFiltroCiclo] = useState<number | ''>('');
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<number | null>(null);
   const [tabActiva, setTabActiva] = useState<'datos' | 'actuales' | 'historial' | 'estadisticas'>('datos');
   const [estudianteAEliminar, setEstudianteAEliminar] = useState<EstudianteAdmin | null>(null);
@@ -54,8 +57,12 @@ export default function VisualizacionEstudiantesPage() {
 
   // Queries
   const { data: estudiantes = [], isLoading, isError, error } = useQuery<EstudianteAdmin[]>({
-    queryKey: ['estudiantes-admin'],
-    queryFn: adminCursosApi.getTodosEstudiantes,
+    queryKey: ['estudiantes-admin', filtroFacultad, filtroEscuela, filtroCiclo],
+    queryFn: () => adminCursosApi.getTodosEstudiantes(
+      filtroFacultad ? Number(filtroFacultad) : undefined,
+      filtroEscuela ? Number(filtroEscuela) : undefined,
+      filtroCiclo ? Number(filtroCiclo) : undefined
+    ),
     retry: 1,
   });
 
@@ -199,19 +206,80 @@ export default function VisualizacionEstudiantesPage() {
         </div>
       </div>
 
-      {/* Buscador */}
+      {/* Buscador y Filtros */}
       <div className="bg-white rounded-xl border border-zinc-200 shadow-sm p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre, código, email o DNI..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative md:col-span-4 lg:col-span-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, código..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 transition-all placeholder:text-zinc-400 text-sm"
+            />
+          </div>
+          
+          <div className="col-span-1">
+            <select
+              value={filtroFacultad}
+              onChange={(e) => {
+                setFiltroFacultad(e.target.value ? Number(e.target.value) : '');
+                setFiltroEscuela('');
+              }}
+              className="w-full py-2.5 px-3 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+            >
+              <option value="">Todas las Facultades</option>
+              {facultades.map((f: any) => (
+                <option key={f.id} value={f.id}>{f.nombre}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="col-span-1">
+            <select
+              value={filtroEscuela}
+              onChange={(e) => setFiltroEscuela(e.target.value ? Number(e.target.value) : '')}
+              disabled={!filtroFacultad}
+              className="w-full py-2.5 px-3 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm disabled:bg-zinc-50 disabled:text-zinc-400"
+            >
+              <option value="">Todas las Escuelas</option>
+              {escuelas.filter((e: any) => e.facultadId === filtroFacultad).map((e: any) => (
+                <option key={e.id} value={e.id}>{e.nombre}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-span-1 flex gap-2">
+            <select
+              value={filtroCiclo}
+              onChange={(e) => setFiltroCiclo(e.target.value ? Number(e.target.value) : '')}
+              className="w-full py-2.5 px-3 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-900 text-sm"
+            >
+              <option value="">Todos los Ciclos</option>
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>Ciclo {i + 1}</option>
+              ))}
+            </select>
+
+            {(filtroFacultad !== '' || filtroEscuela !== '' || filtroCiclo !== '' || busqueda !== '') && (
+              <button
+                onClick={() => {
+                  setFiltroFacultad('');
+                  setFiltroEscuela('');
+                  setFiltroCiclo('');
+                  setBusqueda('');
+                }}
+                className="px-3 py-2 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Limpiar filtros"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
-        <div className="mt-3 flex items-center justify-between text-sm">
+
+        <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between text-sm">
           <p className="text-zinc-500">
             Mostrando <span className="font-medium text-zinc-900">{estudiantesFiltrados.length}</span> estudiantes
           </p>
