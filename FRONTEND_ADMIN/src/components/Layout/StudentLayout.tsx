@@ -239,13 +239,14 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               );
             })}
           </nav>
-          <div className="px-3 py-3 border-t border-zinc-200">
+          <div className="p-4 border-t border-zinc-200">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-zinc-500 rounded-md hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+              className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-md transition-all text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-100 font-medium text-sm"
+              title="Cerrar sesión"
             >
-              <LogOut className="h-4 w-4" />
-              Cerrar Sesión
+              <LogOut className="w-5 h-5 shrink-0" />
+              <span>Cerrar sesión</span>
             </button>
           </div>
         </div>
@@ -337,13 +338,14 @@ const StudentLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               );
             })}
           </nav>
-          <div className="px-3 py-3 border-t border-zinc-200">
+          <div className="p-4 border-t border-zinc-200">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-zinc-500 rounded-md hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+              className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-md transition-all text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-100 font-medium text-sm"
+              title="Cerrar sesión"
             >
-              <LogOut className="h-4 w-4" />
-              Cerrar Sesión
+              <LogOut className="w-5 h-5 shrink-0" />
+              <span>Cerrar sesión</span>
             </button>
           </div>
         </div>
