@@ -64,6 +64,14 @@ const PagoExitosoPage: React.FC = () => {
         // Confirmar pago con Stripe directamente (procesa si webhook no llegó)
         const confirmResponse = await paymentApi.post(`/payments/confirm-session/${sessionId}`);
         setPaymentStatus(confirmResponse.data);
+
+        // Intentar obtener el recibo
+        try {
+          const receiptResponse = await paymentApi.get(`/receipts/by-session/${sessionId}`);
+          setReceipt(receiptResponse.data);
+        } catch (receiptError) {
+          console.warn('El recibo aún no está disponible:', receiptError);
+        }
       } catch {
         setError('No se encontró información del pago');
       }
