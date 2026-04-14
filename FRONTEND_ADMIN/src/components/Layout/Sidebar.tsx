@@ -14,9 +14,11 @@ import {
   ClipboardCheck,
   Landmark,
   School,
+  LogOut,
 } from 'lucide-react'
 import { DocumentTextIcon } from '@heroicons/react/24/outline'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface SidebarProps {
   isOpen: boolean
@@ -115,6 +117,17 @@ const navigation = [
 // Extracted SidebarContent to prevent re-creation on every render
 const SidebarContent = memo(({ collapsed = false, onClose }: { collapsed?: boolean; onClose: () => void }) => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/admin/login')
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error)
+    }
+  }
 
   const isActive = (path: string) => {
     if (path === '/admin/dashboard') {
@@ -200,10 +213,14 @@ const SidebarContent = memo(({ collapsed = false, onClose }: { collapsed?: boole
 
       {/* Footer */}
       <div className="p-4 border-t border-zinc-200">
-        <div className={`bg-zinc-50 border border-zinc-200 p-3 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-1.5 h-1.5 bg-green-500 shrink-0"></div>
-          {!collapsed && <span className="text-[10px] font-mono text-zinc-700">V.2.4.0 STABLE</span>}
-        </div>
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all text-red-600 hover:bg-red-50 hover:text-red-700 ${collapsed ? 'justify-center border border-transparent hover:border-red-100' : 'border border-red-100'}`}
+          title={collapsed ? 'Cerrar sesión' : undefined}
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && <span className="font-medium text-sm">Cerrar sesión</span>}
+        </button>
       </div>
     </div>
   )
