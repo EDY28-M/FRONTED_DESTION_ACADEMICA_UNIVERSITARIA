@@ -82,19 +82,22 @@ api.interceptors.response.use(
 
     // Si es error 401 y no es la ruta de login/refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Detectar si es docente ANTES de cualquier otra lógica
-      const isDocente = !!localStorage.getItem('docenteToken')
+      
+      const currentPath = window.location.pathname;
+      let targetLoginUrl = '/admin/login';
+      if (currentPath.startsWith('/docente')) {
+        targetLoginUrl = '/docente/login';
+      } else if (currentPath.startsWith('/estudiante')) {
+        targetLoginUrl = '/estudiante/login';
+      }
 
       if (originalRequest.url?.includes('/auth/login')) {
         // Si falla login, solo limpiar datos y rechazar el error (no redirigir)
-        // El componente manejará el error y mostrará el mensaje correspondiente
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
-        if (isDocente) {
-          localStorage.removeItem('docenteToken')
-          localStorage.removeItem('docenteData')
-        }
+        localStorage.removeItem('docenteToken')
+        localStorage.removeItem('docenteData')
         return Promise.reject(error)
       }
 
@@ -105,17 +108,19 @@ api.interceptors.response.use(
         localStorage.removeItem('user_data')
         localStorage.removeItem('docenteToken')
         localStorage.removeItem('docenteData')
-        window.location.href = isDocente ? '/docente/login' : '/admin/login'
+        
+        if (currentPath !== targetLoginUrl) {
+          window.location.href = targetLoginUrl;
+        }
         return Promise.reject(error)
       }
 
       // Si es docente y recibe 401, redirigir directamente al login de docente
-      // (no intentar hacer refresh porque el sistema de refresh puede ser diferente)
-      if (isDocente) {
+      if (currentPath.startsWith('/docente')) {
         localStorage.removeItem('docenteToken')
         localStorage.removeItem('docenteData')
-        if (window.location.pathname !== '/docente/login') {
-          window.location.href = '/docente/login'
+        if (currentPath !== targetLoginUrl) {
+          window.location.href = targetLoginUrl
         }
         return Promise.reject(error)
       }
@@ -137,7 +142,6 @@ api.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      // isDocente ya está declarado arriba, reutilizamos esa variable
       const refreshToken = localStorage.getItem('refresh_token')
       const currentToken = localStorage.getItem('auth_token')
 
@@ -147,17 +151,8 @@ api.interceptors.response.use(
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
         
-        // Si es docente, redirigir al login de docente
-        if (isDocente) {
-          localStorage.removeItem('docenteToken')
-          localStorage.removeItem('docenteData')
-          if (window.location.pathname !== '/docente/login') {
-            window.location.href = '/docente/login'
-          }
-        } else {
-          if (window.location.pathname !== '/admin/login' && window.location.pathname !== '/estudiante/login') {
-            window.location.href = '/admin/login'
-          }
+        if (currentPath !== targetLoginUrl) {
+          window.location.href = targetLoginUrl
         }
         return Promise.reject(error)
       }
@@ -194,16 +189,14 @@ api.interceptors.response.use(
         isRefreshing = false
 
         // Si falla el refresh, limpiar datos y redirigir al login correcto
-        const wasDocente = !!localStorage.getItem('docenteToken')
         localStorage.removeItem('auth_token')
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('user_data')
         localStorage.removeItem('docenteToken')
         localStorage.removeItem('docenteData')
         
-        const targetUrl = wasDocente ? '/docente/login' : '/admin/login'
-        if (window.location.pathname !== targetUrl && window.location.pathname !== '/estudiante/login') {
-          window.location.href = targetUrl
+        if (currentPath !== targetLoginUrl) {
+          window.location.href = targetLoginUrl
         }
 
         return Promise.reject(refreshError)

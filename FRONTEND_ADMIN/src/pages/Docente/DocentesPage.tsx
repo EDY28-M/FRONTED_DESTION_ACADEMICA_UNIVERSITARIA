@@ -40,13 +40,7 @@ const DocentesPage = () => {
     mutationFn: docentesApi.delete,
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
-      const nombreCompleto = `${docenteToDelete?.nombres} ${docenteToDelete?.apellidos}`
       toast.success('Docente eliminado exitosamente')
-      await createNotification({
-        type: 'docente',
-        action: 'eliminar',
-        nombre: nombreCompleto
-      })
       setIsDeleteModalOpen(false)
       setDocenteToDelete(null)
     },

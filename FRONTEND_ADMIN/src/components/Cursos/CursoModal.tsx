@@ -104,11 +104,6 @@ const CursoModal: React.FC<CursoModalProps> = ({
     onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
       toast.success('Curso creado exitosamente')
-      await createNotification({
-        type: 'curso',
-        action: 'crear',
-        nombre: variables.nombreCurso
-      })
       onClose()
     },
     onError: (error) => {
@@ -123,11 +118,6 @@ const CursoModal: React.FC<CursoModalProps> = ({
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
       toast.success('Curso actualizado exitosamente')
-      await createNotification({
-        type: 'curso',
-        action: 'editar',
-        nombre: variables.data.nombreCurso
-      })
       onClose()
     },
     onError: (error) => {

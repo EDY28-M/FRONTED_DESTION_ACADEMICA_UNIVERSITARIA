@@ -94,11 +94,6 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
       toast.success('Docente creado exitosamente')
-      await createNotification({
-        type: 'docente',
-        action: 'crear',
-        nombre: `${variables.nombres} ${variables.apellidos}`
-      })
       onClose()
     },
     onError: (error) => {
@@ -113,11 +108,6 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
       toast.success('Docente actualizado exitosamente')
-      await createNotification({
-        type: 'docente',
-        action: 'editar',
-        nombre: `${variables.data.nombres} ${variables.data.apellidos}`
-      })
       onClose()
     },
     onError: (error) => {
