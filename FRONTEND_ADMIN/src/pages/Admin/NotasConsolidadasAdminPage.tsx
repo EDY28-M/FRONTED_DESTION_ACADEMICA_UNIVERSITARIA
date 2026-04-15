@@ -174,12 +174,21 @@ export default function NotasConsolidadasAdminPage() {
       return resp.data;
     },
     onSuccess: () => {
-      createNotification('success', 'Matrícula actualizada', 'Los cambios han sido guardados exitosamente');
+      void createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Matrícula actualizada',
+      });
       queryClient.invalidateQueries({ queryKey: ['estudiante-detalle'] });
       setEditingRow(null);
     },
     onError: (error: any) => {
-      createNotification('error', 'Error al actualizar', error?.response?.data?.mensaje || 'Ocurrió un error inesperado');
+      const mensaje = error?.response?.data?.mensaje || 'Ocurrió un error inesperado';
+      void createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: `Error al actualizar: ${mensaje}`,
+      });
     }
   });
 
@@ -190,7 +199,7 @@ export default function NotasConsolidadasAdminPage() {
   };
 
   const handleSaveRow = async (idEstudiante: number, idCurso: number, idPeriodo: number) => {
-    if (updateMatriculaMutation.isLoading) return;
+    if (updateMatriculaMutation.isPending) return;
     await updateMatriculaMutation.mutateAsync({
       idEstudiante,
       idCurso,
@@ -596,7 +605,7 @@ export default function NotasConsolidadasAdminPage() {
         max="20"
       />
       <button 
-        disabled={updateMatriculaMutation.isLoading}
+        disabled={updateMatriculaMutation.isPending}
         onClick={(e) => { e.stopPropagation(); handleSaveRow(est.id, curso.idCurso, periodo.idPeriodo); }} 
         className="text-emerald-600 hover:bg-emerald-50 p-1 rounded transition-colors"
         title="Guardar"
@@ -604,7 +613,7 @@ export default function NotasConsolidadasAdminPage() {
         <Check className="w-4 h-4"/>
       </button>
       <button 
-        disabled={updateMatriculaMutation.isLoading}
+        disabled={updateMatriculaMutation.isPending}
         onClick={(e) => { e.stopPropagation(); setEditingRow(null); }} 
         className="text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
         title="Cancelar"
