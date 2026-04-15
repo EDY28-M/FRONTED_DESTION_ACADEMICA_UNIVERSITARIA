@@ -81,13 +81,7 @@ export default function GestionPeriodosPage() {
         action: 'crear',
         nombre: 'Período creado exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'crear',
-        nombre: 'Nuevo registro creado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
       cerrarModal();
     },
@@ -106,13 +100,7 @@ export default function GestionPeriodosPage() {
         action: 'editar',
         nombre: 'Período actualizado exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Registro editado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
       cerrarModal();
     },
@@ -130,13 +118,7 @@ export default function GestionPeriodosPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Registro activado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
     },
     onError: (error: any) => {
@@ -153,13 +135,7 @@ export default function GestionPeriodosPage() {
         action: 'eliminar',
         nombre: 'Período eliminado exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'eliminar',
-        nombre: 'Registro eliminado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
     },
     onError: (error: any) => {
@@ -190,13 +166,7 @@ export default function GestionPeriodosPage() {
         action: 'editar',
         nombre: data.mensaje || 'Período cerrado exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Periodo cerrado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
     onError: (error: any) => {
@@ -215,13 +185,7 @@ export default function GestionPeriodosPage() {
         action: 'editar',
         nombre: data.mensaje || 'Período abierto exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Periodo abierto'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
+queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
     onError: (error: any) => {

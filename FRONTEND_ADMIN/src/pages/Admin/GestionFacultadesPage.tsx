@@ -33,13 +33,7 @@ const [searchTerm, setSearchTerm] = useState('')
         action: 'eliminar',
         nombre: 'Facultad eliminada exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'eliminar',
-        nombre: 'Registro eliminado'
-      });
-
-            setIsDeleteModalOpen(false)
+setIsDeleteModalOpen(false)
             setFacultadToDelete(null)
         },
         onError: (error) => {
@@ -59,13 +53,7 @@ const [searchTerm, setSearchTerm] = useState('')
         action: 'editar',
         nombre: 'Estado actualizado correctamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Estado cambiado'
-      });
-
-        },
+},
         onError: (error) => {
             toast.error('Error al cambiar estado')
             console.error(error)

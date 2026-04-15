@@ -88,13 +88,7 @@ export default function ActivacionCursosPage() {
         action: 'editar',
         nombre: 'Curso activado exitosamente'
       });
-      await createNotification({
-        type: 'curso',
-        action: 'editar',
-        nombre: 'Registro activado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
+queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       cerrarModalActivar();
     },
     onError: (error: any) => {
@@ -112,13 +106,7 @@ export default function ActivacionCursosPage() {
         action: 'editar',
         nombre: 'Curso desactivado exitosamente'
       });
-      await createNotification({
-        type: 'curso',
-        action: 'editar',
-        nombre: 'Registro desactivado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
+queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       setModalDesactivarAbierto(false);
       setCursoADesactivar(null);
     },

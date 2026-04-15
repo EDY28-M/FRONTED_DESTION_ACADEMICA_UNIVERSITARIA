@@ -56,13 +56,7 @@ export default function GestionEstudiantesPage() {
         action: 'crear',
         nombre: 'Estudiante creado exitosamente'
       });
-      await createNotification({
-        type: 'academico',
-        action: 'crear',
-        nombre: 'Estudiante creado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
+queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
 
       // Limpiar formulario
       setFormData({

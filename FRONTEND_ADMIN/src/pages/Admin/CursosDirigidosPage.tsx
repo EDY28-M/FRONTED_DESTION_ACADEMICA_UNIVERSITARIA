@@ -62,14 +62,7 @@ export default function CursosDirigidosPage() {
         `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
       
       });
-      await createNotification({
-        type: 'curso',
-        action: 'crear',
-        nombre: 'Cursos dirigidos creados'
-      });
-
-
-      // Mostrar detalles
+// Mostrar detalles
       if (data.detalles.exitosos.length > 0) {
         console.log('Matrículas exitosas:', data.detalles.exitosos);
       }

@@ -76,13 +76,7 @@ export default function GestionDocentesPasswordPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'password',
-        action: 'crear',
-        nombre: 'Nuevo registro creado'
-      });
-
-      cerrarModal();
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al crear docente');
@@ -101,13 +95,7 @@ export default function GestionDocentesPasswordPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'password',
-        action: 'editar',
-        nombre: 'Contraseña asignada'
-      });
-
-      cerrarModal();
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al asignar contraseña');
@@ -126,13 +114,7 @@ export default function GestionDocentesPasswordPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'password',
-        action: 'editar',
-        nombre: 'Registro actualizado'
-      });
-
-      cerrarModal();
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al actualizar docente');
@@ -150,13 +132,7 @@ export default function GestionDocentesPasswordPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'password',
-        action: 'eliminar',
-        nombre: 'Registro eliminado'
-      });
-
-      cerrarModal();
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al eliminar docente');

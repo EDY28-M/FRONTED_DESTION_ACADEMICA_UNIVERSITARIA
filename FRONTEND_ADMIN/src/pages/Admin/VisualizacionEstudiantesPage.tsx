@@ -99,13 +99,7 @@ export default function VisualizacionEstudiantesPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'academico',
-        action: 'eliminar',
-        nombre: 'Registro eliminado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
+queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
       setEstudianteAEliminar(null);
     },
     onError: (error: any) => {
@@ -123,13 +117,7 @@ export default function VisualizacionEstudiantesPage() {
         action: 'editar',
         nombre: data.mensaje
       });
-      await createNotification({
-        type: 'academico',
-        action: 'editar',
-        nombre: 'Registro actualizado'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
+queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiante-detalle'] });
       setEstudianteAEditar(null);
     },
