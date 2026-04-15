@@ -556,7 +556,7 @@ export default function NotasConsolidadasAdminPage() {
       <option value="Retirado">Retirado</option>
     </select>
   ) : (
-    <div className="flex items-center justify-center cursor-pointer group" onClick={() => handleEditRow(curso, periodo.idPeriodo)}>
+    <div className="flex items-center justify-center cursor-pointer group" onClick={(e) => { e.stopPropagation(); handleEditRow(curso, periodo.idPeriodo); }}>
     {curso.estado === 'Retirado' ? (
       <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 border border-red-200">Retirado</span>
     ) : curso.estado === 'Aprobado' ? (
@@ -579,7 +579,17 @@ export default function NotasConsolidadasAdminPage() {
       <input 
         type="number" 
         value={editNota} 
-        onChange={e => setEditNota(e.target.value === '' ? '' : Number(e.target.value))} 
+        onChange={e => {
+          const val = e.target.value;
+          setEditNota(val === '' ? '' : Number(val));
+          if (val !== '') {
+            const num = Number(val);
+            if (num >= 11) setEditEstado('Aprobado');
+            else setEditEstado('Desaprobado');
+          } else {
+            setEditEstado('Cursando');
+          }
+        }} 
         className="border border-slate-300 rounded p-1 text-xs w-16 text-center outline-none focus:border-zinc-900" 
         step="1"
         min="0"
@@ -587,7 +597,7 @@ export default function NotasConsolidadasAdminPage() {
       />
       <button 
         disabled={updateMatriculaMutation.isLoading}
-        onClick={() => estudiante && handleSaveRow(estudiante.datosPersonales.id, curso.idCurso, periodo.idPeriodo)} 
+        onClick={(e) => { e.stopPropagation(); handleSaveRow(est.id, curso.idCurso, periodo.idPeriodo); }} 
         className="text-emerald-600 hover:bg-emerald-50 p-1 rounded transition-colors"
         title="Guardar"
       >
@@ -595,7 +605,7 @@ export default function NotasConsolidadasAdminPage() {
       </button>
       <button 
         disabled={updateMatriculaMutation.isLoading}
-        onClick={() => setEditingRow(null)} 
+        onClick={(e) => { e.stopPropagation(); setEditingRow(null); }} 
         className="text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
         title="Cancelar"
       >
@@ -603,7 +613,7 @@ export default function NotasConsolidadasAdminPage() {
       </button>
     </div>
   ) : (
-    <div className="flex items-center justify-center gap-2 cursor-pointer group" onClick={() => handleEditRow(curso, periodo.idPeriodo)}>
+    <div className="flex items-center justify-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); handleEditRow(curso, periodo.idPeriodo); }}>
       <span className={`text-base font-mono font-bold ${getNotaColor(curso.promedioFinal)}`}>
         {curso.promedioFinal !== null ? Number(curso.promedioFinal).toFixed(2) : '—'}
       </span>
