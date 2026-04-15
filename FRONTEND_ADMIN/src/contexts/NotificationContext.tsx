@@ -176,7 +176,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       const idsNoLeidas = notifications
         .filter(n => n.leida === false)
         .map(n => parseInt(n.id))
-        .filter(id => !isNaN(id));
+        .filter(id => !isNaN(id) && id <= 2147483647); // Prevent SQL Int overflow
 
       if (idsNoLeidas.length > 0) {
         await api.put('/notificaciones/marcar-leidas', { notificacionIds: idsNoLeidas });

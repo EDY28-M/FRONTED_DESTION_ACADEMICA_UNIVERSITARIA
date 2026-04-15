@@ -83,7 +83,7 @@ const PerformanceMonitor: React.FC = () => {
             {/* Header */}
             <div className="h-12 border-b border-zinc-200 flex items-center px-4 justify-between bg-white/60 backdrop-blur">
                 <h3 className="text-zinc-900 font-bold uppercase text-xs tracking-wider">Carga Académica</h3>
-                <span className={`text-[10px] ${visualTheme.badgeText} font-mono`}>PERÍODO ACTIVO</span>
+                <span className={`text-[10px] ${visualTheme.badgeText} font-mono uppercase`}>ACTIVO / ÚLTIMO</span>
             </div>
 
             {/* Gauge container */}
