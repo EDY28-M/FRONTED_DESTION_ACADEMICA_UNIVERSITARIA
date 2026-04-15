@@ -41,6 +41,7 @@ interface EditarEstudianteForm {
 }
 
 export default function VisualizacionEstudiantesPage() {
+  const { createNotification } = useNotifications();
   const [busqueda, setBusqueda] = useState('');
   const [filtroFacultad, setFiltroFacultad] = useState<number | ''>('');
   const [filtroEscuela, setFiltroEscuela] = useState<number | ''>('');
@@ -138,8 +139,7 @@ export default function VisualizacionEstudiantesPage() {
   });
 
   const abrirEditar = (est: EstudianteAdmin) => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();setEstudianteAEditar(est);
+setEstudianteAEditar(est);
     setEditForm({
       nombres: est.nombres || est.nombreCompleto.split(' ')[0] || '',
       apellidos: est.apellidos || est.nombreCompleto.split(' ').slice(1).join(' ') || '',

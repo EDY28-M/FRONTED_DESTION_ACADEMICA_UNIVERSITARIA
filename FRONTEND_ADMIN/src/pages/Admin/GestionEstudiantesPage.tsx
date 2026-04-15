@@ -20,6 +20,7 @@ interface CrearEstudianteForm {
 }
 
 export default function GestionEstudiantesPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState<CrearEstudianteForm>({
     email: '',
@@ -115,8 +116,7 @@ export default function GestionEstudiantesPage() {
   });
 
   const handleSubmit = (e: React.FormEvent) => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();e.preventDefault();
+e.preventDefault();
 
     // Validaciones
     if (!formData.email.includes('@')) {

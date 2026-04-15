@@ -10,8 +10,7 @@ import ConfirmModal from '../../components/Common/ConfirmModal'
 
 const GestionFacultadesPage = () => {
   const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();
-    const [searchTerm, setSearchTerm] = useState('')
+const [searchTerm, setSearchTerm] = useState('')
     const [selectedFacultad, setSelectedFacultad] = useState<Facultad | null>(null)
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
     const [isModalOpen, setIsModalOpen] = useState(false)

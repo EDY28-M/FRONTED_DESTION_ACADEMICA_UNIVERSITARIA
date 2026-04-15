@@ -71,6 +71,7 @@ interface EstudianteDetalle {
 
 export default function NotasConsolidadasAdminPage() {
   const { createNotification } = useNotifications();
+;
   const [filtroEstudiante, setFiltroEstudiante] = useState('');
   const [filtroCiclo, setFiltroCiclo] = useState<number | undefined>(undefined);
   const [filtroEstado, setFiltroEstado] = useState<string>('');

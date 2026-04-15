@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 type ModalType = 'crear' | 'asignarPassword' | 'editar' | 'eliminar' | null;
 
 export default function GestionDocentesPasswordPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAbierto, setModalAbierto] = useState<ModalType>(null);
@@ -178,8 +179,7 @@ export default function GestionDocentesPasswordPage() {
 
   // Función para limpiar todos los filtros
   const limpiarFiltros = () => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();setBusqueda('')
+setBusqueda('')
     setSelectedFacultadId('')
     setSelectedEscuelaId('')
   }

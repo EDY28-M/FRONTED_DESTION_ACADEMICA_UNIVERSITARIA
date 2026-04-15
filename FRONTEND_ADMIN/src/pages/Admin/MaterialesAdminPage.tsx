@@ -22,6 +22,7 @@ import { es } from 'date-fns/locale';
 
 export default function MaterialesAdminPage() {
   const { createNotification } = useNotifications();
+;
   const [mostrarModal, setMostrarModal] = useState(false);
   const [materialEditando, setMaterialEditando] = useState<MaterialAdmin | null>(null);
   const [filtroCurso, setFiltroCurso] = useState<number | undefined>(undefined);

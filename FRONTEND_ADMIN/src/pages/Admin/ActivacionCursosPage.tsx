@@ -25,6 +25,7 @@ import { cursosApi } from '../../services/cursosService';
 import { Curso } from '../../types';
 
 export default function ActivacionCursosPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [modalActivarAbierto, setModalActivarAbierto] = useState(false);
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | null>(null);
@@ -127,8 +128,7 @@ export default function ActivacionCursosPage() {
   });
 
   const handleActivar = () => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();if (!cursoSeleccionado || !periodoSeleccionado) {
+if (!cursoSeleccionado || !periodoSeleccionado) {
       toast.error('Selecciona un curso y un período');
       return;
     }

@@ -21,6 +21,7 @@ import { format } from 'date-fns'
 import { useNotifications } from '../../contexts/NotificationContext'
 
 const DocentesPage = () => {
+  const { createNotification } = useNotifications();
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDocente, setSelectedDocente] = useState<Docente | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -29,9 +30,7 @@ const DocentesPage = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
 
   const queryClient = useQueryClient()
-  const { createNotification } = useNotifications()
-
-  const { data: docentes, isLoading, error } = useQuery({
+const { data: docentes, isLoading, error } = useQuery({
     queryKey: ['docentes'],
     queryFn: docentesApi.getAll,
   })

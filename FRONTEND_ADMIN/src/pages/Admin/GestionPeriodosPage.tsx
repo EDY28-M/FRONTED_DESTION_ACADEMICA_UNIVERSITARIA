@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 
 export default function GestionPeriodosPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -230,8 +231,7 @@ export default function GestionPeriodosPage() {
 
   // Handlers
   const abrirModalCrear = () => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();setModoEdicion(false);
+setModoEdicion(false);
     setPeriodoEditando(null);
     setFormData({
       nombre: '',

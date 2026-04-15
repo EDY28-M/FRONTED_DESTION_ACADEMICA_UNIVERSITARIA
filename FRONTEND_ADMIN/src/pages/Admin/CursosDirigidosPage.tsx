@@ -24,6 +24,7 @@ import { Curso } from '../../types';
 import { Periodo } from '../../types/estudiante';
 
 export default function CursosDirigidosPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | null>(null);
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | null>(null);
@@ -91,8 +92,7 @@ export default function CursosDirigidosPage() {
 
   // Handlers
   const handleCursoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  const { createNotification } = useNotifications();
-  const queryClient = useQueryClient();const id = parseInt(e.target.value);
+const id = parseInt(e.target.value);
     setCursoSeleccionado(id || null);
     setEstudiantesSeleccionados([]); // Limpiar selección al cambiar curso
   };

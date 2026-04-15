@@ -18,6 +18,7 @@ import { es } from 'date-fns/locale';
 
 export default function AnunciosAdminPage() {
   const { createNotification } = useNotifications();
+;
   const [mostrarModal, setMostrarModal] = useState(false);
   const [anuncioEditando, setAnuncioEditando] = useState<AnuncioAdmin | null>(null);
   const [filtroCurso, setFiltroCurso] = useState<number | undefined>(undefined);
