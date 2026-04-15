@@ -703,7 +703,7 @@ setModoEdicion(false);
                             Advertencias ({validacionData.advertencias.length})
                           </h4>
                           <ul className="list-disc list-inside text-sm text-amber-800 space-y-1 max-h-40 overflow-y-auto">
-                            {validacionData.advertencias.map((adv, i) => (
+                            {[...new Set(validacionData.advertencias)].map((adv, i) => (
                               <li key={i}>{adv}</li>
                             ))}
                           </ul>
