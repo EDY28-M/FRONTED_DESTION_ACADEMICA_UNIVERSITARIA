@@ -103,8 +103,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
     mutationFn: cursosApi.create,
     onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
-      toast.success('Curso creado exitosamente')
-      onClose()
+      toast.success('Curso creado exitosamente');
+      await createNotification({
+        type: 'curso',
+        action: 'crear',
+        nombre: variables.nombre || variables.nombres || 'Nuevo registro'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al crear curso')
@@ -117,8 +122,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
       cursosApi.update(id, data),
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
-      toast.success('Curso actualizado exitosamente')
-      onClose()
+      toast.success('Curso actualizado exitosamente');
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: variables.data?.nombre || variables.data?.nombres || 'Registro modificado'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al actualizar curso')

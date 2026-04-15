@@ -93,8 +93,13 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
     mutationFn: docentesApi.create,
     onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
-      toast.success('Docente creado exitosamente')
-      onClose()
+      toast.success('Docente creado exitosamente');
+      await createNotification({
+        type: 'docente',
+        action: 'crear',
+        nombre: variables.nombre || variables.nombres || 'Nuevo registro'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al crear docente')
@@ -107,8 +112,13 @@ const DocenteModal: React.FC<DocenteModalProps> = ({
       docentesApi.update(id, data),
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
-      toast.success('Docente actualizado exitosamente')
-      onClose()
+      toast.success('Docente actualizado exitosamente');
+      await createNotification({
+        type: 'docente',
+        action: 'editar',
+        nombre: variables.data?.nombre || variables.data?.nombres || 'Registro modificado'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al actualizar docente')

@@ -81,10 +81,15 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
 
     const createMutation = useMutation({
         mutationFn: escuelasApi.create,
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['escuelas'] })
-            toast.success('Escuela creada exitosamente')
-            onClose()
+            toast.success('Escuela creada exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: variables.nombre || variables.nombres || 'Nuevo registro'
+      });
+      onClose();
         },
         onError: (error) => {
             toast.error('Error al crear escuela')
@@ -95,10 +100,15 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: ActualizarEscuela }) =>
             escuelasApi.update(id, data),
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['escuelas'] })
-            toast.success('Escuela actualizada exitosamente')
-            onClose()
+            toast.success('Escuela actualizada exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: variables.data?.nombre || variables.data?.nombres || 'Registro modificado'
+      });
+      onClose();
         },
         onError: (error) => {
             toast.error('Error al actualizar escuela')
