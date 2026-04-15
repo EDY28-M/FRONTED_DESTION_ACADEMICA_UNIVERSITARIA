@@ -36,6 +36,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
   // Cargar notificaciones desde el servidor
   const loadNotifications = async () => {
+    // Evitar peticiones 401 si no hay token (ej. en la pantalla de login)
+    if (!localStorage.getItem('auth_token')) {
+      return;
+    }
     try {
       const response = await api.get('/notificaciones')
       const serverNotifications = response.data.map((n: any) => ({
