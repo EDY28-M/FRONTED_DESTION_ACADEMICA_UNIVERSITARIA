@@ -93,6 +93,12 @@ const CursosPage = () => {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
       toast.success('Curso eliminado exitosamente')
+      await createNotification({
+        type: 'curso',
+        action: 'eliminar',
+        nombre: 'Curso eliminado'
+      });
+
       setIsDeleteModalOpen(false)
       setCursoToDelete(null)
     },

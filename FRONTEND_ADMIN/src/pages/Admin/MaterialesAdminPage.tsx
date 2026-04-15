@@ -1,3 +1,4 @@
+import { useNotifications } from '../../contexts/NotificationContext';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, MaterialAdmin, CrearMaterialDto, ActualizarMaterialDto } from '../../services/adminApi';
@@ -20,6 +21,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function MaterialesAdminPage() {
+  const { createNotification } = useNotifications();
   const [mostrarModal, setMostrarModal] = useState(false);
   const [materialEditando, setMaterialEditando] = useState<MaterialAdmin | null>(null);
   const [filtroCurso, setFiltroCurso] = useState<number | undefined>(undefined);
@@ -48,11 +50,16 @@ export default function MaterialesAdminPage() {
   const crearMutation = useMutation({
     mutationFn: ({ material, idDocente }: { material: CrearMaterialDto; idDocente?: number }) =>
       adminApi.crearMaterial(material, idDocente),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['materiales-admin'] });
       setMostrarModal(false);
       setTieneVencimiento(false);
       toast.success('Material creado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Material creado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al crear el material');
@@ -62,12 +69,17 @@ export default function MaterialesAdminPage() {
   const actualizarMutation = useMutation({
     mutationFn: ({ id, material }: { id: number; material: ActualizarMaterialDto }) =>
       adminApi.actualizarMaterial(id, material),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['materiales-admin'] });
       setMostrarModal(false);
       setMaterialEditando(null);
       setTieneVencimiento(false);
       toast.success('Material actualizado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Material actualizado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al actualizar el material');
@@ -76,9 +88,14 @@ export default function MaterialesAdminPage() {
 
   const eliminarMutation = useMutation({
     mutationFn: (id: number) => adminApi.eliminarMaterial(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['materiales-admin'] });
       toast.success('Material eliminado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Material eliminado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al eliminar el material');

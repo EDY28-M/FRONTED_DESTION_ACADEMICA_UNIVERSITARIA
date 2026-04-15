@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { estudiantesApi } from '../../services/estudiantesApi';
 import { facultadesApi } from '../../services/facultadesApi';
 import { escuelasApi } from '../../services/escuelasApi';
@@ -47,8 +48,19 @@ export default function GestionEstudiantesPage() {
 
   const crearEstudianteMutation = useMutation({
     mutationFn: (datos: CrearEstudianteForm) => estudiantesApi.crearEstudiante(datos),
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       toast.success('Estudiante creado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Estudiante creado exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Estudiante creado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['estudiantes'] });
 
       // Limpiar formulario
@@ -103,7 +115,8 @@ export default function GestionEstudiantesPage() {
   });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const { createNotification } = useNotifications();
+  const queryClient = useQueryClient();e.preventDefault();
 
     // Validaciones
     if (!formData.email.includes('@')) {

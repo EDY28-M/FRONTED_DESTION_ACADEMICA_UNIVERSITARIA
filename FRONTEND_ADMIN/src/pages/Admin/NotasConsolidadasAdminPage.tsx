@@ -1,3 +1,4 @@
+import { useNotifications } from '../../contexts/NotificationContext';
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/axios';
@@ -69,6 +70,7 @@ interface EstudianteDetalle {
 }
 
 export default function NotasConsolidadasAdminPage() {
+  const { createNotification } = useNotifications();
   const [filtroEstudiante, setFiltroEstudiante] = useState('');
   const [filtroCiclo, setFiltroCiclo] = useState<number | undefined>(undefined);
   const [filtroEstado, setFiltroEstado] = useState<string>('');

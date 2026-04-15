@@ -53,12 +53,14 @@ export default function CursosDirigidosPage() {
     onSuccess: async (data) => {
       toast.success(
         `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
+        { duration: 5000 }
       );
       await createNotification({
         type: 'curso',
         action: 'editar',
         nombre: 
         `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
+        { duration: 5000 }
       
       });
       await createNotification({

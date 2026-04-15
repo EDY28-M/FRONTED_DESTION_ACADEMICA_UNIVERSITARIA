@@ -41,6 +41,12 @@ const DocentesPage = () => {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
       toast.success('Docente eliminado exitosamente')
+      await createNotification({
+        type: 'docente',
+        action: 'eliminar',
+        nombre: 'Docente eliminado'
+      });
+
       setIsDeleteModalOpen(false)
       setDocenteToDelete(null)
     },

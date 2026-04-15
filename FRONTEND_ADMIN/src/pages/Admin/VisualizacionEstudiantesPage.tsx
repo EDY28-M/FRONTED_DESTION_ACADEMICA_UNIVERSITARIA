@@ -1,5 +1,6 @@
 import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { Dialog, Transition } from '@headlessui/react';
 import { adminCursosApi, EstudianteAdmin, EstudianteDetalle } from '../../services/adminCursosApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
@@ -90,8 +91,19 @@ export default function VisualizacionEstudiantesPage() {
   // Mutation para eliminar estudiante
   const eliminarMutation = useMutation({
     mutationFn: (id: number) => estudiantesApi.eliminarEstudiante(id),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data.mensaje);
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Registro eliminado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
       setEstudianteAEliminar(null);
     },
@@ -103,8 +115,19 @@ export default function VisualizacionEstudiantesPage() {
   // Mutation para actualizar estudiante
   const actualizarMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => estudiantesApi.actualizarEstudiante(id, data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data.mensaje);
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Registro actualizado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiante-detalle'] });
       setEstudianteAEditar(null);
@@ -115,7 +138,8 @@ export default function VisualizacionEstudiantesPage() {
   });
 
   const abrirEditar = (est: EstudianteAdmin) => {
-    setEstudianteAEditar(est);
+  const { createNotification } = useNotifications();
+  const queryClient = useQueryClient();setEstudianteAEditar(est);
     setEditForm({
       nombres: est.nombres || est.nombreCompleto.split(' ')[0] || '',
       apellidos: est.apellidos || est.nombreCompleto.split(' ').slice(1).join(' ') || '',

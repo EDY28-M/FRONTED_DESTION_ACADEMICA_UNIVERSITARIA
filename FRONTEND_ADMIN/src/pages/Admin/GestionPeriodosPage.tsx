@@ -1,5 +1,6 @@
 import { useState, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { Dialog, Transition } from '@headlessui/react';
 import {
   adminCursosApi,
@@ -72,8 +73,19 @@ export default function GestionPeriodosPage() {
   // Mutations
   const crearMutation = useMutation({
     mutationFn: adminCursosApi.crearPeriodo,
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Período creado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Período creado exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Nuevo registro creado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
       cerrarModal();
@@ -86,8 +98,19 @@ export default function GestionPeriodosPage() {
   const editarMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) =>
       adminCursosApi.editarPeriodo(id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Período actualizado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Período actualizado exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Registro editado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
       cerrarModal();
@@ -99,8 +122,19 @@ export default function GestionPeriodosPage() {
 
   const activarMutation = useMutation({
     mutationFn: adminCursosApi.activarPeriodo,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data.mensaje);
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Registro activado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
     },
@@ -111,8 +145,19 @@ export default function GestionPeriodosPage() {
 
   const eliminarMutation = useMutation({
     mutationFn: adminCursosApi.eliminarPeriodo,
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Período eliminado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Período eliminado exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Registro eliminado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['periodos'] });
     },
@@ -123,7 +168,7 @@ export default function GestionPeriodosPage() {
 
   const validarCierreMutation = useMutation({
     mutationFn: adminCursosApi.validarCierrePeriodo,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setValidacionData(data as ExtendedValidacionCierrePeriodo);
       setModalValidacionAbierto(true);
     },
@@ -134,11 +179,22 @@ export default function GestionPeriodosPage() {
 
   const cerrarPeriodoMutation = useMutation({
     mutationFn: adminCursosApi.cerrarPeriodo,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setResultadoCierre(data as ExtendedResultadoCierrePeriodo);
       setModalCierreAbierto(false);
       setModalValidacionAbierto(false);
       toast.success(data.mensaje || 'Período cerrado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: data.mensaje || 'Período cerrado exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Periodo cerrado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
@@ -149,10 +205,21 @@ export default function GestionPeriodosPage() {
 
   const abrirPeriodoMutation = useMutation({
     mutationFn: adminCursosApi.abrirPeriodo,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setResultadoApertura(data as { mensaje: string });
       setModalAperturaAbierto(false);
       toast.success(data.mensaje || 'Período abierto exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: data.mensaje || 'Período abierto exitosamente'
+      });
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Periodo abierto'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['periodos-admin'] });
       queryClient.invalidateQueries({ queryKey: ['estudiantes-admin'] });
     },
@@ -163,7 +230,8 @@ export default function GestionPeriodosPage() {
 
   // Handlers
   const abrirModalCrear = () => {
-    setModoEdicion(false);
+  const { createNotification } = useNotifications();
+  const queryClient = useQueryClient();setModoEdicion(false);
     setPeriodoEditando(null);
     setFormData({
       nombre: '',

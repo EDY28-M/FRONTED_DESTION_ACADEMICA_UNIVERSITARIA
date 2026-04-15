@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import {
@@ -79,8 +80,19 @@ export default function ActivacionCursosPage() {
   const activarMutation = useMutation({
     mutationFn: (data: ActivarCursoPeriodoRequest) =>
       adminCursosApi.activarCursoPeriodo(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Curso activado exitosamente');
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Curso activado exitosamente'
+      });
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Registro activado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       cerrarModalActivar();
     },
@@ -92,8 +104,19 @@ export default function ActivacionCursosPage() {
   const desactivarMutation = useMutation({
     mutationFn: (data: { idCurso: number; idPeriodo: number }) =>
       adminCursosApi.desactivarCursoPeriodo(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Curso desactivado exitosamente');
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Curso desactivado exitosamente'
+      });
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Registro desactivado'
+      });
+
       queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       setModalDesactivarAbierto(false);
       setCursoADesactivar(null);
@@ -104,7 +127,8 @@ export default function ActivacionCursosPage() {
   });
 
   const handleActivar = () => {
-    if (!cursoSeleccionado || !periodoSeleccionado) {
+  const { createNotification } = useNotifications();
+  const queryClient = useQueryClient();if (!cursoSeleccionado || !periodoSeleccionado) {
       toast.error('Selecciona un curso y un período');
       return;
     }
