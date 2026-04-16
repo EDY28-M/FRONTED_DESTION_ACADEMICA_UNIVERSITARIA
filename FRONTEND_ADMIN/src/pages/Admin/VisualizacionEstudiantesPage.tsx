@@ -570,7 +570,7 @@ setEstudianteAEditar(est);
                     <div className="grid grid-cols-4 border-b border-zinc-200 bg-zinc-50/50">
                       {[
                         { label: 'Créditos', value: estudianteDetalle.datosPersonales.creditosAcumulados },
-                        { label: 'Semestre', value: String(estudianteDetalle.cursosActuales.filter((c: any) => c.estado === 'Matriculado').reduce((s: number, c: any) => s + c.creditos, 0)).padStart(2, '0') },
+                        { label: 'Créd. Actuales', value: String(estudianteDetalle.cursosActuales.filter((c: any) => c.estado === 'Matriculado').reduce((s: number, c: any) => s + c.creditos, 0)).padStart(2, '0') },
                         { label: 'Cursos', value: String(estudianteDetalle.cursosActuales.filter((c: any) => c.estado === 'Matriculado').length).padStart(2, '0') },
                         { label: 'Promedio', value: estudianteDetalle.datosPersonales.promedioAcumulado?.toFixed(1) || '0.0' },
                       ].map((stat, i) => (
