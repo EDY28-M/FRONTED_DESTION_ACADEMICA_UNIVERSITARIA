@@ -154,7 +154,7 @@ const PerformanceMonitor: React.FC = () => {
                         </svg>
 
                         {/* Center percentage */}
-                        <div className="absolute flex flex-col items-center bg-white/90 p-4 ">
+                        <div className="absolute flex flex-col items-center justify-center">
                             <div className="flex items-baseline">
                                 <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
                                     {metrics.efficiencyTotal}
