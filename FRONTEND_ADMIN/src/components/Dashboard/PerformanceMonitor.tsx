@@ -155,10 +155,12 @@ const PerformanceMonitor: React.FC = () => {
 
                         {/* Center percentage */}
                         <div className="absolute flex flex-col items-center bg-white/90 p-4 ">
-                            <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
-                                {metrics.efficiencyTotal}
-                                <span className={`text-lg ${visualTheme.percentText}`}>%</span>
-                            </span>
+                            <div className="flex items-baseline">
+                                <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
+                                    {metrics.efficiencyTotal}
+                                </span>
+                                <span className={`text-xl font-bold ml-1.5 ${visualTheme.percentText}`}>%</span>
+                            </div>
                             <span className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">Eficiencia</span>
                         </div>
                     </div>
