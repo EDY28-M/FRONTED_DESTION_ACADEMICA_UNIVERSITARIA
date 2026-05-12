@@ -217,10 +217,16 @@ export interface CursoActivacionPeriodo {
 
 export const adminCursosApi = {
   // Obtener todos los estudiantes (admin)
-  getTodosEstudiantes: async (): Promise<EstudianteAdmin[]> => {
-    const response = await axios.get('/admin/estudiantes');
-    return response.data;
-  },
+    getTodosEstudiantes: async (facultadId?: number, escuelaId?: number, ciclo?: number): Promise<EstudianteAdmin[]> => {
+      const params = new URLSearchParams();
+      if (facultadId) params.append('facultadId', facultadId.toString());
+      if (escuelaId) params.append('escuelaId', escuelaId.toString());
+      if (ciclo) params.append('ciclo', ciclo.toString());
+
+      const url = `/admin/estudiantes${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await axios.get(url);
+      return response.data;
+    },
 
   // Obtener detalle completo de un estudiante
   getEstudianteDetalle: async (id: number): Promise<EstudianteDetalle> => {

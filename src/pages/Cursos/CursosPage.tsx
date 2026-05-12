@@ -22,6 +22,7 @@ import ConfirmModal from '../../components/Common/ConfirmModal'
 import { useNotifications } from '../../contexts/NotificationContext'
 
 const CursosPage = () => {
+  const { createNotification } = useNotifications();
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -33,9 +34,7 @@ const CursosPage = () => {
   const [selectedEscuelaId, setSelectedEscuelaId] = useState<number | ''>('')
 
   const queryClient = useQueryClient()
-  const { createNotification } = useNotifications()
-
-  const { data: cursos, isLoading, error } = useQuery({
+const { data: cursos, isLoading, error } = useQuery({
     queryKey: ['cursos'],
     queryFn: cursosApi.getAll,
   })
@@ -96,8 +95,9 @@ const CursosPage = () => {
       await createNotification({
         type: 'curso',
         action: 'eliminar',
-        nombre: cursoToDelete?.nombreCurso || 'Curso'
-      })
+        nombre: 'Curso eliminado'
+      });
+
       setIsDeleteModalOpen(false)
       setCursoToDelete(null)
     },

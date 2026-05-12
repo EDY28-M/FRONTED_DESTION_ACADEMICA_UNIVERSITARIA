@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Nota: Instalar dependencias: npm install @stripe/stripe-js @stripe/react-stripe-js
-// @ts-ignore - Dependencias de Stripe
-import { loadStripe, Stripe, StripeElementsOptions } from '@stripe/stripe-js';
-// @ts-ignore - Dependencias de Stripe
+import { loadStripe } from '@stripe/stripe-js/pure';
+import type { Stripe, StripeElementsOptions } from '@stripe/stripe-js';
 import {
   Elements,
   CardElement,
@@ -12,7 +10,10 @@ import {
 import { CreditCard, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '');
+const getStripePublishableKey = (): string | null => {
+  const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.trim();
+  return key ? key : null;
+};
 
 interface StripePaymentFormProps {
   clientSecret: string;
@@ -157,14 +158,48 @@ export const StripePaymentForm: React.FC<StripePaymentFormWrapperProps> = ({
   buttonText,
 }) => {
   const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   useEffect(() => {
-    stripePromise.then((stripeInstance) => {
-      if (stripeInstance) {
+    let isMounted = true;
+    const publishableKey = getStripePublishableKey();
+
+    if (!publishableKey) {
+      setStripeError('No se configuró la clave pública de Stripe.');
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    loadStripe(publishableKey)
+      .then((stripeInstance) => {
+        if (!isMounted) return;
+
+        if (!stripeInstance) {
+          setStripeError('No se pudo inicializar Stripe.');
+          return;
+        }
+
         setStripe(stripeInstance);
-      }
-    });
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setStripeError('No se pudo inicializar Stripe.');
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  if (stripeError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-red-800">{stripeError}</p>
+      </div>
+    );
+  }
 
   if (!stripe) {
     return (

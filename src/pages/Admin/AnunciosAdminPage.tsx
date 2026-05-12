@@ -1,3 +1,4 @@
+import { useNotifications } from '../../contexts/NotificationContext';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, AnuncioAdmin, CrearAnuncioDto, ActualizarAnuncioDto } from '../../services/adminApi';
@@ -16,6 +17,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function AnunciosAdminPage() {
+  const { createNotification } = useNotifications();
+;
   const [mostrarModal, setMostrarModal] = useState(false);
   const [anuncioEditando, setAnuncioEditando] = useState<AnuncioAdmin | null>(null);
   const [filtroCurso, setFiltroCurso] = useState<number | undefined>(undefined);
@@ -44,11 +47,16 @@ export default function AnunciosAdminPage() {
   const crearMutation = useMutation({
     mutationFn: ({ anuncio, idDocente }: { anuncio: CrearAnuncioDto; idDocente?: number }) =>
       adminApi.crearAnuncio(anuncio, idDocente),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['anuncios-admin'] });
       setMostrarModal(false);
       setTieneVencimiento(false);
       toast.success('Anuncio creado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: 'Anuncio creado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al crear el anuncio');
@@ -58,12 +66,17 @@ export default function AnunciosAdminPage() {
   const actualizarMutation = useMutation({
     mutationFn: ({ id, anuncio }: { id: number; anuncio: ActualizarAnuncioDto }) =>
       adminApi.actualizarAnuncio(id, anuncio),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['anuncios-admin'] });
       setMostrarModal(false);
       setAnuncioEditando(null);
       setTieneVencimiento(false);
       toast.success('Anuncio actualizado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Anuncio actualizado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al actualizar el anuncio');
@@ -72,9 +85,14 @@ export default function AnunciosAdminPage() {
 
   const eliminarMutation = useMutation({
     mutationFn: (id: number) => adminApi.eliminarAnuncio(id),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['anuncios-admin'] });
       toast.success('Anuncio eliminado exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Anuncio eliminado exitosamente'
+      });
     },
     onError: () => {
       toast.error('Error al eliminar el anuncio');

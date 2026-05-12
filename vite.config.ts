@@ -31,6 +31,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    esbuild: mode === 'production'
+      ? {
+          drop: ['console', 'debugger'],
+        }
+      : undefined,
     server: {
       host: 'localhost',
       port: 3000,

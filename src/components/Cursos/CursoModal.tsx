@@ -4,6 +4,8 @@ import { X } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { cursosApi } from '../../services/cursosService'
 import { Curso, CursoCreate, CursoUpdate, Docente } from '../../types'
 import { Facultad } from '../../types/facultad'
@@ -19,6 +21,28 @@ interface CursoModalProps {
   facultades: Facultad[]
   escuelas: Escuela[]
 }
+
+const emptyToNull = z.union([z.number(), z.string(), z.null(), z.undefined()]).transform(v => {
+  if (v === '' || v === null || v === undefined) return null;
+  const num = Number(v);
+  return isNaN(num) ? null : num;
+});
+
+const cursoSchema = z.object({
+  codigo: z.string().optional().transform(v => v === '' ? undefined : v),
+  nombreCurso: z.string().min(1, 'El nombre es requerido'),
+  creditos: z.coerce.number().min(1, 'Mín. 1').max(10, 'Máx. 10'),
+  horasSemanal: z.coerce.number().min(1, 'Mín. 1').max(40, 'Máx. 40'),
+  horasTeoria: emptyToNull,
+  horasPractica: emptyToNull,
+  horasTotales: emptyToNull,
+  ciclo: z.coerce.number().min(1, 'Requerido').max(10, 'Máx. 10'),
+  idDocente: emptyToNull,
+  idFacultad: emptyToNull,
+  idEscuela: emptyToNull,
+});
+
+type CursoFormValues = z.infer<typeof cursoSchema>;
 
 const CursoModal: React.FC<CursoModalProps> = ({
   isOpen,
@@ -43,7 +67,9 @@ const CursoModal: React.FC<CursoModalProps> = ({
     reset,
     setValue,
     watch,
-  } = useForm<CursoCreate | CursoUpdate>()
+  } = useForm<CursoFormValues>({
+    resolver: zodResolver(cursoSchema)
+  })
 
   const cicloActual = watch('ciclo')
 
@@ -77,13 +103,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
     mutationFn: cursosApi.create,
     onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
-      toast.success('Curso creado exitosamente')
+      toast.success('Curso creado exitosamente');
       await createNotification({
         type: 'curso',
         action: 'crear',
-        nombre: variables.nombreCurso
-      })
-      onClose()
+        nombre: variables.nombre || variables.nombres || 'Nuevo registro'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al crear curso')
@@ -96,13 +122,13 @@ const CursoModal: React.FC<CursoModalProps> = ({
       cursosApi.update(id, data),
     onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['cursos'] })
-      toast.success('Curso actualizado exitosamente')
+      toast.success('Curso actualizado exitosamente');
       await createNotification({
         type: 'curso',
         action: 'editar',
-        nombre: variables.data.nombreCurso
-      })
-      onClose()
+        nombre: variables.data?.nombre || variables.data?.nombres || 'Registro modificado'
+      });
+      onClose();
     },
     onError: (error) => {
       toast.error('Error al actualizar curso')
@@ -110,14 +136,11 @@ const CursoModal: React.FC<CursoModalProps> = ({
     },
   })
 
-  const onSubmit = (data: CursoCreate | CursoUpdate) => {
+  const onSubmit = (data: CursoFormValues) => {
     const formData = {
       ...data,
-      idDocente: data.idDocente ? Number(data.idDocente) : undefined,
-      idFacultad: data.idFacultad ? Number(data.idFacultad) : undefined,
-      idEscuela: data.idEscuela ? Number(data.idEscuela) : undefined,
       prerequisitosIds: selectedPrerequisitos,
-    }
+    };
 
     if (isCreateMode) {
       createMutation.mutate(formData as CursoCreate)

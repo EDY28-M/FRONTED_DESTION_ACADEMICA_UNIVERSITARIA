@@ -2,6 +2,14 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
+# Build-time environment for Vite
+ARG VITE_API_URL=/api
+ARG VITE_PAYMENT_API_URL=/payment-api
+ARG VITE_STRIPE_PUBLISHABLE_KEY=
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_PAYMENT_API_URL=${VITE_PAYMENT_API_URL}
+ENV VITE_STRIPE_PUBLISHABLE_KEY=${VITE_STRIPE_PUBLISHABLE_KEY}
+
 # Install dependencies
 COPY package*.json ./
 RUN npm ci --silent

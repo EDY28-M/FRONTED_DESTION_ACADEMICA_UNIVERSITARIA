@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus, Search, Landmark, Pencil, Trash2, Eye } from 'lucide-react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNotifications } from '../../contexts/NotificationContext';
 import { facultadesApi } from '../../services/facultadesApi'
 import { Facultad } from '../../types/facultad'
 import FacultadModal from '../../components/Facultades/FacultadModal'
@@ -8,8 +9,8 @@ import { toast } from 'react-toastify'
 import ConfirmModal from '../../components/Common/ConfirmModal'
 
 const GestionFacultadesPage = () => {
-    const queryClient = useQueryClient()
-    const [searchTerm, setSearchTerm] = useState('')
+  const { createNotification } = useNotifications();
+const [searchTerm, setSearchTerm] = useState('')
     const [selectedFacultad, setSelectedFacultad] = useState<Facultad | null>(null)
     const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -24,10 +25,15 @@ const GestionFacultadesPage = () => {
     // Mutación para eliminar
     const deleteMutation = useMutation({
         mutationFn: facultadesApi.delete,
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['facultades'] })
             toast.success('Facultad eliminada exitosamente')
-            setIsDeleteModalOpen(false)
+      await createNotification({
+        type: 'academico',
+        action: 'eliminar',
+        nombre: 'Facultad eliminada exitosamente'
+      });
+setIsDeleteModalOpen(false)
             setFacultadToDelete(null)
         },
         onError: (error) => {
@@ -39,10 +45,15 @@ const GestionFacultadesPage = () => {
     // Mutación para cambiar estado
     const toggleActiveMutation = useMutation({
         mutationFn: facultadesApi.toggleActive,
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['facultades'] })
             toast.success('Estado actualizado correctamente')
-        },
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Estado actualizado correctamente'
+      });
+},
         onError: (error) => {
             toast.error('Error al cambiar estado')
             console.error(error)

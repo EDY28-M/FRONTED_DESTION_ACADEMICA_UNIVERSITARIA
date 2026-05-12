@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { authService } from '../services/authService'
 import type { User, LoginRequest } from '../types'
 import { getDeviceInfo, getLocationInfo, isNewDevice, isNewLocation, registerDevice, registerLocation } from '../utils/deviceDetection'
-import { useNotifications } from './NotificationContext'
 import { startSignalRConnection, stopSignalRConnection } from '../lib/signalr'
 import { queryClient } from '../lib/queryClient'
+import { appLogger } from '../lib/logger'
 
 interface AuthContextType {
   user: User | null
@@ -30,15 +30,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return token && storedUser ? storedUser : null
   })
   const [isLoading, setIsLoading] = useState(false) // Cambiar a false para carga instantánea
-
-  // Obtener addNotification solo si ya está montado el NotificationProvider
-  const getNotifications = () => {
-    try {
-      return useNotifications()
-    } catch {
-      return null
-    }
-  }
 
   // Estado para controlar la inactividad
   const [lastActivity, setLastActivity] = useState(Date.now())
@@ -97,14 +88,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Si ha pasado el tiempo límite de inactividad
       if (timeSinceLastActivity > INACTIVITY_LIMIT) {
-        console.log('Sesión expirada por inactividad')
+        appLogger.info('Session expired due to inactivity')
         await logout()
         return
       }
 
       // Si el usuario está activo y el token va a expirar, refrescar
       if (authService.isTokenExpiringSoon()) {
-        console.log('Token próximo a expirar, refrescando...')
+        appLogger.debug('Token close to expiration; refreshing token')
         const refreshed = await authService.refreshToken()
         if (refreshed) {
           setUser(refreshed.usuario)
@@ -128,18 +119,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token) {
         try {
           await startSignalRConnection(token)
-          console.log('✅ SignalR conectado')
+          appLogger.info('SignalR connected after login')
         } catch (error) {
-          console.error('Error al conectar SignalR:', error)
+          appLogger.error('SignalR connection failed during login', error)
         }
       }
 
       // Cargar notificaciones desde el servidor
       setTimeout(async () => {
-        const notificationContext = getNotifications()
-        if (notificationContext) {
-          await notificationContext.loadNotifications()
-
+        try {
           // Detectar dispositivo y ubicación
           const deviceInfo = getDeviceInfo()
           const location = await getLocationInfo()
@@ -147,37 +135,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const isNewDev = isNewDevice(deviceInfo.fingerprint)
           const isNewLoc = isNewLocation(location)
 
-          // Si es un nuevo dispositivo o ubicación, crear notificación en el servidor
+          // Registrar dispositivo y ubicación limpia localmente
           if (isNewDev || isNewLoc) {
-            let message = ''
-            if (isNewDev && isNewLoc) {
-              message = 'Nuevo dispositivo y ubicación'
-            } else if (isNewDev) {
-              message = 'Nuevo dispositivo detectado'
-            } else {
-              message = 'Nueva ubicación detectada'
-            }
-
-            await notificationContext.createNotification({
-              type: 'login',
-              action: 'iniciar',
-              nombre: message,
-              metadata: {
-                device: `${deviceInfo.deviceType} - ${deviceInfo.browser} en ${deviceInfo.os}`,
-                location: location
-              }
-            })
+            appLogger.info('New login context detected', {
+              newDevice: isNewDev,
+              newLocation: isNewLoc,
+            });
           }
-
-          // Registrar dispositivo y ubicación
           registerDevice(deviceInfo.fingerprint)
           registerLocation(location)
+        } catch(e) {
+          appLogger.error('Failed to register device or location metadata', e)
         }
       }, 1000)
 
       return response.usuario
     } catch (error) {
-      console.error('Error en login:', error)
+      appLogger.error('Login failed', error)
       throw error
     }
   }
@@ -190,7 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Desconectar SignalR
       await stopSignalRConnection()
     } catch (error) {
-      console.error('Error en logout:', error)
+      appLogger.error('Logout failed', error)
     } finally {
       setUser(null)
       authService.clearAuthData()
@@ -206,7 +180,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(currentUser)
       }
     } catch (error) {
-      console.error('Error al refrescar usuario:', error)
+      appLogger.error('Failed to refresh current user', error)
     }
   }
 

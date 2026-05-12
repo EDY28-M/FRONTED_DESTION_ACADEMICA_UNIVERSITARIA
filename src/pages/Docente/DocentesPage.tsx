@@ -21,6 +21,7 @@ import { format } from 'date-fns'
 import { useNotifications } from '../../contexts/NotificationContext'
 
 const DocentesPage = () => {
+  const { createNotification } = useNotifications();
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDocente, setSelectedDocente] = useState<Docente | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -29,9 +30,7 @@ const DocentesPage = () => {
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create')
 
   const queryClient = useQueryClient()
-  const { createNotification } = useNotifications()
-
-  const { data: docentes, isLoading, error } = useQuery({
+const { data: docentes, isLoading, error } = useQuery({
     queryKey: ['docentes'],
     queryFn: docentesApi.getAll,
   })
@@ -40,13 +39,13 @@ const DocentesPage = () => {
     mutationFn: docentesApi.delete,
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['docentes'] })
-      const nombreCompleto = `${docenteToDelete?.nombres} ${docenteToDelete?.apellidos}`
       toast.success('Docente eliminado exitosamente')
       await createNotification({
         type: 'docente',
         action: 'eliminar',
-        nombre: nombreCompleto
-      })
+        nombre: 'Docente eliminado'
+      });
+
       setIsDeleteModalOpen(false)
       setDocenteToDelete(null)
     },

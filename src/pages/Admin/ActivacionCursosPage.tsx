@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { Dialog, Transition } from '@headlessui/react';
 import toast from 'react-hot-toast';
 import {
@@ -24,6 +25,7 @@ import { cursosApi } from '../../services/cursosService';
 import { Curso } from '../../types';
 
 export default function ActivacionCursosPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [modalActivarAbierto, setModalActivarAbierto] = useState(false);
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | null>(null);
@@ -79,9 +81,14 @@ export default function ActivacionCursosPage() {
   const activarMutation = useMutation({
     mutationFn: (data: ActivarCursoPeriodoRequest) =>
       adminCursosApi.activarCursoPeriodo(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Curso activado exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Curso activado exitosamente'
+      });
+queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       cerrarModalActivar();
     },
     onError: (error: any) => {
@@ -92,9 +99,14 @@ export default function ActivacionCursosPage() {
   const desactivarMutation = useMutation({
     mutationFn: (data: { idCurso: number; idPeriodo: number }) =>
       adminCursosApi.desactivarCursoPeriodo(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Curso desactivado exitosamente');
-      queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 'Curso desactivado exitosamente'
+      });
+queryClient.invalidateQueries({ queryKey: ['cursos-activados'] });
       setModalDesactivarAbierto(false);
       setCursoADesactivar(null);
     },
@@ -104,7 +116,7 @@ export default function ActivacionCursosPage() {
   });
 
   const handleActivar = () => {
-    if (!cursoSeleccionado || !periodoSeleccionado) {
+if (!cursoSeleccionado || !periodoSeleccionado) {
       toast.error('Selecciona un curso y un período');
       return;
     }

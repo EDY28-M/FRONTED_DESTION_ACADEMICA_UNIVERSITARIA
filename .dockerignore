@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.vscode
+.env
+.env.*
+Dockerfile*
+*.md
+**/._*
+._*
+**/.DS_Store

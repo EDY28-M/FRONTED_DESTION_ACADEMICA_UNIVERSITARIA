@@ -11,6 +11,25 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        if ('%VITE_ENABLE_BROWSER_CONSOLE%' === 'true') {
+          return
+        }
+
+        var noop = function () {}
+        var methods = ['log', 'info', 'debug', 'warn', 'error', 'trace']
+
+        for (var i = 0; i < methods.length; i += 1) {
+          var method = methods[i]
+          try {
+            console[method] = noop
+          } catch (_ignored) {
+            // Ignore assignment failures in restricted browser environments.
+          }
+        }
+      })()
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

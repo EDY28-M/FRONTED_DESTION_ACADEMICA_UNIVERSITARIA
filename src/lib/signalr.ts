@@ -1,4 +1,5 @@
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { appLogger } from './logger';
 
 let connection: HubConnection | null = null;
 
@@ -15,7 +16,7 @@ const getHubBaseUrl = (): string => {
 
 export const startSignalRConnection = async (token: string): Promise<HubConnection> => {
   if (connection && connection.state === HubConnectionState.Connected) {
-    console.log('SignalR ya está conectado');
+    appLogger.debug('SignalR already connected');
     return connection;
   }
 
@@ -24,8 +25,9 @@ export const startSignalRConnection = async (token: string): Promise<HubConnecti
     const baseUrl = getHubBaseUrl();
     const url = `${baseUrl}/hub/notifications?access_token=${encodeURIComponent(token)}`;
 
-    // Log solo para debugging (sin mostrar el token completo por seguridad)
-    console.log('🔌 Conectando a SignalR hub...', baseUrl ? `(${baseUrl})` : '(local)');
+    appLogger.debug('Starting SignalR connection', {
+      baseUrl: baseUrl || 'local',
+    });
 
     connection = new HubConnectionBuilder()
       .withUrl(url)
@@ -42,24 +44,28 @@ export const startSignalRConnection = async (token: string): Promise<HubConnecti
 
     // Manejar reconexión
     connection.onreconnecting((error) => {
-      console.warn('🔄 SignalR reconectando...', error);
+      appLogger.warn('SignalR reconnecting', {
+        reason: error?.message,
+      });
     });
 
     connection.onreconnected((connectionId) => {
-      console.log('✅ SignalR reconectado. ConnectionId:', connectionId);
+      appLogger.info('SignalR reconnected', {
+        connectionId,
+      });
     });
 
     connection.onclose((error) => {
-      console.error('❌ SignalR desconectado:', error);
+      appLogger.error('SignalR connection closed', error);
     });
 
     // Iniciar conexión
     await connection.start();
-    console.log('✅ SignalR conectado exitosamente');
+    appLogger.info('SignalR connected');
 
     return connection;
   } catch (error) {
-    console.error('❌ Error al conectar SignalR:', error);
+    appLogger.error('SignalR connection failed', error);
     throw error;
   }
 };
@@ -68,10 +74,10 @@ export const stopSignalRConnection = async (): Promise<void> => {
   if (connection) {
     try {
       await connection.stop();
-      console.log('SignalR desconectado');
+      appLogger.debug('SignalR disconnected');
       connection = null;
     } catch (error) {
-      console.error('Error al desconectar SignalR:', error);
+      appLogger.error('SignalR disconnection failed', error);
     }
   }
 };

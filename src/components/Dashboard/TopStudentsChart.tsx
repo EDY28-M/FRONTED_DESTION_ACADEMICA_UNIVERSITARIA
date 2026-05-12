@@ -10,6 +10,7 @@ type TopStudentDatum = {
   semestre: number
   rangoMerito: string
   creditosAprobados: number
+  periodoNombre: string
 }
 
 const COLORS = ['#0ea5e9', '#38bdf8', '#60a5fa', '#818cf8', '#a78bfa']
@@ -38,6 +39,12 @@ const CustomTooltip = ({ active, payload }: any) => {
           <span className="text-slate-500">Promoción</span>
           <span className="font-mono text-slate-700">{d.promocion}</span>
         </div>
+        {d.periodoNombre && (
+          <div className="flex justify-between text-[11px]">
+            <span className="text-slate-500">Período Evaluado</span>
+            <span className="font-bold font-mono text-slate-900">{d.periodoNombre}</span>
+          </div>
+        )}
         {d.rangoMerito && (
           <div className="flex justify-between text-[11px]">
             <span className="text-slate-500">Mérito</span>
@@ -68,6 +75,7 @@ const TopStudentsChart: React.FC = () => {
     semestre: s.semestre,
     rangoMerito: s.rangoMerito || '',
     creditosAprobados: s.totalCreditosAprobados,
+    periodoNombre: s.periodoNombre || ''
   }))
 
   const hasData = chartData.length > 0

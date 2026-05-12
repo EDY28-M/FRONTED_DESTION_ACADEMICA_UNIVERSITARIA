@@ -1,10 +1,9 @@
+  import { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useAuth } from './contexts/AuthContext'
+import ObservabilityTracker from './components/Observability/ObservabilityTracker'
 import { DocenteAuthProvider } from './contexts/DocenteAuthContext'
-import Layout from './components/Layout/Layout'
-import StudentLayout from './components/Layout/StudentLayout'
-import DocenteLayout from './components/Layout/DocenteLayout'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import { ProtectedDocenteRoute } from './components/ProtectedDocenteRoute'
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage'
@@ -14,59 +13,98 @@ import ResetPasswordAdminPage from './pages/Admin/ResetPasswordAdminPage'
 import LoginEstudiantePage from './pages/Student/LoginEstudiantePage'
 import ForgotPasswordEstudiantePage from './pages/Student/ForgotPasswordEstudiantePage'
 import ResetPasswordEstudiantePage from './pages/Student/ResetPasswordEstudiantePage'
-import {
-  DashboardDocentePage,
-  GestionCursoDocentePage,
-  LoginDocentePage,
-  ForgotPasswordDocentePage,
-  ResetPasswordDocentePage,
-  PerfilDocentePage,
-  MisCursosDocentePage,
-  EstudiantesDocentePage,
-  AsistenciasDocentePage,
-  HorarioDocentePage,
-  EstadisticasDocentePage,
-  NotasConsolidadasDocentePage,
-  AnunciosDocentePage,
-  MaterialesDocentePage
-} from './pages/Docente'
-import Dashboard from './pages/Dashboard'
-import DocentesPage from './pages/Docente/DocentesPage'
-import CursosPage from './pages/Cursos/CursosPage'
-import GestionHorariosPage from './pages/Admin/GestionHorariosPage'
-import EstadisticasPage from './pages/Estadisticas/EstadisticasPage'
-import PerfilPage from './pages/Perfil/PerfilPage'
-import GestionEstudiantesPage from './pages/Admin/GestionEstudiantesPage'
-import CursosDirigidosPage from './pages/Admin/CursosDirigidosPage'
-import GestionPeriodosPage from './pages/Admin/GestionPeriodosPage'
-import VisualizacionEstudiantesPage from './pages/Admin/VisualizacionEstudiantesPage'
-import GestionDocentesPasswordPage from './pages/Admin/GestionDocentesPasswordPage'
-import GestionAsistenciasPage from './pages/Admin/GestionAsistenciasPage'
-import NotasConsolidadasAdminPage from './pages/Admin/NotasConsolidadasAdminPage'
-import AnunciosAdminPage from './pages/Admin/AnunciosAdminPage'
-import MaterialesAdminPage from './pages/Admin/MaterialesAdminPage'
-import ActivacionCursosPage from './pages/Admin/ActivacionCursosPage'
-import GestionFacultadesPage from './pages/Admin/GestionFacultadesPage'
-import GestionEscuelasPage from './pages/Admin/GestionEscuelasPage'
-import InicioDashboard from './pages/Student/InicioDashboard'
-import MisCursosPage from './pages/Student/MisCursosPage'
-import MatriculaPage from './pages/Student/MatriculaPage'
-import PagoMatriculaPage from './pages/Student/PagoMatriculaPage'
-import PagoMatriculaInicialPage from './pages/Student/PagoMatriculaInicialPage'
-import AumentoCursosPage from './pages/Student/AumentoCursosPage'
-import RetiroCursosPage from './pages/Student/RetiroCursosPage'
-import NotasPage from './pages/Student/NotasPage'
-import AsistenciasPage from './pages/Student/AsistenciasPage'
-import PerfilEstudiantePage from './pages/Student/PerfilEstudiantePage'
-import RegistroNotasPage from './pages/Student/RegistroNotasPage'
-import OrdenMeritoPage from './pages/Student/OrdenMeritoPage'
-import { HorarioEstudiantePage } from './pages/Student/HorarioEstudiantePage'
-import TrabajosPage from './pages/Student/TrabajosPage'
-import TrabajoDetallePage from './pages/Student/TrabajoDetallePage'
-import { AnunciosPage } from './pages/Student/AnunciosPage'
-import { MaterialesPage } from './pages/Student/MaterialesPage'
-import PagoExitosoPage from './pages/Student/PagoExitosoPage'
-import PagoCanceladoPage from './pages/Student/PagoCanceladoPage'
+import { LoginDocentePage } from './pages/Docente/LoginDocentePage'
+import { ForgotPasswordDocentePage } from './pages/Docente/ForgotPasswordDocentePage'
+import { ResetPasswordDocentePage } from './pages/Docente/ResetPasswordDocentePage'
+
+const Layout = lazy(() => import('./components/Layout/Layout'))
+const StudentLayout = lazy(() => import('./components/Layout/StudentLayout'))
+const DocenteLayout = lazy(() => import('./components/Layout/DocenteLayout'))
+
+const DashboardDocentePage = lazy(() =>
+  import('./pages/Docente/DashboardDocentePage').then((module) => ({ default: module.DashboardDocentePage }))
+)
+const GestionCursoDocentePage = lazy(() =>
+  import('./pages/Docente/GestionCursoDocentePage').then((module) => ({ default: module.GestionCursoDocentePage }))
+)
+const PerfilDocentePage = lazy(() =>
+  import('./pages/Docente/PerfilDocentePage').then((module) => ({ default: module.PerfilDocentePage }))
+)
+const MisCursosDocentePage = lazy(() =>
+  import('./pages/Docente/MisCursosDocentePage').then((module) => ({ default: module.MisCursosDocentePage }))
+)
+const EstudiantesDocentePage = lazy(() =>
+  import('./pages/Docente/EstudiantesDocentePage').then((module) => ({ default: module.EstudiantesDocentePage }))
+)
+const AsistenciasDocentePage = lazy(() =>
+  import('./pages/Docente/AsistenciasDocentePage').then((module) => ({ default: module.AsistenciasDocentePage }))
+)
+const HorarioDocentePage = lazy(() =>
+  import('./pages/Docente/HorarioDocentePage').then((module) => ({ default: module.HorarioDocentePage }))
+)
+const EstadisticasDocentePage = lazy(() =>
+  import('./pages/Docente/EstadisticasDocentePage').then((module) => ({ default: module.EstadisticasDocentePage }))
+)
+const NotasConsolidadasDocentePage = lazy(() =>
+  import('./pages/Docente/NotasConsolidadasDocentePage').then((module) => ({ default: module.NotasConsolidadasDocentePage }))
+)
+const AnunciosDocentePage = lazy(() =>
+  import('./pages/Docente/AnunciosDocentePage').then((module) => ({ default: module.AnunciosDocentePage }))
+)
+const MaterialesDocentePage = lazy(() =>
+  import('./pages/Docente/MaterialesDocentePage').then((module) => ({ default: module.MaterialesDocentePage }))
+)
+
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const DocentesPage = lazy(() => import('./pages/Docente/DocentesPage'))
+const CursosPage = lazy(() => import('./pages/Cursos/CursosPage'))
+const GestionHorariosPage = lazy(() => import('./pages/Admin/GestionHorariosPage'))
+const EstadisticasPage = lazy(() => import('./pages/Estadisticas/EstadisticasPage'))
+const PerfilPage = lazy(() => import('./pages/Perfil/PerfilPage'))
+const GestionEstudiantesPage = lazy(() => import('./pages/Admin/GestionEstudiantesPage'))
+const CursosDirigidosPage = lazy(() => import('./pages/Admin/CursosDirigidosPage'))
+const GestionPeriodosPage = lazy(() => import('./pages/Admin/GestionPeriodosPage'))
+const VisualizacionEstudiantesPage = lazy(() => import('./pages/Admin/VisualizacionEstudiantesPage'))
+const GestionDocentesPasswordPage = lazy(() => import('./pages/Admin/GestionDocentesPasswordPage'))
+const GestionAsistenciasPage = lazy(() => import('./pages/Admin/GestionAsistenciasPage'))
+const NotasConsolidadasAdminPage = lazy(() => import('./pages/Admin/NotasConsolidadasAdminPage'))
+const AnunciosAdminPage = lazy(() => import('./pages/Admin/AnunciosAdminPage'))
+const MaterialesAdminPage = lazy(() => import('./pages/Admin/MaterialesAdminPage'))
+const ActivacionCursosPage = lazy(() => import('./pages/Admin/ActivacionCursosPage'))
+const GestionFacultadesPage = lazy(() => import('./pages/Admin/GestionFacultadesPage'))
+const GestionEscuelasPage = lazy(() => import('./pages/Admin/GestionEscuelasPage'))
+
+const InicioDashboard = lazy(() => import('./pages/Student/InicioDashboard'))
+const MisCursosPage = lazy(() => import('./pages/Student/MisCursosPage'))
+const MatriculaPage = lazy(() => import('./pages/Student/MatriculaPage'))
+const PagoMatriculaPage = lazy(() => import('./pages/Student/PagoMatriculaPage'))
+const PagoMatriculaInicialPage = lazy(() => import('./pages/Student/PagoMatriculaInicialPage'))
+const AumentoCursosPage = lazy(() => import('./pages/Student/AumentoCursosPage'))
+const RetiroCursosPage = lazy(() => import('./pages/Student/RetiroCursosPage'))
+const NotasPage = lazy(() => import('./pages/Student/NotasPage'))
+const AsistenciasPage = lazy(() => import('./pages/Student/AsistenciasPage'))
+const PerfilEstudiantePage = lazy(() => import('./pages/Student/PerfilEstudiantePage'))
+const RegistroNotasPage = lazy(() => import('./pages/Student/RegistroNotasPage'))
+const OrdenMeritoPage = lazy(() => import('./pages/Student/OrdenMeritoPage'))
+const HorarioEstudiantePage = lazy(() =>
+  import('./pages/Student/HorarioEstudiantePage').then((module) => ({ default: module.HorarioEstudiantePage }))
+)
+const TrabajosPage = lazy(() => import('./pages/Student/TrabajosPage'))
+const TrabajoDetallePage = lazy(() => import('./pages/Student/TrabajoDetallePage'))
+const AnunciosPage = lazy(() =>
+  import('./pages/Student/AnunciosPage').then((module) => ({ default: module.AnunciosPage }))
+)
+const MaterialesPage = lazy(() =>
+  import('./pages/Student/MaterialesPage').then((module) => ({ default: module.MaterialesPage }))
+)
+const PagoExitosoPage = lazy(() => import('./pages/Student/PagoExitosoPage'))
+const PagoCanceladoPage = lazy(() => import('./pages/Student/PagoCanceladoPage'))
+
+const RouteLoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-700" />
+  </div>
+)
 
 function App() {
   const { isAuthenticated, user } = useAuth()
@@ -76,6 +114,8 @@ function App() {
 
   return (
     <DocenteAuthProvider>
+      <ObservabilityTracker />
+      <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         {/* Rutas de Admin - accesibles sin autenticación */}
         <Route
@@ -249,6 +289,7 @@ function App() {
           }
         />
       </Routes>
+      </Suspense>
       <Toaster
         position="top-right"
         toastOptions={{

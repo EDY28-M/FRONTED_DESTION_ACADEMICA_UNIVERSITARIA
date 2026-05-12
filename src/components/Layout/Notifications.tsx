@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export interface Notification {
+  leida?: boolean;
   id: string
   type: 'docente' | 'curso' | 'password' | 'login' | 'academico'
   action: 'crear' | 'editar' | 'eliminar' | 'iniciar' | 'matricula' | 'retiro'
@@ -24,24 +25,12 @@ interface NotificationsProps {
 
 export const Notifications = ({ notifications, onClear, onMarkAsRead }: NotificationsProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [lastReadTimestamp, setLastReadTimestamp] = useState(() => {
-    // Cargar el último timestamp leído desde localStorage
-    const saved = localStorage.getItem('notifications_last_read_timestamp')
-    return saved ? parseInt(saved, 10) : 0
-  })
-  
-  // Contar notificaciones no leídas basándose en el timestamp
-  const unreadCount = notifications.filter(n => {
-    const notifTimestamp = n.timestamp instanceof Date ? n.timestamp.getTime() : new Date(n.timestamp).getTime()
-    return notifTimestamp > lastReadTimestamp
-  }).length
+    // Contar notificaciones no leídas basándose en el flag 'leida'
+  const unreadCount = notifications.filter(n => n.leida === false).length
 
-  // Marcar como leídas cuando se abre el panel
+// Marcar como leídas cuando se abre el panel
   const handleToggle = () => {
     if (!isOpen && notifications.length > 0 && unreadCount > 0) {
-      const now = Date.now()
-      setLastReadTimestamp(now)
-      localStorage.setItem('notifications_last_read_timestamp', now.toString())
       onMarkAsRead()
     }
     setIsOpen(!isOpen)
@@ -51,8 +40,6 @@ export const Notifications = ({ notifications, onClear, onMarkAsRead }: Notifica
   const handleClearAll = (e: React.MouseEvent) => {
     e.stopPropagation()
     onClear()
-    setLastReadTimestamp(Date.now())
-    localStorage.setItem('notifications_last_read_timestamp', Date.now().toString())
   }
 
   // No necesitamos useEffect porque usamos hasUnread como variable calculada

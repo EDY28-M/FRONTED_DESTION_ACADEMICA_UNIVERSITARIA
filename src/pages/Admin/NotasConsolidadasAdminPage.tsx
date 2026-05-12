@@ -1,7 +1,8 @@
+import { useNotifications } from '../../contexts/NotificationContext';
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../../lib/axios';
-import { Search, ChevronDown, ChevronRight, Download, FileText, User, BookOpen, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Download, FileText, User, BookOpen, TrendingUp, AlertTriangle, Check, X, Edit2 } from 'lucide-react';
 
 interface EstudianteResumen {
   id: number;
@@ -69,6 +70,9 @@ interface EstudianteDetalle {
 }
 
 export default function NotasConsolidadasAdminPage() {
+  const { createNotification } = useNotifications();
+  const queryClient = useQueryClient();
+;
   const [filtroEstudiante, setFiltroEstudiante] = useState('');
   const [filtroCiclo, setFiltroCiclo] = useState<number | undefined>(undefined);
   const [filtroEstado, setFiltroEstado] = useState<string>('');
@@ -158,6 +162,52 @@ export default function NotasConsolidadasAdminPage() {
     if (filtroPeriodoDetalle) return periodos.filter(p => p.idPeriodo === filtroPeriodoDetalle);
     return periodos;
   }, [detalleEstudiante, filtroPeriodoDetalle]);
+
+
+  const [editingRow, setEditingRow] = useState<string | null>(null);
+  const [editNota, setEditNota] = useState<number | ''>('');
+  const [editEstado, setEditEstado] = useState<string>('');
+
+  const updateMatriculaMutation = useMutation({
+    mutationFn: async (data: { idEstudiante: number, idCurso: number, idPeriodo: number, promedioFinal: number | null, estado: string }) => {
+      const resp = await api.put(`/admin/matriculas/${data.idEstudiante}/${data.idCurso}/${data.idPeriodo}`, data);
+      return resp.data;
+    },
+    onSuccess: () => {
+      void createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: 'Matrícula actualizada',
+      });
+      queryClient.invalidateQueries({ queryKey: ['estudiante-detalle'] });
+      setEditingRow(null);
+    },
+    onError: (error: any) => {
+      const mensaje = error?.response?.data?.mensaje || 'Ocurrió un error inesperado';
+      void createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: `Error al actualizar: ${mensaje}`,
+      });
+    }
+  });
+
+  const handleEditRow = (curso: any, idPeriodo: number) => {
+    setEditingRow(`${idPeriodo}-${curso.idCurso}`);
+    setEditNota(curso.promedioFinal ?? '');
+    setEditEstado(curso.estado || 'Cursando');
+  };
+
+  const handleSaveRow = async (idEstudiante: number, idCurso: number, idPeriodo: number) => {
+    if (updateMatriculaMutation.isPending) return;
+    await updateMatriculaMutation.mutateAsync({
+      idEstudiante,
+      idCurso,
+      idPeriodo,
+      promedioFinal: editNota === '' ? null : Number(editNota),
+      estado: editEstado
+    });
+  };
 
   const handleExportarTodo = () => {
     if (!estudiantesFiltrados.length) return alert('No hay datos para exportar');
@@ -501,22 +551,86 @@ export default function NotasConsolidadasAdminPage() {
                                             <td className="p-3 text-center text-xs text-slate-500">{curso.ciclo}°</td>
                                             <td className="p-3 text-center text-xs text-slate-500">{curso.creditos}</td>
                                             <td className="p-3 text-xs text-slate-600">{curso.docente}</td>
-                                            <td className="p-3 text-center">
-                                              {curso.estado === 'Retirado' ? (
-                                                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 border border-red-200">Retirado</span>
-                                              ) : curso.promedioFinal !== null && curso.promedioFinal < 11 ? (
-                                                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 border border-amber-200">Desaprobado</span>
-                                              ) : curso.promedioFinal !== null ? (
-                                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-200">Aprobado</span>
-                                              ) : (
-                                                <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 border border-sky-200">Cursando</span>
-                                              )}
-                                            </td>
-                                            <td className="p-3 text-center">
-                                              <span className={`text-base font-mono font-bold ${getNotaColor(curso.promedioFinal)}`}>
-                                                {curso.promedioFinal !== null ? curso.promedioFinal.toFixed(2) : '—'}
-                                              </span>
-                                            </td>
+                                            
+<td className="p-3 text-center">
+  {editingRow === `${periodo.idPeriodo}-${curso.idCurso}` ? (
+    <select 
+      value={editEstado} 
+      onChange={e => setEditEstado(e.target.value)} 
+      className="border border-slate-300 rounded p-1 text-xs w-full bg-white"
+    >
+      <option value="Cursando">Cursando</option>
+      <option value="Aprobado">Aprobado</option>
+      <option value="Desaprobado">Desaprobado</option>
+      <option value="Retirado">Retirado</option>
+    </select>
+  ) : (
+    <div className="flex items-center justify-center cursor-pointer group" onClick={(e) => { e.stopPropagation(); handleEditRow(curso, periodo.idPeriodo); }}>
+    {curso.estado === 'Retirado' ? (
+      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 border border-red-200">Retirado</span>
+    ) : curso.estado === 'Aprobado' ? (
+      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-200">Aprobado</span>
+    ) : curso.estado === 'Desaprobado' ? (
+      <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 border border-amber-200">Desaprobado</span>
+    ) : curso.promedioFinal !== null && curso.promedioFinal < 11 ? (
+      <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 border border-amber-200">Desaprobado</span>
+    ) : curso.promedioFinal !== null ? (
+      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-200">Aprobado</span>
+    ) : (
+      <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 border border-sky-200">Cursando</span>
+    )}
+    </div>
+  )}
+</td>
+<td className="p-3 text-center">
+  {editingRow === `${periodo.idPeriodo}-${curso.idCurso}` ? (
+    <div className="flex items-center justify-center gap-1">
+      <input 
+        type="number" 
+        value={editNota} 
+        onChange={e => {
+          const val = e.target.value;
+          setEditNota(val === '' ? '' : Number(val));
+          if (val !== '') {
+            const num = Number(val);
+            if (num >= 11) setEditEstado('Aprobado');
+            else setEditEstado('Desaprobado');
+          } else {
+            setEditEstado('Cursando');
+          }
+        }} 
+        className="border border-slate-300 rounded p-1 text-xs w-16 text-center outline-none focus:border-zinc-900" 
+        step="1"
+        min="0"
+        max="20"
+      />
+      <button 
+        disabled={updateMatriculaMutation.isPending}
+        onClick={(e) => { e.stopPropagation(); handleSaveRow(est.id, curso.idCurso, periodo.idPeriodo); }} 
+        className="text-emerald-600 hover:bg-emerald-50 p-1 rounded transition-colors"
+        title="Guardar"
+      >
+        <Check className="w-4 h-4"/>
+      </button>
+      <button 
+        disabled={updateMatriculaMutation.isPending}
+        onClick={(e) => { e.stopPropagation(); setEditingRow(null); }} 
+        className="text-red-600 hover:bg-red-50 p-1 rounded transition-colors"
+        title="Cancelar"
+      >
+        <X className="w-4 h-4"/>
+      </button>
+    </div>
+  ) : (
+    <div className="flex items-center justify-center gap-2 cursor-pointer group" onClick={(e) => { e.stopPropagation(); handleEditRow(curso, periodo.idPeriodo); }}>
+      <span className={`text-base font-mono font-bold ${getNotaColor(curso.promedioFinal)}`}>
+        {curso.promedioFinal !== null ? Number(curso.promedioFinal).toFixed(2) : '—'}
+      </span>
+      <Edit2 className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+    </div>
+  )}
+</td>
+
                                           </tr>
                                         ))}
                                       </tbody>

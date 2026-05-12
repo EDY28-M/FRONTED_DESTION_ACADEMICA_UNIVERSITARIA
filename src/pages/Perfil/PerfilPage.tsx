@@ -73,11 +73,7 @@ export default function PerfilPage() {
         newPassword: passwordData.newPassword
       });
 
-      await createNotification({
-        type: 'docente',
-        action: 'editar',
-        nombre: 'Contraseña actualizada'
-      });
+
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setIsModalOpen(false);
       setMessage({ type: 'success', text: 'Contraseña actualizada correctamente' });

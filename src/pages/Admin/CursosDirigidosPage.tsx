@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { cursosApi } from '../../services/cursosService';
 import { adminCursosApi, EstudianteAdmin } from '../../services/adminCursosApi';
 import { estudiantesApi } from '../../services/estudiantesApi';
@@ -23,6 +24,7 @@ import { Curso } from '../../types';
 import { Periodo } from '../../types/estudiante';
 
 export default function CursosDirigidosPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [cursoSeleccionado, setCursoSeleccionado] = useState<number | null>(null);
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<number | null>(null);
@@ -49,13 +51,18 @@ export default function CursosDirigidosPage() {
   // Mutation
   const crearDirigidosMutation = useMutation({
     mutationFn: adminCursosApi.crearCursosDirigidos,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(
         `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
-        { duration: 5000 }
       );
-
-      // Mostrar detalles
+      await createNotification({
+        type: 'curso',
+        action: 'editar',
+        nombre: 
+        `✅ Proceso completado: ${data.exitosos} exitosos, ${data.fallidos} fallidos`,
+      
+      });
+// Mostrar detalles
       if (data.detalles.exitosos.length > 0) {
         console.log('Matrículas exitosas:', data.detalles.exitosos);
       }
@@ -78,7 +85,7 @@ export default function CursosDirigidosPage() {
 
   // Handlers
   const handleCursoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = parseInt(e.target.value);
+const id = parseInt(e.target.value);
     setCursoSeleccionado(id || null);
     setEstudiantesSeleccionados([]); // Limpiar selección al cambiar curso
   };

@@ -1,5 +1,6 @@
 import { useState, Fragment, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '../../contexts/NotificationContext';
 import { Dialog, Transition } from '@headlessui/react';
 import { adminDocentesApi, DocenteAdmin, CrearDocenteConPasswordRequest, AsignarPasswordRequest, ActualizarDocenteRequest } from '../../services/adminDocentesApi';
 import { facultadesApi } from '../../services/facultadesApi';
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 type ModalType = 'crear' | 'asignarPassword' | 'editar' | 'eliminar' | null;
 
 export default function GestionDocentesPasswordPage() {
+  const { createNotification } = useNotifications();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAbierto, setModalAbierto] = useState<ModalType>(null);
@@ -66,10 +68,15 @@ export default function GestionDocentesPasswordPage() {
   // Mutation para crear docente
   const crearMutation = useMutation({
     mutationFn: adminDocentesApi.crearDocente,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['docentes-admin'] });
       toast.success(data.mensaje);
-      cerrarModal();
+      await createNotification({
+        type: 'password',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al crear docente');
@@ -80,10 +87,15 @@ export default function GestionDocentesPasswordPage() {
   const asignarPasswordMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: AsignarPasswordRequest }) =>
       adminDocentesApi.asignarPassword(id, data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['docentes-admin'] });
       toast.success(data.mensaje);
-      cerrarModal();
+      await createNotification({
+        type: 'password',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al asignar contraseña');
@@ -94,10 +106,15 @@ export default function GestionDocentesPasswordPage() {
   const actualizarMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: ActualizarDocenteRequest }) =>
       adminDocentesApi.actualizarDocente(id, data),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['docentes-admin'] });
       toast.success(data.mensaje);
-      cerrarModal();
+      await createNotification({
+        type: 'password',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al actualizar docente');
@@ -107,10 +124,15 @@ export default function GestionDocentesPasswordPage() {
   // Mutation para eliminar docente
   const eliminarMutation = useMutation({
     mutationFn: (id: number) => adminDocentesApi.eliminarDocente(id),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['docentes-admin'] });
       toast.success(data.mensaje);
-      cerrarModal();
+      await createNotification({
+        type: 'password',
+        action: 'editar',
+        nombre: data.mensaje
+      });
+cerrarModal();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.mensaje || 'Error al eliminar docente');
@@ -133,7 +155,7 @@ export default function GestionDocentesPasswordPage() {
 
   // Función para limpiar todos los filtros
   const limpiarFiltros = () => {
-    setBusqueda('')
+setBusqueda('')
     setSelectedFacultadId('')
     setSelectedEscuelaId('')
   }

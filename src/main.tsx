@@ -6,9 +6,15 @@ import { ToastContainer } from 'react-toastify'
 import { AuthProvider } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { queryClient } from './lib/queryClient'
+import { hardenBrowserConsole, suppressKnownBrowserNoise } from './lib/logger'
+import { initializeMonitoring } from './lib/monitoring'
 import App from './App'
 import './index.css'
 import 'react-toastify/dist/ReactToastify.css'
+
+initializeMonitoring()
+suppressKnownBrowserNoise()
+hardenBrowserConsole()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

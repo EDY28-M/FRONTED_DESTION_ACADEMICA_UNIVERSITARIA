@@ -83,7 +83,7 @@ const PerformanceMonitor: React.FC = () => {
             {/* Header */}
             <div className="h-12 border-b border-zinc-200 flex items-center px-4 justify-between bg-white/60 backdrop-blur">
                 <h3 className="text-zinc-900 font-bold uppercase text-xs tracking-wider">Carga Académica</h3>
-                <span className={`text-[10px] ${visualTheme.badgeText} font-mono`}>PERÍODO ACTIVO</span>
+                <span className={`text-[10px] ${visualTheme.badgeText} font-mono uppercase`}>ACTIVO / ÚLTIMO</span>
             </div>
 
             {/* Gauge container */}
@@ -154,11 +154,13 @@ const PerformanceMonitor: React.FC = () => {
                         </svg>
 
                         {/* Center percentage */}
-                        <div className="absolute flex flex-col items-center bg-white/90 p-4 ">
-                            <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
-                                {metrics.efficiencyTotal}
-                                <span className={`text-lg ${visualTheme.percentText}`}>%</span>
-                            </span>
+                        <div className="absolute flex flex-col items-center justify-center">
+                            <div className="flex items-baseline">
+                                <span className="text-5xl font-bold text-zinc-900 tracking-tighter font-mono">
+                                    {metrics.efficiencyTotal}
+                                </span>
+                                <span className={`text-xl font-bold ml-1.5 ${visualTheme.percentText}`}>%</span>
+                            </div>
                             <span className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1">Eficiencia</span>
                         </div>
                     </div>

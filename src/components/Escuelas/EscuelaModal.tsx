@@ -4,6 +4,8 @@ import { X, GraduationCap, FileText, Code, Clock, BookOpen } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { escuelasApi } from '../../services/escuelasApi'
 import { facultadesApi } from '../../services/facultadesApi'
 import { Escuela, CrearEscuela, ActualizarEscuela } from '../../types/escuela'
@@ -14,6 +16,23 @@ interface EscuelaModalProps {
     escuela?: Escuela | null
     mode: 'create' | 'edit' | 'view'
 }
+
+const emptyToNull = z.union([z.number(), z.string(), z.null(), z.undefined()]).transform(v => {
+  if (v === '' || v === null || v === undefined) return null;
+  const num = Number(v);
+  return isNaN(num) ? null : num;
+});
+
+const escuelaSchema = z.object({
+  facultadId: z.coerce.number().min(1, 'La facultad es requerida'),
+  nombre: z.string().min(1, 'El nombre es requerido'),
+  codigo: z.string().optional().transform(v => v === '' ? undefined : v),
+  duracionAnios: emptyToNull,
+  totalCreditos: emptyToNull,
+  descripcion: z.string().optional().transform(v => v === '' ? undefined : v)
+});
+
+type EscuelaFormValues = z.infer<typeof escuelaSchema>;
 
 const EscuelaModal: React.FC<EscuelaModalProps> = ({
     isOpen,
@@ -37,7 +56,9 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
         formState: { errors },
         reset,
         setValue,
-    } = useForm<CrearEscuela | ActualizarEscuela>()
+    } = useForm<EscuelaFormValues>({
+        resolver: zodResolver(escuelaSchema)
+    })
 
     useEffect(() => {
         if (isOpen && escuela && (isEditMode || isViewMode)) {
@@ -60,10 +81,15 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
 
     const createMutation = useMutation({
         mutationFn: escuelasApi.create,
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['escuelas'] })
-            toast.success('Escuela creada exitosamente')
-            onClose()
+            toast.success('Escuela creada exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'crear',
+        nombre: variables.nombre || variables.nombres || 'Nuevo registro'
+      });
+      onClose();
         },
         onError: (error) => {
             toast.error('Error al crear escuela')
@@ -74,10 +100,15 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: ActualizarEscuela }) =>
             escuelasApi.update(id, data),
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['escuelas'] })
-            toast.success('Escuela actualizada exitosamente')
-            onClose()
+            toast.success('Escuela actualizada exitosamente');
+      await createNotification({
+        type: 'academico',
+        action: 'editar',
+        nombre: variables.data?.nombre || variables.data?.nombres || 'Registro modificado'
+      });
+      onClose();
         },
         onError: (error) => {
             toast.error('Error al actualizar escuela')
@@ -85,14 +116,7 @@ const EscuelaModal: React.FC<EscuelaModalProps> = ({
         },
     })
 
-    const onSubmit = (data: CrearEscuela | ActualizarEscuela) => {
-        // Convert numerical values from strings
-        data.facultadId = Number(data.facultadId)
-        // @ts-ignore
-        if (data.duracionAnios) data.duracionAnios = Number(data.duracionAnios)
-        // @ts-ignore
-        if (data.totalCreditos) data.totalCreditos = Number(data.totalCreditos)
-
+    const onSubmit = (data: EscuelaFormValues) => {
         if (isCreateMode) {
             createMutation.mutate(data as CrearEscuela)
         } else if (isEditMode && escuela) {
